@@ -200,9 +200,10 @@ function addFieldToMap(fieldId, geojson, config) {
             `;
             layer.bindTooltip(tooltipContent, {
                 permanent: false,
-                direction: 'right',
+                direction: 'top',
                 className: 'field-tooltip',
-                offset: [10, 0]
+                offset: [0, -10],
+                opacity: 1
             });
 
             // Clicking polygon does nothing now - use field cards instead
@@ -1619,9 +1620,10 @@ function displayUploadedLayer(geojson, fileName) {
             layer.bindPopup(popupContent, {
                 autoPan: true,
                 autoPanPadding: [50, 50],
-                offset: [0, -20],
+                offset: [0, -10],
                 closeButton: true,
-                autoClose: true
+                autoClose: true,
+                className: 'custom-popup'
             });
         }
     }).addTo(AppState.map);

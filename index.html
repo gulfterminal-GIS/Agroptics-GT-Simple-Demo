@@ -191,10 +191,10 @@
             width: 100%;
         }
 
-        /* Ensure image overlays appear above polygons */
+        /* Ensure image overlays appear above polygons but below popups */
         .leaflet-image-layer,
         .satellite-overlay {
-            z-index: 1000 !important;
+            z-index: 400 !important;
             pointer-events: none;
         }
 
@@ -204,6 +204,15 @@
 
         .leaflet-pane {
             z-index: 200;
+        }
+
+        /* Ensure popups and tooltips appear above everything */
+        .leaflet-popup-pane {
+            z-index: 700 !important;
+        }
+
+        .leaflet-tooltip-pane {
+            z-index: 650 !important;
         }
 
         /* Header */
@@ -879,10 +888,16 @@
 
         .leaflet-popup {
             margin-bottom: 20px !important;
+            z-index: 700 !important;
         }
 
         .leaflet-popup-tip-container {
             display: block !important;
+        }
+
+        /* Ensure popup pane is always on top */
+        .leaflet-map-pane .leaflet-popup-pane {
+            z-index: 700 !important;
         }
 
         .field-popup {
