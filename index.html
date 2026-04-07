@@ -485,6 +485,17 @@
         .btn-secondary:hover {
             background: #d0d0d0;
         }
+        
+        .btn-compare {
+            background: #FF9800;
+            color: white;
+            /* margin-top: 8px; */
+            width: 100%;
+        }
+        
+        .btn-compare:hover {
+            background: #F57C00;
+        }
 
         .btn:disabled {
             opacity: 0.5;
@@ -1323,6 +1334,332 @@
         .drawing-tools-tooltip.hidden {
             display: none;
         }
+        
+        /* Date Comparison Modal */
+        .comparison-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .comparison-modal.hidden {
+            display: none;
+        }
+        
+        .comparison-modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .comparison-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+        
+        .comparison-modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .comparison-modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .comparison-modal-body {
+            padding: 20px;
+        }
+        
+        .comparison-date-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-date-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .comparison-date-select,
+        .comparison-index-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .comparison-date-select:focus,
+        .comparison-index-select:focus {
+            outline: none;
+            border-color: #2c5f2d;
+        }
+        
+        .comparison-index-selector {
+            margin-bottom: 20px;
+        }
+        
+        .comparison-index-selector label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .comparison-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .comparison-actions .btn {
+            flex: 1;
+        }
+        
+        /* Comparison View */
+        .comparison-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1a1a1a;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .comparison-view.hidden {
+            display: none;
+        }
+        
+        .comparison-view-header {
+            background: #2c5f2d;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .comparison-view-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .comparison-view-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .comparison-view-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .comparison-view-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .comparison-map-container {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 2px;
+            background: #000;
+            padding: 2px;
+        }
+        
+        .comparison-map-panel {
+            position: relative;
+            background: #2a2a2a;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .comparison-map-label {
+            background: #2a2a2a;
+            color: white;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .comparison-map {
+            flex: 1;
+            position: relative;
+        }
+        
+        .comparison-stats-panel {
+            width: 400px;
+            background: #2a2a2a;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 2px solid #444;
+        }
+        
+        .comparison-stats-panel h4 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .comparison-stats-content {
+            font-size: 13px;
+        }
+        
+        .stat-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 6px;
+        }
+        
+        .stat-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #FF9800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-section-icon {
+            font-size: 18px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #aaa;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: white;
+        }
+        
+        .stat-value.positive {
+            color: #4CAF50;
+        }
+        
+        .stat-value.negative {
+            color: #f44336;
+        }
+        
+        .stat-value.neutral {
+            color: #FFC107;
+        }
+        
+        .insight-box {
+            background: #1a1a1a;
+            border-left: 4px solid #4CAF50;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .insight-box.warning {
+            border-left-color: #FFC107;
+        }
+        
+        .insight-box.alert {
+            border-left-color: #f44336;
+        }
+        
+        .insight-text {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #ddd;
+        }
+        
+        .change-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .change-indicator.positive {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .change-indicator.negative {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        .change-indicator.neutral {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+        }
 
         /* Swipe Control for Image Comparison */
         .swipe-slider {
@@ -1677,6 +2014,7 @@
                     <div class="overlay-actions">
                         <button id="showImageBtn" class="btn btn-primary">Show Image</button>
                         <button id="clearImageBtn" class="btn btn-secondary">Clear</button>
+                        <button id="compareBtn" class="btn btn-compare">Compare Dates</button>
                     </div>
 
                     <div id="overlayInfo" class="overlay-info" style="display: none;">
@@ -1773,6 +2111,87 @@
             <!-- Drawing Tools Tooltip -->
             <div id="drawingToolsTooltip" class="drawing-tools-tooltip">
                 Drawing tools available
+            </div>
+            
+            <!-- Date Comparison Modal -->
+            <div id="comparisonModal" class="comparison-modal hidden">
+                <div class="comparison-modal-content">
+                    <div class="comparison-modal-header">
+                        <h3>Compare Dates</h3>
+                        <button id="closeComparisonModal" class="comparison-modal-close">&times;</button>
+                    </div>
+                    
+                    <div class="comparison-modal-body">
+                        <div class="comparison-date-selector">
+                            <div class="comparison-date-group">
+                                <label>Date 1 (Earlier)</label>
+                                <select id="compareDate1" class="comparison-date-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="comparison-date-group">
+                                <label>Date 2 (Later)</label>
+                                <select id="compareDate2" class="comparison-date-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-index-selector">
+                            <label>Index to Compare</label>
+                            <select id="compareIndex" class="comparison-index-select">
+                                <option value="NDVI">NDVI - Vegetation Index</option>
+                                <option value="ETc_NDVI">ETc_NDVI - Evapotranspiration</option>
+                                <option value="FC">FC - Fractional Cover</option>
+                                <option value="GCI">GCI - Green Chlorophyll Index</option>
+                                <option value="MSAVI">MSAVI - Soil-Adjusted VI</option>
+                                <option value="RECI">RECI - Red Edge Chlorophyll</option>
+                            </select>
+                        </div>
+                        
+                        <div class="comparison-actions">
+                            <button id="startComparisonBtn" class="btn btn-primary">Start Comparison</button>
+                            <button id="cancelComparisonBtn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comparison View -->
+            <div id="comparisonView" class="comparison-view hidden">
+                <div class="comparison-view-header">
+                    <h3 id="comparisonViewTitle">Comparing Dates</h3>
+                    <button id="closeComparisonView" class="comparison-view-close">Exit Comparison</button>
+                </div>
+                
+                <div class="comparison-view-content">
+                    <div class="comparison-map-container">
+                        <div class="comparison-map-panel">
+                            <div class="comparison-map-label" id="comparisonLabel1">Date 1</div>
+                            <div id="comparisonMap1" class="comparison-map"></div>
+                        </div>
+                        
+                        <div class="comparison-map-panel">
+                            <div class="comparison-map-label" id="comparisonLabel2">Date 2</div>
+                            <div id="comparisonMap2" class="comparison-map"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-stats-panel">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            Analysis & Insights
+                        </h4>
+                        <div id="comparisonStats" class="comparison-stats-content">
+                            <!-- Stats will be populated here -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Analysis Section - Bottom 70% -->
@@ -1903,6 +2322,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Leaflet Draw -->
     <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <!-- Leaflet Sync for comparison maps -->
+    <script src="https://unpkg.com/leaflet.sync@0.2.4/L.Map.Sync.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <!-- Chart.js Annotation Plugin -->

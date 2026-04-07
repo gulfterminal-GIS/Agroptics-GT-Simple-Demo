@@ -17,7 +17,19 @@ const AppState = {
     selectedDate: null,
     currentCalendarMonth: new Date(),
     uploadedLayers: [],
-    swipeSlider: null
+    swipeSlider: null,
+    comparisonMaps: {
+        map1: null,
+        map2: null,
+        mapDiff: null
+    },
+    comparisonData: {
+        date1: null,
+        date2: null,
+        index: null,
+        data1: null,
+        data2: null
+    }
 };
 
 // Field configurations
@@ -2773,3 +2785,748 @@ function removeTimelineMarkersFromCharts() {
     
     // console.log(`[TIMELINE-CHART] Restored ${chartsRestored} charts`);
 }
+
+
+/**
+ * ========================================
+ * DATE COMPARISON SYSTEM
+ * ========================================
+ */
+
+/**
+ * Setup comparison button and modal
+ */
+function setupComparison() {
+    const compareBtn = document.getElementById('compareBtn');
+    const comparisonModal = document.getElementById('comparisonModal');
+    const closeModalBtn = document.getElementById('closeComparisonModal');
+    const cancelBtn = document.getElementById('cancelComparisonBtn');
+    const startBtn = document.getElementById('startComparisonBtn');
+    
+    // Open modal
+    compareBtn.addEventListener('click', openComparisonModal);
+    
+    // Close modal
+    closeModalBtn.addEventListener('click', closeComparisonModal);
+    cancelBtn.addEventListener('click', closeComparisonModal);
+    
+    // Start comparison
+    startBtn.addEventListener('click', startComparison);
+    
+    // Close comparison view
+    document.getElementById('closeComparisonView').addEventListener('click', closeComparisonView);
+}
+
+/**
+ * Open comparison modal
+ */
+function openComparisonModal() {
+    if (!AppState.selectedField || !AppState.availableDates || AppState.availableDates.length < 2) {
+        alert('Please select a field with at least 2 available dates first.');
+        return;
+    }
+    
+    // Populate date selectors
+    const date1Select = document.getElementById('compareDate1');
+    const date2Select = document.getElementById('compareDate2');
+    
+    // Clear existing options
+    date1Select.innerHTML = '<option value="">Select date...</option>';
+    date2Select.innerHTML = '<option value="">Select date...</option>';
+    
+    // Add dates
+    const sortedDates = [...AppState.availableDates].sort((a, b) => new Date(a) - new Date(b));
+    sortedDates.forEach(date => {
+        const dateStr = new Date(date).toISOString().split('T')[0];
+        const displayDate = formatDate(dateStr);
+        
+        const option1 = document.createElement('option');
+        option1.value = dateStr;
+        option1.textContent = displayDate;
+        date1Select.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = dateStr;
+        option2.textContent = displayDate;
+        date2Select.appendChild(option2);
+    });
+    
+    // Set default values (first and last date)
+    if (sortedDates.length >= 2) {
+        date1Select.value = new Date(sortedDates[0]).toISOString().split('T')[0];
+        date2Select.value = new Date(sortedDates[sortedDates.length - 1]).toISOString().split('T')[0];
+    }
+    
+    // Show modal
+    document.getElementById('comparisonModal').classList.remove('hidden');
+}
+
+/**
+ * Close comparison modal
+ */
+function closeComparisonModal() {
+    document.getElementById('comparisonModal').classList.add('hidden');
+}
+
+/**
+ * Start comparison
+ */
+async function startComparison() {
+    const date1 = document.getElementById('compareDate1').value;
+    const date2 = document.getElementById('compareDate2').value;
+    const index = document.getElementById('compareIndex').value;
+    
+    if (!date1 || !date2) {
+        alert('Please select both dates.');
+        return;
+    }
+    
+    if (date1 === date2) {
+        alert('Please select different dates.');
+        return;
+    }
+    
+    // Store comparison data
+    AppState.comparisonData.date1 = date1;
+    AppState.comparisonData.date2 = date2;
+    AppState.comparisonData.index = index;
+    
+    // Close modal
+    closeComparisonModal();
+    
+    // Show comparison view
+    await showComparisonView();
+}
+
+/**
+ * Show comparison view
+ */
+async function showComparisonView() {
+    const comparisonView = document.getElementById('comparisonView');
+    comparisonView.classList.remove('hidden');
+    
+    // Update title
+    const title = document.getElementById('comparisonViewTitle');
+    title.textContent = `Comparing ${AppState.comparisonData.index} - ${formatDate(AppState.comparisonData.date1)} vs ${formatDate(AppState.comparisonData.date2)}`;
+    
+    // Update labels
+    document.getElementById('comparisonLabel1').textContent = `${formatDate(AppState.comparisonData.date1)} - ${AppState.comparisonData.index}`;
+    document.getElementById('comparisonLabel2').textContent = `${formatDate(AppState.comparisonData.date2)} - ${AppState.comparisonData.index}`;
+    
+    // Initialize maps
+    setTimeout(async () => {
+        await initializeComparisonMaps();
+        await loadComparisonData();
+    }, 100);
+}
+
+/**
+ * Initialize comparison maps
+ */
+async function initializeComparisonMaps() {
+    const fieldId = AppState.selectedField;
+    const fieldLayer = AppState.fieldLayers[fieldId];
+    const bounds = fieldLayer.getBounds();
+    const center = bounds.getCenter();
+    const zoom = AppState.map.getZoom();
+    
+    // Initialize map 1
+    if (AppState.comparisonMaps.map1) {
+        AppState.comparisonMaps.map1.remove();
+    }
+    AppState.comparisonMaps.map1 = L.map('comparisonMap1', {
+        zoomControl: true,
+        attributionControl: false
+    }).setView([center.lat, center.lng], zoom);
+    
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19
+    }).addTo(AppState.comparisonMaps.map1);
+    
+    // Initialize map 2
+    if (AppState.comparisonMaps.map2) {
+        AppState.comparisonMaps.map2.remove();
+    }
+    AppState.comparisonMaps.map2 = L.map('comparisonMap2', {
+        zoomControl: true,
+        attributionControl: false
+    }).setView([center.lat, center.lng], zoom);
+    
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19
+    }).addTo(AppState.comparisonMaps.map2);
+    
+    // Synchronize map movements
+    AppState.comparisonMaps.map1.sync(AppState.comparisonMaps.map2);
+    AppState.comparisonMaps.map2.sync(AppState.comparisonMaps.map1);
+}
+
+/**
+ * Load comparison data and display
+ */
+async function loadComparisonData() {
+    const fieldId = AppState.selectedField;
+    const date1 = AppState.comparisonData.date1;
+    const date2 = AppState.comparisonData.date2;
+    const index = AppState.comparisonData.index;
+    
+    try {
+        // Load both images
+        const data1 = await loadComparisonImage(fieldId, date1, index);
+        const data2 = await loadComparisonImage(fieldId, date2, index);
+        
+        AppState.comparisonData.data1 = data1;
+        AppState.comparisonData.data2 = data2;
+        
+        // Display images
+        displayComparisonImage(AppState.comparisonMaps.map1, data1.dataUrl, data1.bounds);
+        displayComparisonImage(AppState.comparisonMaps.map2, data2.dataUrl, data2.bounds);
+        
+        // Calculate difference statistics
+        const diffStats = calculateDifferenceStats(data1, data2);
+        
+        // Display enhanced statistics and insights
+        displayEnhancedStats(data1, data2, diffStats, index);
+        
+    } catch (error) {
+        console.error('Error loading comparison data:', error);
+        alert('Failed to load comparison data. Please try again.');
+        closeComparisonView();
+    }
+}
+
+/**
+ * Load comparison image
+ */
+async function loadComparisonImage(fieldId, dateStr, selectedIndex) {
+    const tifPath = `exports/${fieldId}/${dateStr}/${selectedIndex}.tif`;
+    
+    const response = await fetch(tifPath);
+    if (!response.ok) {
+        throw new Error(`Image not found: ${tifPath}`);
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const tiff = await GeoTIFF.fromArrayBuffer(arrayBuffer);
+    const image = await tiff.getImage();
+    const rasters = await image.readRasters();
+    const data = rasters[0];
+    
+    // Get bounds
+    const fieldLayer = AppState.fieldLayers[fieldId];
+    const fieldBounds = fieldLayer.getBounds();
+    const bounds = [
+        [fieldBounds.getSouth(), fieldBounds.getWest()],
+        [fieldBounds.getNorth(), fieldBounds.getEast()]
+    ];
+    
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    const width = image.getWidth();
+    const height = image.getHeight();
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(width, height);
+    
+    // Apply color scale
+    const colorScale = getColorScale(selectedIndex);
+    const stats = calculateImageStats(data);
+    
+    for (let i = 0; i < data.length; i++) {
+        const value = data[i];
+        
+        if (isNaN(value) || !isFinite(value) || value === -9999 || value < -1 || value > 1) {
+            const idx = i * 4;
+            imageData.data[idx] = 0;
+            imageData.data[idx + 1] = 0;
+            imageData.data[idx + 2] = 0;
+            imageData.data[idx + 3] = 0;
+            continue;
+        }
+        
+        const normalized = Math.max(0, Math.min(1, (value - stats.min) / (stats.max - stats.min)));
+        const color = colorScale(normalized);
+        
+        const idx = i * 4;
+        imageData.data[idx] = color.r;
+        imageData.data[idx + 1] = color.g;
+        imageData.data[idx + 2] = color.b;
+        imageData.data[idx + 3] = 220;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    return {
+        dataUrl: canvas.toDataURL(),
+        bounds: bounds,
+        data: data,
+        stats: stats,
+        width: width,
+        height: height
+    };
+}
+
+/**
+ * Display comparison image on map
+ */
+function displayComparisonImage(map, dataUrl, bounds) {
+    L.imageOverlay(dataUrl, bounds, {
+        opacity: 0.8,
+        interactive: false
+    }).addTo(map);
+}
+
+/**
+ * Calculate difference statistics between two images
+ */
+function calculateDifferenceStats(data1, data2) {
+    const diffData = new Float32Array(data1.data.length);
+    let validCount = 0;
+    let sumDiff = 0;
+    let minDiff = Infinity;
+    let maxDiff = -Infinity;
+    let positiveCount = 0;
+    let negativeCount = 0;
+    let unchangedCount = 0;
+    let sumPositive = 0;
+    let sumNegative = 0;
+    
+    for (let i = 0; i < data1.data.length; i++) {
+        const val1 = data1.data[i];
+        const val2 = data2.data[i];
+        
+        if (isNaN(val1) || isNaN(val2) || !isFinite(val1) || !isFinite(val2) || 
+            val1 === -9999 || val2 === -9999 || val1 < -1 || val1 > 1 || val2 < -1 || val2 > 1) {
+            diffData[i] = NaN;
+            continue;
+        }
+        
+        const diff = val2 - val1;
+        diffData[i] = diff;
+        
+        validCount++;
+        sumDiff += diff;
+        minDiff = Math.min(minDiff, diff);
+        maxDiff = Math.max(maxDiff, diff);
+        
+        if (diff > 0.01) {
+            positiveCount++;
+            sumPositive += diff;
+        } else if (diff < -0.01) {
+            negativeCount++;
+            sumNegative += diff;
+        } else {
+            unchangedCount++;
+        }
+    }
+    
+    const meanDiff = validCount > 0 ? sumDiff / validCount : 0;
+    const meanPositive = positiveCount > 0 ? sumPositive / positiveCount : 0;
+    const meanNegative = negativeCount > 0 ? sumNegative / negativeCount : 0;
+    
+    const percentImproved = validCount > 0 ? (positiveCount / validCount * 100) : 0;
+    const percentDeclined = validCount > 0 ? (negativeCount / validCount * 100) : 0;
+    const percentUnchanged = validCount > 0 ? (unchangedCount / validCount * 100) : 0;
+    
+    return {
+        min: minDiff,
+        max: maxDiff,
+        mean: meanDiff,
+        validCount: validCount,
+        positiveCount: positiveCount,
+        negativeCount: negativeCount,
+        unchangedCount: unchangedCount,
+        meanPositive: meanPositive,
+        meanNegative: meanNegative,
+        percentImproved: percentImproved,
+        percentDeclined: percentDeclined,
+        percentUnchanged: percentUnchanged
+    };
+}
+
+/**
+ * Display enhanced statistics and insights
+ */
+function displayEnhancedStats(data1, data2, diffStats, index) {
+    const statsContainer = document.getElementById('comparisonStats');
+    
+    const percentChange = data1.stats.mean !== 0 
+        ? ((data2.stats.mean - data1.stats.mean) / Math.abs(data1.stats.mean) * 100)
+        : 0;
+    
+    const changeClass = percentChange > 5 ? 'positive' : percentChange < -5 ? 'negative' : 'neutral';
+    const changeSymbol = percentChange > 0 ? '+' : '';
+    
+    // SVG Icons
+    const trendUpIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>';
+    const trendDownIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>';
+    const trendFlatIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+    const chartIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>';
+    const mapIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>';
+    const lightbulbIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg>';
+    const calendarIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+    
+    const changeIcon = percentChange > 5 ? trendUpIcon : percentChange < -5 ? trendDownIcon : trendFlatIcon;
+    
+    // Determine overall health status
+    let healthStatus = '';
+    let healthClass = '';
+    if (percentChange > 10) {
+        healthStatus = 'Significant Improvement';
+        healthClass = 'positive';
+    } else if (percentChange > 5) {
+        healthStatus = 'Moderate Improvement';
+        healthClass = 'positive';
+    } else if (percentChange > -5) {
+        healthStatus = 'Stable Condition';
+        healthClass = 'neutral';
+    } else if (percentChange > -10) {
+        healthStatus = 'Moderate Decline';
+        healthClass = 'negative';
+    } else {
+        healthStatus = 'Significant Decline';
+        healthClass = 'negative';
+    }
+    
+    // Generate insights based on index type
+    const insights = generateInsights(index, percentChange, diffStats, data1, data2);
+    
+    statsContainer.innerHTML = `
+        <!-- Overall Status -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">${changeIcon}</span>
+                Overall Status
+            </div>
+            <div style="text-align: center; padding: 15px 0;">
+                <div class="change-indicator ${healthClass}" style="font-size: 16px; padding: 8px 16px;">
+                    ${healthStatus}
+                </div>
+                <div style="margin-top: 10px; font-size: 24px; font-weight: 700; color: ${changeClass === 'positive' ? '#4CAF50' : changeClass === 'negative' ? '#f44336' : '#FFC107'};">
+                    ${changeSymbol}${percentChange.toFixed(2)}%
+                </div>
+                <div style="color: #aaa; font-size: 11px; margin-top: 5px;">Change in ${index}</div>
+            </div>
+        </div>
+        
+        <!-- Key Metrics -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">${chartIcon}</span>
+                Key Metrics
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 1 Average:</span>
+                <span class="stat-value">${data1.stats.mean.toFixed(4)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 2 Average:</span>
+                <span class="stat-value">${data2.stats.mean.toFixed(4)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Absolute Change:</span>
+                <span class="stat-value ${changeClass}">${changeSymbol}${(data2.stats.mean - data1.stats.mean).toFixed(4)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 1 Range:</span>
+                <span class="stat-value">${data1.stats.min.toFixed(3)} - ${data1.stats.max.toFixed(3)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 2 Range:</span>
+                <span class="stat-value">${data2.stats.min.toFixed(3)} - ${data2.stats.max.toFixed(3)}</span>
+            </div>
+        </div>
+        
+        <!-- Field Coverage Analysis -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">${mapIcon}</span>
+                Field Coverage
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Improved Areas:</span>
+                <span class="stat-value positive">${diffStats.percentImproved.toFixed(1)}%</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Declined Areas:</span>
+                <span class="stat-value negative">${diffStats.percentDeclined.toFixed(1)}%</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Stable Areas:</span>
+                <span class="stat-value neutral">${diffStats.percentUnchanged.toFixed(1)}%</span>
+            </div>
+            ${diffStats.positiveCount > 0 ? `
+            <div class="stat-row">
+                <span class="stat-label">Avg. Improvement:</span>
+                <span class="stat-value positive">+${diffStats.meanPositive.toFixed(4)}</span>
+            </div>
+            ` : ''}
+            ${diffStats.negativeCount > 0 ? `
+            <div class="stat-row">
+                <span class="stat-label">Avg. Decline:</span>
+                <span class="stat-value negative">${diffStats.meanNegative.toFixed(4)}</span>
+            </div>
+            ` : ''}
+        </div>
+        
+        <!-- Insights & Recommendations -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">${lightbulbIcon}</span>
+                Insights & Recommendations
+            </div>
+            ${insights}
+        </div>
+        
+        <!-- Time Period -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">${calendarIcon}</span>
+                Time Period
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Start Date:</span>
+                <span class="stat-value">${formatDate(AppState.comparisonData.date1)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">End Date:</span>
+                <span class="stat-value">${formatDate(AppState.comparisonData.date2)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Days Elapsed:</span>
+                <span class="stat-value">${Math.round((new Date(AppState.comparisonData.date2) - new Date(AppState.comparisonData.date1)) / (1000 * 60 * 60 * 24))} days</span>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Generate insights based on index and changes
+ */
+function generateInsights(index, percentChange, diffStats, data1, data2) {
+    let insights = '';
+    
+    // SVG Icons for insights
+    const checkIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    const alertIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+    const infoIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+    const dropletIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>';
+    const seedIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
+    const searchIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+    const starIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+    const targetIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>';
+    
+    // Index-specific insights
+    if (index === 'NDVI') {
+        if (percentChange > 10) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${checkIcon} <strong>Excellent vegetation growth!</strong> NDVI increased by ${percentChange.toFixed(1)}%, indicating healthy crop development and good canopy coverage.
+                    </div>
+                </div>
+            `;
+        } else if (percentChange < -10) {
+            insights += `
+                <div class="insight-box alert">
+                    <div class="insight-text">
+                        ${alertIcon} <strong>Vegetation stress detected.</strong> NDVI decreased by ${Math.abs(percentChange).toFixed(1)}%. Consider checking irrigation, pest issues, or nutrient deficiency.
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (diffStats.percentImproved > 70) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${targetIcon} <strong>Widespread improvement:</strong> ${diffStats.percentImproved.toFixed(0)}% of the field shows increased vegetation health.
+                    </div>
+                </div>
+            `;
+        } else if (diffStats.percentDeclined > 50) {
+            insights += `
+                <div class="insight-box warning">
+                    <div class="insight-text">
+                        ${targetIcon} <strong>Attention needed:</strong> ${diffStats.percentDeclined.toFixed(0)}% of the field shows declining vegetation. Investigate potential causes.
+                    </div>
+                </div>
+            `;
+        }
+    } else if (index === 'ETc_NDVI') {
+        if (percentChange > 5) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${dropletIcon} <strong>Increased water demand:</strong> Evapotranspiration rose by ${percentChange.toFixed(1)}%. Crops are actively growing and may need more irrigation.
+                    </div>
+                </div>
+            `;
+        } else if (percentChange < -5) {
+            insights += `
+                <div class="insight-box warning">
+                    <div class="insight-text">
+                        ${dropletIcon} <strong>Reduced water use:</strong> ET decreased by ${Math.abs(percentChange).toFixed(1)}%. This could indicate crop stress or reduced growth.
+                    </div>
+                </div>
+            `;
+        }
+    } else if (index === 'FC') {
+        if (percentChange > 10) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${seedIcon} <strong>Canopy expansion:</strong> Fractional cover increased by ${percentChange.toFixed(1)}%, showing good crop establishment and ground coverage.
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // General recommendations
+    if (diffStats.percentDeclined > 30) {
+        insights += `
+            <div class="insight-box warning">
+                <div class="insight-text">
+                    ${searchIcon} <strong>Recommended actions:</strong>
+                    <ul style="margin: 8px 0 0 20px; padding: 0;">
+                        <li>Check irrigation system functionality</li>
+                        <li>Scout for pest or disease issues</li>
+                        <li>Review recent weather conditions</li>
+                        <li>Consider soil moisture testing</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+    } else if (percentChange > 15) {
+        insights += `
+            <div class="insight-box">
+                <div class="insight-text">
+                    ${starIcon} <strong>Keep up the good work!</strong> Current management practices are showing positive results. Continue monitoring for optimal outcomes.
+                </div>
+            </div>
+        `;
+    }
+    
+    if (!insights) {
+        insights = `
+            <div class="insight-box">
+                <div class="insight-text">
+                    ${infoIcon} Field conditions remain relatively stable between these dates. Continue regular monitoring to track any emerging trends.
+                </div>
+            </div>
+        `;
+    }
+    
+    return insights;
+}
+
+/**
+ * Calculate difference between two images (kept for potential future use)
+ */
+function calculateDifference(data1, data2) {
+    const width = data1.width;
+    const height = data1.height;
+    
+    // Create canvas for difference
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(width, height);
+    
+    // Calculate difference
+    const diffData = new Float32Array(data1.data.length);
+    let validCount = 0;
+    let sumDiff = 0;
+    let minDiff = Infinity;
+    let maxDiff = -Infinity;
+    
+    for (let i = 0; i < data1.data.length; i++) {
+        const val1 = data1.data[i];
+        const val2 = data2.data[i];
+        
+        if (isNaN(val1) || isNaN(val2) || !isFinite(val1) || !isFinite(val2) || 
+            val1 === -9999 || val2 === -9999 || val1 < -1 || val1 > 1 || val2 < -1 || val2 > 1) {
+            diffData[i] = NaN;
+            continue;
+        }
+        
+        const diff = val2 - val1;
+        diffData[i] = diff;
+        
+        validCount++;
+        sumDiff += diff;
+        minDiff = Math.min(minDiff, diff);
+        maxDiff = Math.max(maxDiff, diff);
+    }
+    
+    const meanDiff = validCount > 0 ? sumDiff / validCount : 0;
+    
+    // Color scale for difference: red (negative) to white (zero) to green (positive)
+    for (let i = 0; i < diffData.length; i++) {
+        const diff = diffData[i];
+        const idx = i * 4;
+        
+        if (isNaN(diff)) {
+            imageData.data[idx] = 0;
+            imageData.data[idx + 1] = 0;
+            imageData.data[idx + 2] = 0;
+            imageData.data[idx + 3] = 0;
+            continue;
+        }
+        
+        // Normalize difference to -1 to 1 range
+        const maxAbsDiff = Math.max(Math.abs(minDiff), Math.abs(maxDiff));
+        const normalized = maxAbsDiff > 0 ? diff / maxAbsDiff : 0;
+        
+        if (normalized > 0) {
+            // Positive change - green
+            imageData.data[idx] = Math.floor(255 * (1 - normalized));
+            imageData.data[idx + 1] = 255;
+            imageData.data[idx + 2] = Math.floor(255 * (1 - normalized));
+        } else {
+            // Negative change - red
+            imageData.data[idx] = 255;
+            imageData.data[idx + 1] = Math.floor(255 * (1 + normalized));
+            imageData.data[idx + 2] = Math.floor(255 * (1 + normalized));
+        }
+        imageData.data[idx + 3] = 220;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    return {
+        dataUrl: canvas.toDataURL(),
+        bounds: data1.bounds,
+        stats: {
+            min: minDiff,
+            max: maxDiff,
+            mean: meanDiff,
+            validCount: validCount
+        }
+    };
+}
+
+/**
+ * Close comparison view
+ */
+function closeComparisonView() {
+    document.getElementById('comparisonView').classList.add('hidden');
+    
+    // Cleanup maps
+    if (AppState.comparisonMaps.map1) {
+        AppState.comparisonMaps.map1.remove();
+        AppState.comparisonMaps.map1 = null;
+    }
+    if (AppState.comparisonMaps.map2) {
+        AppState.comparisonMaps.map2.remove();
+        AppState.comparisonMaps.map2 = null;
+    }
+}
+
+// Initialize comparison on page load
+document.addEventListener('DOMContentLoaded', () => {
+    setupComparison();
+});
