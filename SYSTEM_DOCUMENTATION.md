@@ -821,6 +821,145 @@ A professional tooltip appears 1 second after map loads to guide users:
 
 ---
 
+## 📊 Date Comparison System
+
+### Overview
+The date comparison feature allows farmers to compare field conditions between two different dates, providing side-by-side visual comparison and detailed statistical analysis.
+
+### Features
+- **Side-by-Side Maps:** Two maps stacked vertically showing different dates
+- **Synchronized Navigation:** Both maps zoom and pan together
+- **Comprehensive Statistics:** Detailed metrics and change analysis
+- **Smart Insights:** Context-aware recommendations based on changes
+- **Field Coverage Analysis:** Shows percentage of field that improved/declined
+- **Professional Icons:** SVG-based icons throughout (no emojis)
+
+### Comparison Flow
+```
+User clicks "Compare Dates" button
+  ↓
+openComparisonModal()
+  ↓
+  ├─ Populate date selectors with available dates
+  ├─ Auto-select first and last dates
+  └─ Show modal
+  ↓
+User selects two dates and index
+  ↓
+startComparison()
+  ↓
+showComparisonView()
+  ↓
+  ├─ Initialize two synchronized Leaflet maps
+  ├─ Load GeoTIFF data for both dates
+  ├─ Display images on maps
+  ├─ Calculate difference statistics
+  └─ Display enhanced statistics and insights
+```
+
+### Layout
+```
+┌─────────────────────────────────────────────────────────┐
+│  Comparison View Header                    [Exit Button]│
+├──────────────────────────┬──────────────────────────────┤
+│                          │                              │
+│   Date 1 Map (Top)       │                              │
+│   Satellite + Overlay    │                              │
+│                          │                              │
+├──────────────────────────┤   Analysis & Insights        │
+│                          │   (400px wide, scrollable)   │
+│   Date 2 Map (Bottom)    │                              │
+│   Satellite + Overlay    │   - Overall Status           │
+│                          │   - Key Metrics              │
+│                          │   - Field Coverage           │
+│                          │   - Insights                 │
+│                          │   - Time Period              │
+└──────────────────────────┴──────────────────────────────┘
+```
+
+### Statistics Sections
+
+**1. Overall Status**
+- Visual health indicator (Significant Improvement, Moderate Decline, etc.)
+- Large percentage change display
+- Color-coded (green = positive, red = negative, yellow = neutral)
+
+**2. Key Metrics**
+- Date 1 and Date 2 average values
+- Absolute change
+- Value ranges for both dates
+
+**3. Field Coverage Analysis**
+- Percentage of field that improved
+- Percentage of field that declined
+- Percentage of field that remained stable
+- Average improvement/decline values
+
+**4. Insights & Recommendations**
+Index-specific insights:
+- **NDVI:** Vegetation health analysis, growth patterns
+- **ETc_NDVI:** Water demand changes, irrigation needs
+- **FC:** Canopy coverage analysis
+
+General recommendations:
+- Check irrigation systems
+- Scout for pests/diseases
+- Review weather conditions
+- Soil moisture testing
+
+**5. Time Period**
+- Start and end dates
+- Days elapsed between dates
+
+### Key Functions
+- `setupComparison()` - Initialize comparison button and modal
+- `openComparisonModal()` - Show date selection modal
+- `closeComparisonModal()` - Hide modal
+- `startComparison()` - Begin comparison process
+- `showComparisonView()` - Display comparison view
+- `initializeComparisonMaps()` - Create two synchronized Leaflet maps
+- `loadComparisonData()` - Load and process both images
+- `loadComparisonImage(fieldId, date, index)` - Load single GeoTIFF
+- `displayComparisonImage(map, dataUrl, bounds)` - Add image to map
+- `calculateDifferenceStats(data1, data2)` - Calculate change statistics
+- `displayEnhancedStats(data1, data2, diffStats, index)` - Show analysis
+- `generateInsights(index, percentChange, diffStats)` - Generate recommendations
+- `closeComparisonView()` - Exit comparison and cleanup
+
+### Difference Calculation
+```javascript
+// For each pixel
+diff = value_date2 - value_date1
+
+// Classify changes
+if (diff > 0.01) → Improved
+if (diff < -0.01) → Declined
+else → Stable
+
+// Calculate statistics
+percentImproved = (improvedPixels / totalPixels) * 100
+percentDeclined = (declinedPixels / totalPixels) * 100
+meanChange = sum(allDiffs) / totalPixels
+```
+
+### Insight Generation Logic
+```javascript
+// Health status determination
+if (percentChange > 10) → "Significant Improvement"
+if (percentChange > 5) → "Moderate Improvement"
+if (percentChange > -5) → "Stable Condition"
+if (percentChange > -10) → "Moderate Decline"
+else → "Significant Decline"
+
+// Recommendations triggered when:
+- percentDeclined > 30% → Show action items
+- percentChange > 15% → Positive reinforcement
+- No significant change → Continue monitoring
+```
+
+
+---
+
 ## 🔧 Key Functions Reference
 
 ### Initialization Functions
@@ -832,6 +971,7 @@ A professional tooltip appears 1 second after map loads to guide users:
 - `setupAnalysisSection()` - Setup tab switching
 - `setupImageOverlayControls()` - Setup calendar and controls
 - `setupFileUpload()` - Setup file upload handlers
+- `setupComparison()` - Initialize date comparison feature
 
 ### Field Selection Functions
 - `zoomToField(fieldId)` - Zoom to field and open analysis
@@ -883,6 +1023,21 @@ A professional tooltip appears 1 second after map loads to guide users:
 - `initializeDrawingControls()` - Setup Leaflet.draw
 - Event handlers for draw:created, draw:edited, draw:deleted
 - Custom measurement calculations for areas and distances
+
+### Date Comparison Functions
+- `setupComparison()` - Initialize comparison button and modal
+- `openComparisonModal()` - Show date selection modal
+- `closeComparisonModal()` - Hide modal
+- `startComparison()` - Begin comparison process
+- `showComparisonView()` - Display comparison view
+- `initializeComparisonMaps()` - Create two synchronized Leaflet maps
+- `loadComparisonData()` - Load and process both images
+- `loadComparisonImage(fieldId, date, index)` - Load single GeoTIFF
+- `displayComparisonImage(map, dataUrl, bounds)` - Add image to map
+- `calculateDifferenceStats(data1, data2)` - Calculate change statistics
+- `displayEnhancedStats(data1, data2, diffStats, index)` - Show analysis
+- `generateInsights(index, percentChange, diffStats)` - Generate recommendations
+- `closeComparisonView()` - Exit comparison and cleanup
 
 ### File Upload Functions
 - `handleFileUpload(file)` - Process uploaded file

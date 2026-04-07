@@ -41,6 +41,14 @@ Agroptics is a browser-based satellite imagery analysis tool designed for precis
 - **Smooth Interaction:** Precise clipping with CSS clip-path
 - **Visual Feedback:** White line with blue circular handle
 
+### 📊 Date Comparison (NEW!)
+- **Side-by-Side Maps:** Two maps stacked vertically showing different dates
+- **Synchronized Navigation:** Both maps zoom and pan together
+- **Comprehensive Statistics:** Detailed metrics and change analysis
+- **Smart Insights:** Context-aware recommendations based on changes
+- **Field Coverage Analysis:** Shows percentage of field that improved/declined
+- **Professional Icons:** SVG-based icons throughout (no emojis)
+
 ### ✏️ Drawing & Measurement Tools (NEW!)
 - **Polygon Drawing:** Draw irregular shapes with area measurements
 - **Circle Drawing:** Draw circles with radius and area calculations
@@ -140,6 +148,16 @@ http://localhost:8000
 1. With an image displayed, click the orange swipe button in timeline
 2. Drag the vertical slider left/right to compare
 3. Click the button again to hide the swipe control
+
+### Using Date Comparison
+1. Select a field from the sidebar
+2. Click the "Compare Dates" button in the overlay controls
+3. Select two dates from the dropdown menus
+4. Choose an index to compare (NDVI, ETc_NDVI, FC, etc.)
+5. Click "Start Comparison"
+6. View side-by-side maps with synchronized navigation
+7. Review comprehensive statistics and insights in the right panel
+8. Click "Exit Comparison" to return to normal view
 
 ### Drawing and Measuring
 1. Use the drawing tools in the top-right corner
