@@ -15,3 +15,9 @@
 !package.json
 !package-lock.json
 !preprocess-data-template.js
+
+# Allow only these specific documentation files
+!README.md
+!SYSTEM_DOCUMENTATION.md
+!DATA_FLOW_EXPLANATION.md
+!CHART_DATA_VISUAL_GUIDE.md
