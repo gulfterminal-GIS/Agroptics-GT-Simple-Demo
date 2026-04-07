@@ -1,6 +1,6 @@
 # 🌾 Agroptics - Satellite Imagery Field Monitoring
 
-A professional web application for monitoring agricultural fields using real satellite imagery data. Visualize crop health, analyze vegetation indices, and track field conditions over time with interactive charts and maps.
+A professional web application for monitoring agricultural fields using real satellite imagery data. Visualize crop health, analyze vegetation indices, track field conditions over time with interactive charts, animated timeline playback, and advanced comparison tools.
 
 [![Status](https://img.shields.io/badge/Status-Active-success)](https://github.com/gulfterminal-GIS/Agroptics-GT-Simple-Demo)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
@@ -10,12 +10,15 @@ A professional web application for monitoring agricultural fields using real sat
 
 ## 🎯 What is Agroptics?
 
-Agroptics is a browser-based satellite imagery analysis tool designed for precision agriculture. It processes real GeoTIFF satellite data and presents it through an intuitive interface with interactive maps and time-series charts.
+Agroptics is a browser-based satellite imagery analysis tool designed for precision agriculture. It processes real GeoTIFF satellite data and presents it through an intuitive interface with interactive maps, time-series charts, and advanced visualization features including timeline animation and swipe comparison.
 
 ### Key Capabilities
 - 📊 **Real Satellite Data** - 170+ observation dates from Planet/Sentinel imagery
 - 🗺️ **Interactive Mapping** - Leaflet-based maps with field boundaries and image overlays
 - 📈 **Time-Series Analysis** - 6 chart categories tracking crop health metrics
+- 🎬 **Timeline Animation** - Animate through satellite imagery with synchronized chart updates
+- 🔄 **Swipe Comparison** - Compare satellite imagery with base maps
+- ✏️ **Drawing Tools** - Measure areas and distances with professional GIS tools
 - 📁 **GIS File Support** - Upload GeoJSON, KML, Shapefile, GPX files
 - 🎨 **Professional UI** - Clean, responsive design optimized for field analysis
 
@@ -23,11 +26,36 @@ Agroptics is a browser-based satellite imagery analysis tool designed for precis
 
 ## ✨ Features
 
+### 🎬 Timeline Player (NEW!)
+- **Animated Playback:** Watch satellite imagery change over time
+- **Playback Controls:** Play/Pause, First, Previous, Next, Last navigation
+- **Speed Control:** 0.5x, 1x, 2x, 4x playback speeds
+- **Loop Mode:** Continuous playback option
+- **Chart Synchronization:** Charts dynamically update to show data up to current date
+- **Image Preloading:** Smooth playback with intelligent caching
+- **Timeline Slider:** Drag to any date instantly
+
+### 🔄 Swipe Comparison (NEW!)
+- **Toggle Control:** Orange button in timeline to enable/disable
+- **Vertical Slider:** Drag left/right to compare imagery with base map
+- **Smooth Interaction:** Precise clipping with CSS clip-path
+- **Visual Feedback:** White line with blue circular handle
+
+### ✏️ Drawing & Measurement Tools (NEW!)
+- **Polygon Drawing:** Draw irregular shapes with area measurements
+- **Circle Drawing:** Draw circles with radius and area calculations
+- **Distance Measurement:** Measure distances along polylines
+- **Multiple Units:** Acres, hectares, sq meters, miles, kilometers, feet
+- **Vertex Editing:** Edit drawn shapes by dragging vertices
+- **Custom Icons:** Professional GIS-style icons with hover effects
+- **Enhanced Popups:** Detailed measurement information
+
 ### 📊 Data Visualization
 - **6 Vegetation Indices:** NDVI, ETc_NDVI, FC, GCI, MSAVI, RECI
 - **6 Chart Categories:** ET, Crop Coefficient, Irrigation, Additional Variables, Depletion, AWC
 - **Interactive Charts:** Toggle data series, zoom, hover for details
 - **Real-Time Updates:** Charts update instantly when selecting fields
+- **Dynamic Data:** Charts sync with timeline playback
 
 ### 🗺️ Mapping Features
 - **Dual Base Maps:** Satellite imagery (default) or street map
@@ -48,6 +76,7 @@ Agroptics is a browser-based satellite imagery analysis tool designed for precis
 - **Tabbed Analysis:** Field Info and Planet data tabs
 - **Responsive Design:** Works on desktop and tablet devices
 - **Dark Theme:** Professional dark header with green accents
+- **Compact Timeline:** Optimized height for better screen usage
 
 ---
 
@@ -98,6 +127,28 @@ http://localhost:8000
 2. Choose a date from the calendar (green = available)
 3. Select a vegetation index (NDVI, ETc_NDVI, etc.)
 4. Click "Show Image" to overlay on the map
+
+### Using Timeline Animation
+1. After showing an image, the timeline player appears at the bottom
+2. Click the Play button to start animation
+3. Use speed selector to adjust playback speed (0.5x to 4x)
+4. Enable Loop for continuous playback
+5. Drag the timeline slider to jump to any date
+6. Watch charts update dynamically as timeline plays
+
+### Using Swipe Comparison
+1. With an image displayed, click the orange swipe button in timeline
+2. Drag the vertical slider left/right to compare
+3. Click the button again to hide the swipe control
+
+### Drawing and Measuring
+1. Use the drawing tools in the top-right corner
+2. Click polygon icon to draw irregular shapes
+3. Click circle icon to draw circles
+4. Click distance icon to measure distances
+5. View measurements in popup after drawing
+6. Use edit tool to modify drawn shapes
+7. Use delete tool to remove shapes
 5. Click "Clear" to remove the overlay
 
 ### Uploading Custom Fields
@@ -111,6 +162,7 @@ http://localhost:8000
 2. Use checkboxes to toggle data series on/off
 3. Switch between 6 chart categories using tabs
 4. Charts display real satellite data over time
+5. During timeline playback, charts update dynamically
 
 ---
 
@@ -118,8 +170,8 @@ http://localhost:8000
 
 ```
 Agroptics-GT-Simple-Demo/
-├── index.html                      # Main application (1153 lines)
-├── app.js                          # Core JavaScript logic (1645 lines)
+├── index.html                      # Main application (~1900 lines)
+├── app.js                          # Core JavaScript logic (~2700 lines)
 ├── package.json                    # Node.js dependencies
 │
 ├── data/                           # Preprocessed JSON data
@@ -164,12 +216,15 @@ Agroptics-GT-Simple-Demo/
 - **HTML5/CSS3** - Modern web standards
 - **Vanilla JavaScript** - No frameworks, pure ES6+
 - **Leaflet.js v1.9.4** - Interactive mapping
+- **Leaflet.draw v1.0.4** - Drawing and measurement tools
 - **Chart.js v4.4.0** - Data visualization
+- **chartjs-plugin-annotation v3.0.1** - Chart annotations
 
 ### Data Processing
-- **GeoTIFF.js v2.0.7** - Raster image processing
+- **GeoTIFF.js v2.1.3** - Raster image processing
 - **shp.js** - Shapefile parsing
 - **toGeoJSON** - KML/GPX conversion
+- **chartjs-adapter-date-fns** - Date handling for charts
 
 ### Hosting
 - **GitHub Pages** - Static site hosting

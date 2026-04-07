@@ -1,6 +1,6 @@
 # Agroptics System Documentation
 
-**Version:** 1.0  
+**Version:** 2.0  
 **Last Updated:** April 2026  
 **Purpose:** Complete system reference for AI assistants and developers
 
@@ -8,19 +8,23 @@
 
 ## 🎯 System Overview
 
-Agroptics is a web-based satellite imagery monitoring system for agricultural fields. It displays real satellite data from GeoTIFF files, processes them into interactive charts, and provides field analysis tools.
+Agroptics is a web-based satellite imagery monitoring system for agricultural fields. It displays real satellite data from GeoTIFF files, processes them into interactive charts, and provides field analysis tools with advanced timeline playback and comparison features.
 
 ### Core Purpose
 - Monitor crop health using satellite vegetation indices
 - Visualize time-series data across multiple metrics
 - Overlay actual satellite imagery on interactive maps
+- Animate satellite imagery over time with synchronized chart updates
+- Compare satellite imagery with base maps using swipe control
 - Support custom GIS file uploads for field boundaries
+- Draw and measure polygons, circles, and distances on the map
 
 ### Technology Stack
 - **Frontend:** Vanilla JavaScript (no frameworks)
 - **Mapping:** Leaflet.js v1.9.4
-- **Charts:** Chart.js v4.4.0
-- **Raster Processing:** GeoTIFF.js v2.0.7
+- **Drawing Tools:** Leaflet.draw v1.0.4
+- **Charts:** Chart.js v4.4.0 with Annotation Plugin v3.0.1
+- **Raster Processing:** GeoTIFF.js v2.1.3
 - **GIS Parsing:** shp.js, toGeoJSON
 - **Hosting:** GitHub Pages (static site)
 
@@ -83,7 +87,19 @@ const AppState = {
     availableDates: [],           // Dates with imagery for selected field
     selectedDate: null,           // Currently selected date
     currentCalendarMonth: new Date(),
-    uploadedLayers: []            // User-uploaded GIS layers
+    uploadedLayers: [],           // User-uploaded GIS layers
+    drawnItems: null,             // Leaflet FeatureGroup for drawn shapes
+    swipeSlider: null             // Swipe comparison control element
+};
+
+const TimelineState = {
+    isPlaying: false,             // Timeline playback status
+    currentIndex: 0,              // Current frame index
+    dates: [],                    // Available dates for timeline
+    playInterval: null,           // Playback interval timer
+    speed: 1000,                  // Playback speed in milliseconds
+    loop: false,                  // Loop playback enabled
+    preloadedImages: {}           // Cache for preloaded images
 };
 ```
 
@@ -570,10 +586,246 @@ Property2: Value2
 
 ---
 
+## 🎬 Timeline Player System
+
+### Overview
+The timeline player allows users to animate through satellite imagery over time, with synchronized chart updates showing data progression.
+
+### Features
+- **Playback Controls:** Play/Pause, First, Previous, Next, Last
+- **Speed Control:** 0.5x, 1x, 2x, 4x playback speeds
+- **Loop Mode:** Continuous playback option
+- **Timeline Slider:** Drag to any date
+- **Date Labels:** Shows key dates along timeline
+- **Image Preloading:** Preloads next 3 images for smooth playback
+- **Chart Synchronization:** Charts update to show only data up to current date
+
+### Timeline State
+```javascript
+const TimelineState = {
+    isPlaying: false,        // Playback active
+    currentIndex: 0,         // Current frame (0 to dates.length-1)
+    dates: [],              // Array of available dates
+    playInterval: null,     // setInterval reference
+    speed: 1000,           // Milliseconds between frames
+    loop: false,           // Loop when reaching end
+    preloadedImages: {}    // Cache: {fieldId_date_index: dataUrl}
+};
+```
+
+### Timeline Flow
+```
+User clicks "Show Image"
+  ↓
+initializeTimelinePlayer()
+  ↓
+  ├─ Load available dates
+  ├─ Setup slider (max = dates.length - 1)
+  ├─ Setup control event listeners
+  ├─ Generate date labels
+  └─ Show timeline player UI
+  ↓
+User clicks Play
+  ↓
+startPlayback()
+  ↓
+  ├─ Set interval based on speed
+  └─ Every interval:
+      ↓
+      goToFrame(nextIndex)
+        ↓
+        ├─ Update slider position
+        ├─ Update date display
+        ├─ showTimelineImage(date)
+        │   ↓
+        │   ├─ Load GeoTIFF for date
+        │   ├─ Process and render
+        │   └─ Update image overlay
+        ├─ updateChartsWithTimelineDate(date)
+        │   ↓
+        │   ├─ Filter data to current date
+        │   ├─ Update all chart datasets
+        │   └─ Update irrigation annotations
+        └─ preloadTimelineImages()
+            ↓
+            └─ Preload next 3 images
+```
+
+### Chart Synchronization
+When timeline plays, charts dynamically update to show only data up to the current date:
+```javascript
+updateChartsWithTimelineDate(dateStr)
+  ↓
+  ├─ Filter timeSeries data: date <= currentDate
+  ├─ Update chart.data.labels
+  ├─ Update each dataset.data
+  ├─ Filter irrigation annotations
+  └─ chart.update('none') // No animation for performance
+```
+
+### Key Functions
+- `initializeTimelinePlayer()` - Initialize timeline UI and state
+- `setupTimelineControls()` - Attach event listeners
+- `togglePlayPause()` - Toggle playback
+- `startPlayback()` - Start interval-based playback
+- `stopPlayback()` - Stop playback and clear interval
+- `goToFrame(index)` - Jump to specific frame
+- `showTimelineImage(date)` - Load and display image for date
+- `updateTimelineDisplay()` - Update date text display
+- `preloadTimelineImages()` - Preload upcoming images
+- `updateChartsWithTimelineDate(date)` - Sync charts with timeline
+- `removeTimelineMarkersFromCharts()` - Restore full chart data
+- `hideTimelinePlayer()` - Hide timeline and cleanup
+
+
+---
+
+## 🔄 Swipe Comparison System
+
+### Overview
+The swipe control allows users to compare satellite imagery with the base map by dragging a vertical slider left/right.
+
+### Features
+- **Toggle Button:** Orange button in timeline controls
+- **Vertical Slider:** White line with blue circular handle
+- **Clip-Path:** Uses CSS clip-path for precise clipping
+- **Drag Interaction:** Smooth dragging with visual feedback
+- **Map Interaction:** Disables map dragging during swipe
+
+### Swipe Flow
+```
+User clicks Swipe Toggle Button
+  ↓
+toggleSwipeControl()
+  ↓
+  ├─ If swipe active: removeSwipeControl()
+  └─ If swipe inactive: initializeSwipeControl()
+      ↓
+      ├─ Create swipe slider element
+      ├─ Position at center of map
+      ├─ Attach drag event listeners
+      ├─ Disable map dragging
+      └─ Apply initial clip-path
+```
+
+### Swipe Implementation
+```javascript
+// Create slider
+const swipeSlider = document.createElement('div');
+swipeSlider.className = 'swipe-slider';
+
+// Drag handling
+let isDragging = false;
+
+slider.addEventListener('mousedown', () => {
+    isDragging = true;
+    AppState.map.dragging.disable();
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        const x = e.clientX - mapRect.left;
+        swipeSlider.style.left = x + 'px';
+        updateSwipeClip(x);
+    }
+});
+
+// Update clip-path
+function updateSwipeClip(x) {
+    const clipX = x - imgLeft;
+    img.style.clipPath = `inset(0 ${img.width - clipX}px 0 0)`;
+}
+```
+
+### Key Functions
+- `initializeSwipeControl()` - Create and setup swipe slider
+- `removeSwipeControl()` - Remove swipe slider and reset
+- `toggleSwipeControl()` - Toggle swipe on/off
+- `updateSwipeClip(x)` - Update image clip-path based on position
+
+
+---
+
+## ✏️ Drawing Tools System
+
+### Overview
+Custom GIS-style drawing tools for measuring areas and distances on the map.
+
+### Features
+- **Polygon Drawing:** Draw irregular polygons with area measurements
+- **Circle Drawing:** Draw circles with radius and area
+- **Distance Measurement:** Draw polylines with distance measurements
+- **Vertex Editing:** Edit drawn shapes by dragging vertices
+- **Multiple Units:** Acres, hectares, sq meters, miles, kilometers, feet, meters
+- **Custom Icons:** Professional GIS-style icons (green/orange/red, white on hover)
+- **Enhanced Popups:** Metric rows showing all measurements
+
+### Drawing Tools
+```javascript
+// Leaflet.draw configuration
+const drawControl = new L.Control.Draw({
+    draw: {
+        polygon: {
+            shapeOptions: { color: '#2196F3', weight: 3 },
+            showArea: true,
+            metric: ['km', 'm']
+        },
+        circle: {
+            shapeOptions: { color: '#2196F3', weight: 3 },
+            showRadius: true,
+            metric: true
+        },
+        polyline: {
+            shapeOptions: { color: '#FF9800', weight: 3 },
+            showLength: true,
+            metric: true
+        },
+        rectangle: false,
+        marker: false,
+        circlemarker: false
+    },
+    edit: {
+        featureGroup: drawnItems,
+        edit: { selectedPathOptions: { dashArray: '10, 10' } }
+    }
+});
+```
+
+### Measurement Calculations
+```javascript
+// Area measurements
+const acres = (sqMeters * 0.000247105).toFixed(2);
+const hectares = (sqMeters / 10000).toFixed(2);
+
+// Distance measurements
+const miles = (meters * 0.000621371).toFixed(2);
+const kilometers = (meters / 1000).toFixed(2);
+const feet = (meters * 3.28084).toFixed(2);
+```
+
+### Custom Icons
+- **Polygon:** Vector polygon with vertices (green)
+- **Circle:** Simple circle outline (orange)
+- **Distance:** Zigzag line with dots (red)
+- **Hover State:** All icons turn white
+- **Disabled State:** Icons stay in original colors
+
+### Drawing Tour Tooltip
+A professional tooltip appears 1 second after map loads to guide users:
+- Dark background (#1a1a1a) with blue accent
+- "Drawing tools available" message
+- Pulsing blue dot indicator
+- Auto-hides after 5 seconds
+- Hides when user interacts with drawing tools
+
+
+---
+
 ## 🔧 Key Functions Reference
 
 ### Initialization Functions
 - `initializeMap()` - Create Leaflet map with base layers
+- `initializeDrawingControls()` - Setup Leaflet.draw tools
 - `loadAllFields()` - Load all 3 field GeoJSON files
 - `addFieldToMap(fieldId, geojson, config)` - Add field polygon to map
 - `addFieldCard(fieldId, properties, config)` - Create sidebar card
@@ -599,12 +851,38 @@ Property2: Value2
 - `createCategoryChart(category, data)` - Create Chart.js chart
 - `setupCategoryTabs()` - Setup category tab switching
 - `setupToggleButtons()` - Setup line toggle checkboxes
+- `updateChartsWithTimelineDate(date)` - Sync charts with timeline
+- `removeTimelineMarkersFromCharts()` - Restore full chart data
 
 ### Image Overlay Functions
 - `displayImageOverlay()` - Load and display GeoTIFF
 - `clearImageOverlay()` - Remove overlay from map
 - `renderCalendar(year, month)` - Render calendar UI
 - `selectDate(dateStr)` - Handle date selection
+
+### Timeline Functions
+- `initializeTimelinePlayer()` - Initialize timeline player
+- `setupTimelineControls()` - Setup timeline event listeners
+- `togglePlayPause()` - Toggle playback state
+- `startPlayback()` - Start timeline animation
+- `stopPlayback()` - Stop timeline animation
+- `goToFrame(index)` - Jump to specific frame
+- `showTimelineImage(date)` - Load image for date
+- `loadTimelineImage(fieldId, date, index)` - Load and process GeoTIFF
+- `updateImageOverlay(dataUrl)` - Update overlay with new image
+- `preloadTimelineImages()` - Preload upcoming images
+- `hideTimelinePlayer()` - Hide and cleanup timeline
+
+### Swipe Control Functions
+- `initializeSwipeControl()` - Create swipe slider
+- `removeSwipeControl()` - Remove swipe slider
+- `toggleSwipeControl()` - Toggle swipe on/off
+- `updateSwipeClip(x)` - Update image clip-path
+
+### Drawing Functions
+- `initializeDrawingControls()` - Setup Leaflet.draw
+- Event handlers for draw:created, draw:edited, draw:deleted
+- Custom measurement calculations for areas and distances
 
 ### File Upload Functions
 - `handleFileUpload(file)` - Process uploaded file
@@ -616,6 +894,8 @@ Property2: Value2
 - `formatSoilTexture(texture)` - Format soil texture
 - `getDayOfYear(date)` - Get day number (1-365)
 - `getIrrigationDates(fieldId)` - Get irrigation dates
+- `calculateImageStats(data)` - Calculate min/max/mean for raster
+- `getColorScale(index)` - Get color scale function for index
 
 
 ---
@@ -631,7 +911,6 @@ Property2: Value2
 .leaflet-tooltip-pane { z-index: 650 !important; }
 .leaflet-overlay-pane { z-index: 400 !important; }
 ```
-
 ### Issue 2: GitHub Pages Not Loading Images
 **Problem:** "Invalid byte order value" error when loading .tif files  
 **Cause:** Git LFS pointer files served instead of actual files  
