@@ -1506,6 +1506,16 @@
             overflow: hidden;
         }
         
+        .comparison-stats-panel {
+            width: 400px;
+            background: #2a2a2a;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #444;
+            order: 1;
+        }
+        
         .comparison-map-container {
             flex: 1;
             display: grid;
@@ -1513,6 +1523,7 @@
             gap: 2px;
             background: #000;
             padding: 2px;
+            order: 2;
         }
         
         .comparison-map-panel {
@@ -1537,13 +1548,81 @@
             position: relative;
         }
         
+        /* Comparison Controls */
+        .comparison-controls {
+            background: #333;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-control-group {
+            margin-bottom: 12px;
+        }
+        
+        .comparison-control-group:last-of-type {
+            margin-bottom: 15px;
+        }
+        
+        .comparison-control-label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .comparison-select {
+            width: 100%;
+            padding: 8px 10px;
+            background: #1a1a1a;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .comparison-select:hover {
+            border-color: #4CAF50;
+        }
+        
+        .comparison-select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .update-comparison-btn {
+            width: 100%;
+            padding: 10px;
+            background: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .update-comparison-btn:hover {
+            background: #F57C00;
+        }
+        
+        .update-comparison-btn:active {
+            transform: scale(0.98);
+        }
+        
         .comparison-stats-panel {
             width: 400px;
             background: #2a2a2a;
             color: white;
             padding: 20px;
             overflow-y: auto;
-            border-left: 2px solid #444;
+            border-right: 2px solid #444;
+            order: 1;
         }
         
         .comparison-stats-panel h4 {
@@ -2166,18 +2245,7 @@
                 </div>
                 
                 <div class="comparison-view-content">
-                    <div class="comparison-map-container">
-                        <div class="comparison-map-panel">
-                            <div class="comparison-map-label" id="comparisonLabel1">Date 1</div>
-                            <div id="comparisonMap1" class="comparison-map"></div>
-                        </div>
-                        
-                        <div class="comparison-map-panel">
-                            <div class="comparison-map-label" id="comparisonLabel2">Date 2</div>
-                            <div id="comparisonMap2" class="comparison-map"></div>
-                        </div>
-                    </div>
-                    
+                    <!-- Left Side: Analysis & Insights Panel -->
                     <div class="comparison-stats-panel">
                         <h4>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2187,8 +2255,53 @@
                             </svg>
                             Analysis & Insights
                         </h4>
+                        
+                        <!-- Comparison Controls -->
+                        <div class="comparison-controls">
+                            <div class="comparison-control-group">
+                                <label class="comparison-control-label">Date 1:</label>
+                                <select id="comparisonDate1Select" class="comparison-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="comparison-control-group">
+                                <label class="comparison-control-label">Date 2:</label>
+                                <select id="comparisonDate2Select" class="comparison-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="comparison-control-group">
+                                <label class="comparison-control-label">Index:</label>
+                                <select id="comparisonIndexSelect" class="comparison-select">
+                                    <option value="NDVI">NDVI</option>
+                                    <option value="ETc_NDVI">ETc_NDVI</option>
+                                    <option value="FC">FC</option>
+                                    <option value="GCI">GCI</option>
+                                    <option value="MSAVI">MSAVI</option>
+                                    <option value="RECI">RECI</option>
+                                </select>
+                            </div>
+                            
+                            <button id="updateComparisonBtn" class="update-comparison-btn">Update Comparison</button>
+                        </div>
+                        
                         <div id="comparisonStats" class="comparison-stats-content">
                             <!-- Stats will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side: Two Maps Stacked Vertically -->
+                    <div class="comparison-map-container">
+                        <div class="comparison-map-panel">
+                            <div class="comparison-map-label" id="comparisonLabel1">Date 1</div>
+                            <div id="comparisonMap1" class="comparison-map"></div>
+                        </div>
+                        
+                        <div class="comparison-map-panel">
+                            <div class="comparison-map-label" id="comparisonLabel2">Date 2</div>
+                            <div id="comparisonMap2" class="comparison-map"></div>
                         </div>
                     </div>
                 </div>

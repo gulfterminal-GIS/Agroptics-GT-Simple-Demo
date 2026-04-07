@@ -28,7 +28,8 @@ const AppState = {
         date2: null,
         index: null,
         data1: null,
-        data2: null
+        data2: null,
+        overlays: {}
     }
 };
 
@@ -2815,6 +2816,9 @@ function setupComparison() {
     
     // Close comparison view
     document.getElementById('closeComparisonView').addEventListener('click', closeComparisonView);
+    
+    // Update comparison button in the view
+    document.getElementById('updateComparisonBtn').addEventListener('click', updateComparison);
 }
 
 /**
@@ -2905,6 +2909,9 @@ async function showComparisonView() {
     const comparisonView = document.getElementById('comparisonView');
     comparisonView.classList.remove('hidden');
     
+    // Populate date selectors in the view
+    populateComparisonSelectors();
+    
     // Update title
     const title = document.getElementById('comparisonViewTitle');
     title.textContent = `Comparing ${AppState.comparisonData.index} - ${formatDate(AppState.comparisonData.date1)} vs ${formatDate(AppState.comparisonData.date2)}`;
@@ -2918,6 +2925,75 @@ async function showComparisonView() {
         await initializeComparisonMaps();
         await loadComparisonData();
     }, 100);
+}
+
+/**
+ * Populate comparison selectors in the view
+ */
+function populateComparisonSelectors() {
+    const date1Select = document.getElementById('comparisonDate1Select');
+    const date2Select = document.getElementById('comparisonDate2Select');
+    const indexSelect = document.getElementById('comparisonIndexSelect');
+    
+    // Clear existing options
+    date1Select.innerHTML = '<option value="">Select date...</option>';
+    date2Select.innerHTML = '<option value="">Select date...</option>';
+    
+    // Add dates
+    const sortedDates = [...AppState.availableDates].sort((a, b) => new Date(a) - new Date(b));
+    sortedDates.forEach(date => {
+        const dateStr = new Date(date).toISOString().split('T')[0];
+        const displayDate = formatDate(dateStr);
+        
+        const option1 = document.createElement('option');
+        option1.value = dateStr;
+        option1.textContent = displayDate;
+        date1Select.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = dateStr;
+        option2.textContent = displayDate;
+        date2Select.appendChild(option2);
+    });
+    
+    // Set current values
+    date1Select.value = AppState.comparisonData.date1;
+    date2Select.value = AppState.comparisonData.date2;
+    indexSelect.value = AppState.comparisonData.index;
+}
+
+/**
+ * Update comparison with new selections
+ */
+async function updateComparison() {
+    const date1 = document.getElementById('comparisonDate1Select').value;
+    const date2 = document.getElementById('comparisonDate2Select').value;
+    const index = document.getElementById('comparisonIndexSelect').value;
+    
+    if (!date1 || !date2) {
+        alert('Please select both dates.');
+        return;
+    }
+    
+    if (date1 === date2) {
+        alert('Please select different dates.');
+        return;
+    }
+    
+    // Update comparison data
+    AppState.comparisonData.date1 = date1;
+    AppState.comparisonData.date2 = date2;
+    AppState.comparisonData.index = index;
+    
+    // Update title and labels
+    const title = document.getElementById('comparisonViewTitle');
+    title.textContent = `Comparing ${index} - ${formatDate(date1)} vs ${formatDate(date2)}`;
+    
+    document.getElementById('comparisonLabel1').textContent = `${formatDate(date1)} - ${index}`;
+    document.getElementById('comparisonLabel2').textContent = `${formatDate(date2)} - ${index}`;
+    
+    // Reload comparison data
+    await loadComparisonData();
 }
 
 /**
@@ -2970,17 +3046,37 @@ async function loadComparisonData() {
     const date2 = AppState.comparisonData.date2;
     const index = AppState.comparisonData.index;
     
+    console.log('🔄 [COMPARISON] Loading comparison data...');
+    console.log('   Field:', fieldId);
+    console.log('   Date 1:', date1);
+    console.log('   Date 2:', date2);
+    console.log('   Index:', index);
+    
     try {
+        // Clear existing overlays first
+        console.log('🧹 [COMPARISON] Clearing existing overlays...');
+        clearComparisonOverlays();
+        
         // Load both images
+        console.log('📥 [COMPARISON] Loading image 1...');
         const data1 = await loadComparisonImage(fieldId, date1, index);
+        console.log('✅ [COMPARISON] Image 1 loaded successfully');
+        
+        console.log('📥 [COMPARISON] Loading image 2...');
         const data2 = await loadComparisonImage(fieldId, date2, index);
+        console.log('✅ [COMPARISON] Image 2 loaded successfully');
         
         AppState.comparisonData.data1 = data1;
         AppState.comparisonData.data2 = data2;
         
         // Display images
-        displayComparisonImage(AppState.comparisonMaps.map1, data1.dataUrl, data1.bounds);
-        displayComparisonImage(AppState.comparisonMaps.map2, data2.dataUrl, data2.bounds);
+        console.log('🗺️ [COMPARISON] Displaying image 1 on map 1...');
+        displayComparisonImage(AppState.comparisonMaps.map1, data1.dataUrl, data1.bounds, 'overlay1');
+        console.log('✅ [COMPARISON] Image 1 displayed');
+        
+        console.log('🗺️ [COMPARISON] Displaying image 2 on map 2...');
+        displayComparisonImage(AppState.comparisonMaps.map2, data2.dataUrl, data2.bounds, 'overlay2');
+        console.log('✅ [COMPARISON] Image 2 displayed');
         
         // Calculate difference statistics
         const diffStats = calculateDifferenceStats(data1, data2);
@@ -2988,8 +3084,10 @@ async function loadComparisonData() {
         // Display enhanced statistics and insights
         displayEnhancedStats(data1, data2, diffStats, index);
         
+        console.log('✅ [COMPARISON] Comparison loaded successfully');
+        
     } catch (error) {
-        console.error('Error loading comparison data:', error);
+        console.error('❌ [COMPARISON] Error loading comparison data:', error);
         alert('Failed to load comparison data. Please try again.');
         closeComparisonView();
     }
@@ -3070,11 +3168,49 @@ async function loadComparisonImage(fieldId, dateStr, selectedIndex) {
 /**
  * Display comparison image on map
  */
-function displayComparisonImage(map, dataUrl, bounds) {
-    L.imageOverlay(dataUrl, bounds, {
+function displayComparisonImage(map, dataUrl, bounds, overlayKey) {
+    // Store reference to overlay in AppState
+    if (!AppState.comparisonData.overlays) {
+        AppState.comparisonData.overlays = {};
+    }
+    
+    // Remove existing overlay for this map if it exists
+    if (AppState.comparisonData.overlays[overlayKey]) {
+        console.log(`🗑️ [COMPARISON] Removing existing overlay: ${overlayKey}`);
+        map.removeLayer(AppState.comparisonData.overlays[overlayKey]);
+    }
+    
+    // Create and add new overlay
+    const overlay = L.imageOverlay(dataUrl, bounds, {
         opacity: 0.8,
         interactive: false
     }).addTo(map);
+    
+    // Store reference
+    AppState.comparisonData.overlays[overlayKey] = overlay;
+    console.log(`✅ [COMPARISON] Added overlay: ${overlayKey}`);
+}
+
+/**
+ * Clear all comparison overlays
+ */
+function clearComparisonOverlays() {
+    if (AppState.comparisonData.overlays) {
+        Object.keys(AppState.comparisonData.overlays).forEach(key => {
+            const overlay = AppState.comparisonData.overlays[key];
+            if (overlay) {
+                // Determine which map this overlay belongs to
+                if (key === 'overlay1' && AppState.comparisonMaps.map1) {
+                    AppState.comparisonMaps.map1.removeLayer(overlay);
+                    console.log(`🗑️ [COMPARISON] Removed overlay1 from map1`);
+                } else if (key === 'overlay2' && AppState.comparisonMaps.map2) {
+                    AppState.comparisonMaps.map2.removeLayer(overlay);
+                    console.log(`🗑️ [COMPARISON] Removed overlay2 from map2`);
+                }
+            }
+        });
+        AppState.comparisonData.overlays = {};
+    }
 }
 
 /**
@@ -3162,10 +3298,6 @@ function displayEnhancedStats(data1, data2, diffStats, index) {
     const trendUpIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>';
     const trendDownIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>';
     const trendFlatIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
-    const chartIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>';
-    const mapIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>';
-    const lightbulbIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg>';
-    const calendarIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
     
     const changeIcon = percentChange > 5 ? trendUpIcon : percentChange < -5 ? trendDownIcon : trendFlatIcon;
     
@@ -3189,10 +3321,33 @@ function displayEnhancedStats(data1, data2, diffStats, index) {
         healthClass = 'negative';
     }
     
-    // Generate insights based on index type
-    const insights = generateInsights(index, percentChange, diffStats, data1, data2);
-    
     statsContainer.innerHTML = `
+        <!-- Index Values -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </span>
+                ${index} Values
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 1 (${formatDate(AppState.comparisonData.date1)}):</span>
+                <span class="stat-value">${data1.stats.mean.toFixed(4)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 2 (${formatDate(AppState.comparisonData.date2)}):</span>
+                <span class="stat-value">${data2.stats.mean.toFixed(4)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Difference:</span>
+                <span class="stat-value ${changeClass}">${changeSymbol}${(data2.stats.mean - data1.stats.mean).toFixed(4)}</span>
+            </div>
+        </div>
+        
         <!-- Overall Status -->
         <div class="stat-section">
             <div class="stat-section-title">
@@ -3207,95 +3362,6 @@ function displayEnhancedStats(data1, data2, diffStats, index) {
                     ${changeSymbol}${percentChange.toFixed(2)}%
                 </div>
                 <div style="color: #aaa; font-size: 11px; margin-top: 5px;">Change in ${index}</div>
-            </div>
-        </div>
-        
-        <!-- Key Metrics -->
-        <div class="stat-section">
-            <div class="stat-section-title">
-                <span class="stat-section-icon">${chartIcon}</span>
-                Key Metrics
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Date 1 Average:</span>
-                <span class="stat-value">${data1.stats.mean.toFixed(4)}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Date 2 Average:</span>
-                <span class="stat-value">${data2.stats.mean.toFixed(4)}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Absolute Change:</span>
-                <span class="stat-value ${changeClass}">${changeSymbol}${(data2.stats.mean - data1.stats.mean).toFixed(4)}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Date 1 Range:</span>
-                <span class="stat-value">${data1.stats.min.toFixed(3)} - ${data1.stats.max.toFixed(3)}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Date 2 Range:</span>
-                <span class="stat-value">${data2.stats.min.toFixed(3)} - ${data2.stats.max.toFixed(3)}</span>
-            </div>
-        </div>
-        
-        <!-- Field Coverage Analysis -->
-        <div class="stat-section">
-            <div class="stat-section-title">
-                <span class="stat-section-icon">${mapIcon}</span>
-                Field Coverage
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Improved Areas:</span>
-                <span class="stat-value positive">${diffStats.percentImproved.toFixed(1)}%</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Declined Areas:</span>
-                <span class="stat-value negative">${diffStats.percentDeclined.toFixed(1)}%</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Stable Areas:</span>
-                <span class="stat-value neutral">${diffStats.percentUnchanged.toFixed(1)}%</span>
-            </div>
-            ${diffStats.positiveCount > 0 ? `
-            <div class="stat-row">
-                <span class="stat-label">Avg. Improvement:</span>
-                <span class="stat-value positive">+${diffStats.meanPositive.toFixed(4)}</span>
-            </div>
-            ` : ''}
-            ${diffStats.negativeCount > 0 ? `
-            <div class="stat-row">
-                <span class="stat-label">Avg. Decline:</span>
-                <span class="stat-value negative">${diffStats.meanNegative.toFixed(4)}</span>
-            </div>
-            ` : ''}
-        </div>
-        
-        <!-- Insights & Recommendations -->
-        <div class="stat-section">
-            <div class="stat-section-title">
-                <span class="stat-section-icon">${lightbulbIcon}</span>
-                Insights & Recommendations
-            </div>
-            ${insights}
-        </div>
-        
-        <!-- Time Period -->
-        <div class="stat-section">
-            <div class="stat-section-title">
-                <span class="stat-section-icon">${calendarIcon}</span>
-                Time Period
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Start Date:</span>
-                <span class="stat-value">${formatDate(AppState.comparisonData.date1)}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">End Date:</span>
-                <span class="stat-value">${formatDate(AppState.comparisonData.date2)}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Days Elapsed:</span>
-                <span class="stat-value">${Math.round((new Date(AppState.comparisonData.date2) - new Date(AppState.comparisonData.date1)) / (1000 * 60 * 60 * 24))} days</span>
             </div>
         </div>
     `;
@@ -3513,17 +3579,26 @@ function calculateDifference(data1, data2) {
  * Close comparison view
  */
 function closeComparisonView() {
+    console.log('🚪 [COMPARISON] Closing comparison view...');
+    
     document.getElementById('comparisonView').classList.add('hidden');
+    
+    // Clear overlays
+    clearComparisonOverlays();
     
     // Cleanup maps
     if (AppState.comparisonMaps.map1) {
         AppState.comparisonMaps.map1.remove();
         AppState.comparisonMaps.map1 = null;
+        console.log('🗑️ [COMPARISON] Removed map1');
     }
     if (AppState.comparisonMaps.map2) {
         AppState.comparisonMaps.map2.remove();
         AppState.comparisonMaps.map2 = null;
+        console.log('🗑️ [COMPARISON] Removed map2');
     }
+    
+    console.log('✅ [COMPARISON] Comparison view closed');
 }
 
 // Initialize comparison on page load
