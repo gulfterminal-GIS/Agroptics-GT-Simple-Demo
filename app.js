@@ -72,7 +72,8 @@ function initializeMap() {
         "Street Map": streetMap
     };
 
-    L.control.layers(baseMaps).addTo(AppState.map);
+    // Layer control hidden - basemap switching disabled
+    // L.control.layers(baseMaps).addTo(AppState.map);
 }
 
 /**
