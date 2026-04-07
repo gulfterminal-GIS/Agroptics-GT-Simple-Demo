@@ -16,7 +16,8 @@ const AppState = {
     availableDates: [],
     selectedDate: null,
     currentCalendarMonth: new Date(),
-    uploadedLayers: []
+    uploadedLayers: [],
+    swipeSlider: null
 };
 
 // Field configurations
@@ -74,6 +75,353 @@ function initializeMap() {
 
     // Layer control hidden - basemap switching disabled
     // L.control.layers(baseMaps).addTo(AppState.map);
+
+    // Initialize drawing controls
+    initializeDrawingControls();
+}
+
+/**
+ * Initialize drawing controls with custom styling
+ */
+function initializeDrawingControls() {
+    // Create a feature group to store drawn items
+    const drawnItems = new L.FeatureGroup();
+    AppState.map.addLayer(drawnItems);
+    AppState.drawnItems = drawnItems;
+
+    // Configure draw control options with area display
+    const drawControl = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+            polyline: {
+                shapeOptions: {
+                    color: '#FF9800',
+                    weight: 3
+                },
+                showLength: true,
+                metric: true,
+                feet: false
+            },
+            rectangle: false,
+            marker: false,
+            circlemarker: false,
+            polygon: {
+                allowIntersection: false,
+                showArea: true,
+                metric: ['km', 'm'],
+                feet: false,
+                shapeOptions: {
+                    color: '#2196F3',
+                    weight: 3,
+                    fillColor: '#2196F3',
+                    fillOpacity: 0.3
+                },
+                drawError: {
+                    color: '#d32f2f',
+                    timeout: 1000
+                }
+            },
+            circle: {
+                shapeOptions: {
+                    color: '#2196F3',
+                    weight: 3,
+                    fillColor: '#2196F3',
+                    fillOpacity: 0.3
+                },
+                showRadius: true,
+                metric: true,
+                feet: false
+            }
+        },
+        edit: {
+            featureGroup: drawnItems,
+            edit: {
+                selectedPathOptions: {
+                    maintainColor: true,
+                    opacity: 0.6,
+                    dashArray: '10, 10'
+                }
+            }
+        }
+    });
+
+    AppState.map.addControl(drawControl);
+
+    // Custom area calculation function
+    function calculateArea(latlngs) {
+        let area = 0;
+        if (latlngs && latlngs.length > 2) {
+            for (let i = 0; i < latlngs.length; i++) {
+                const j = (i + 1) % latlngs.length;
+                const xi = latlngs[i].lng;
+                const yi = latlngs[i].lat;
+                const xj = latlngs[j].lng;
+                const yj = latlngs[j].lat;
+                area += xi * yj - xj * yi;
+            }
+            area = Math.abs(area / 2);
+            // Convert to square meters (approximate)
+            const metersPerDegree = 111320;
+            area = area * metersPerDegree * metersPerDegree;
+        }
+        return area;
+    }
+
+    // Handle draw created event
+    AppState.map.on(L.Draw.Event.CREATED, function (event) {
+        const layer = event.layer;
+        const type = event.layerType;
+        
+        // Apply styling to drawn shapes
+        if (type === 'polyline') {
+            layer.setStyle({
+                color: '#FF9800',
+                weight: 3
+            });
+        } else if (layer.setStyle) {
+            layer.setStyle({
+                color: '#2196F3',
+                weight: 3,
+                fillColor: '#2196F3',
+                fillOpacity: 0.3
+            });
+        }
+        
+        drawnItems.addLayer(layer);
+        
+        // Add popup with enhanced styling
+        let popupContent = `<div class="field-popup">
+            <h3>${type.charAt(0).toUpperCase() + type.slice(1)}</h3>`;
+        
+        if (type === 'polyline') {
+            // Calculate distance
+            const latlngs = layer.getLatLngs();
+            let totalDistance = 0;
+            
+            for (let i = 0; i < latlngs.length - 1; i++) {
+                totalDistance += latlngs[i].distanceTo(latlngs[i + 1]);
+            }
+            
+            const meters = totalDistance.toFixed(2);
+            const kilometers = (totalDistance / 1000).toFixed(2);
+            const miles = (totalDistance * 0.000621371).toFixed(2);
+            const feet = (totalDistance * 3.28084).toFixed(2);
+            
+            popupContent += `
+                <div class="metric-row">
+                    <span class="metric-label">Meters</span>
+                    <span class="metric-value">${meters} m</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Kilometers</span>
+                    <span class="metric-value">${kilometers} km</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Miles</span>
+                    <span class="metric-value">${miles} mi</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Feet</span>
+                    <span class="metric-value">${feet} ft</span>
+                </div>`;
+        } else if (type === 'polygon') {
+            const latlngs = layer.getLatLngs()[0];
+            const area = calculateArea(latlngs);
+            const acres = (area * 0.000247105).toFixed(2);
+            const hectares = (area / 10000).toFixed(2);
+            const sqMeters = area.toFixed(0);
+            
+            popupContent += `
+                <div class="metric-row">
+                    <span class="metric-label">Acres</span>
+                    <span class="metric-value">${acres} ac</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Hectares</span>
+                    <span class="metric-value">${hectares} ha</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Square Meters</span>
+                    <span class="metric-value">${sqMeters} m²</span>
+                </div>`;
+        } else if (type === 'circle') {
+            const radius = layer.getRadius();
+            const area = Math.PI * radius * radius;
+            const acres = (area * 0.000247105).toFixed(2);
+            const hectares = (area / 10000).toFixed(2);
+            const sqMeters = area.toFixed(0);
+            
+            popupContent += `
+                <div class="metric-row">
+                    <span class="metric-label">Radius</span>
+                    <span class="metric-value">${radius.toFixed(2)} m</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Acres</span>
+                    <span class="metric-value">${acres} ac</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Hectares</span>
+                    <span class="metric-value">${hectares} ha</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Square Meters</span>
+                    <span class="metric-value">${sqMeters} m²</span>
+                </div>`;
+        }
+        
+        popupContent += '</div>';
+        layer.bindPopup(popupContent);
+        layer.openPopup();
+    });
+
+    // Handle draw edited event
+    AppState.map.on(L.Draw.Event.EDITED, function (event) {
+        const layers = event.layers;
+        layers.eachLayer(function (layer) {
+            // Update popup content for polyline (distance)
+            if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+                const latlngs = layer.getLatLngs();
+                let totalDistance = 0;
+                
+                for (let i = 0; i < latlngs.length - 1; i++) {
+                    totalDistance += latlngs[i].distanceTo(latlngs[i + 1]);
+                }
+                
+                const meters = totalDistance.toFixed(2);
+                const kilometers = (totalDistance / 1000).toFixed(2);
+                const miles = (totalDistance * 0.000621371).toFixed(2);
+                const feet = (totalDistance * 3.28084).toFixed(2);
+                
+                const popupContent = `<div class="field-popup">
+                    <h3>Edited Distance</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Meters</span>
+                        <span class="metric-value">${meters} m</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Kilometers</span>
+                        <span class="metric-value">${kilometers} km</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Miles</span>
+                        <span class="metric-value">${miles} mi</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Feet</span>
+                        <span class="metric-value">${feet} ft</span>
+                    </div>
+                </div>`;
+                layer.setPopupContent(popupContent);
+            }
+            // Update popup content if it's a polygon
+            else if (layer instanceof L.Polygon && !(layer instanceof L.Circle)) {
+                const latlngs = layer.getLatLngs()[0];
+                const area = calculateArea(latlngs);
+                const acres = (area * 0.000247105).toFixed(2);
+                const hectares = (area / 10000).toFixed(2);
+                const sqMeters = area.toFixed(0);
+                
+                const popupContent = `<div class="field-popup">
+                    <h3>Edited Polygon</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Acres</span>
+                        <span class="metric-value">${acres} ac</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Hectares</span>
+                        <span class="metric-value">${hectares} ha</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Square Meters</span>
+                        <span class="metric-value">${sqMeters} m²</span>
+                    </div>
+                </div>`;
+                layer.setPopupContent(popupContent);
+            } else if (layer instanceof L.Circle) {
+                const radius = layer.getRadius();
+                const area = Math.PI * radius * radius;
+                const acres = (area * 0.000247105).toFixed(2);
+                const hectares = (area / 10000).toFixed(2);
+                const sqMeters = area.toFixed(0);
+                
+                const popupContent = `<div class="field-popup">
+                    <h3>Edited Circle</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Radius</span>
+                        <span class="metric-value">${radius.toFixed(2)} m</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Acres</span>
+                        <span class="metric-value">${acres} ac</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Hectares</span>
+                        <span class="metric-value">${hectares} ha</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Square Meters</span>
+                        <span class="metric-value">${sqMeters} m²</span>
+                    </div>
+                </div>`;
+                layer.setPopupContent(popupContent);
+            }
+        });
+    });
+
+    // Handle draw deleted event
+    AppState.map.on(L.Draw.Event.DELETED, function (event) {
+        console.log('Shapes deleted:', event.layers.getLayers().length);
+    });
+
+    // Show area while drawing polygon
+    AppState.map.on('draw:drawvertex', function (e) {
+        const layers = e.layers;
+        layers.eachLayer(function (layer) {
+            if (layer instanceof L.Polygon) {
+                const latlngs = layer.getLatLngs()[0];
+                if (latlngs.length > 2) {
+                    const area = calculateArea(latlngs);
+                    const acres = (area * 0.000247105).toFixed(2);
+                    console.log(`Current area: ${acres} acres`);
+                }
+            }
+        });
+    });
+
+    // Show drawing tools tooltip on load
+    showDrawingToolsTooltip();
+}
+
+/**
+ * Show tooltip pointing to drawing tools
+ */
+function showDrawingToolsTooltip() {
+    const tooltip = document.getElementById('drawingToolsTooltip');
+    if (!tooltip) return;
+
+    // Show tooltip after a short delay
+    setTimeout(() => {
+        tooltip.classList.remove('hidden');
+    }, 1000);
+
+    // Hide tooltip after 5 seconds
+    setTimeout(() => {
+        tooltip.classList.add('hidden');
+    }, 6000);
+
+    // Hide tooltip when user clicks on drawing tools
+    const drawToolbar = document.querySelector('.leaflet-draw-toolbar');
+    if (drawToolbar) {
+        drawToolbar.addEventListener('click', () => {
+            tooltip.classList.add('hidden');
+        });
+    }
+
+    // Hide tooltip when user starts drawing
+    AppState.map.on('draw:drawstart', () => {
+        tooltip.classList.add('hidden');
+    });
 }
 
 /**
@@ -1331,6 +1679,9 @@ async function showImageOverlay() {
         
         console.log('Image overlay added to map');
         
+        // Initialize swipe control
+        initializeSwipeControl();
+        
         // Show info
         const overlayInfo = document.getElementById('overlayInfo');
         overlayInfo.style.display = 'block';
@@ -1362,6 +1713,9 @@ function clearImageOverlay() {
         AppState.map.removeLayer(AppState.imageOverlay);
         AppState.imageOverlay = null;
     }
+    
+    // Remove swipe control
+    removeSwipeControl();
     
     // Restore polygon to normal style
     const fieldId = AppState.selectedField;
@@ -1644,4 +1998,137 @@ function displayUploadedLayer(geojson, fileName) {
     });
     
     console.log(`Uploaded layer: ${fileName}`);
+}
+
+/**
+ * Initialize swipe control for comparing base map with overlay
+ */
+function initializeSwipeControl() {
+    // Remove existing swipe control if any
+    removeSwipeControl();
+    
+    const mapContainer = document.getElementById('map');
+    
+    // Create swipe slider
+    const swipeSlider = document.createElement('div');
+    swipeSlider.id = 'swipeSlider';
+    swipeSlider.className = 'swipe-slider';
+    
+    // Create slider handle
+    const sliderHandle = document.createElement('div');
+    sliderHandle.className = 'swipe-handle';
+    sliderHandle.innerHTML = '<div class="swipe-handle-line"></div><div class="swipe-handle-grip">⬌</div><div class="swipe-handle-line"></div>';
+    
+    swipeSlider.appendChild(sliderHandle);
+    mapContainer.appendChild(swipeSlider);
+    
+    // Store reference
+    AppState.swipeSlider = swipeSlider;
+    
+    // Set initial position (middle)
+    const mapWidth = mapContainer.offsetWidth;
+    const initialX = mapWidth / 2;
+    swipeSlider.style.left = initialX + 'px';
+    
+    // Wait for overlay image to be ready
+    setTimeout(() => {
+        updateSwipeClip(initialX);
+    }, 100);
+    
+    // Add drag functionality
+    let isDragging = false;
+    
+    const startDrag = (e) => {
+        isDragging = true;
+        // Disable map dragging
+        AppState.map.dragging.disable();
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    
+    const stopDrag = () => {
+        if (isDragging) {
+            isDragging = false;
+            // Re-enable map dragging
+            AppState.map.dragging.enable();
+        }
+    };
+    
+    const onDrag = (clientX) => {
+        if (!isDragging) return;
+        
+        const mapRect = mapContainer.getBoundingClientRect();
+        let x = clientX - mapRect.left;
+        
+        // Constrain to map bounds
+        x = Math.max(0, Math.min(x, mapRect.width));
+        
+        swipeSlider.style.left = x + 'px';
+        updateSwipeClip(x);
+    };
+    
+    // Mouse events
+    sliderHandle.addEventListener('mousedown', startDrag);
+    
+    document.addEventListener('mousemove', (e) => {
+        onDrag(e.clientX);
+    });
+    
+    document.addEventListener('mouseup', stopDrag);
+    
+    // Touch events
+    sliderHandle.addEventListener('touchstart', (e) => {
+        startDrag(e);
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length > 0) {
+            onDrag(e.touches[0].clientX);
+        }
+    });
+    
+    document.addEventListener('touchend', stopDrag);
+}
+
+/**
+ * Update the clip path for the overlay based on swipe position
+ */
+function updateSwipeClip(x) {
+    if (!AppState.imageOverlay || !AppState.imageOverlay._image) return;
+    
+    const img = AppState.imageOverlay._image;
+    const mapContainer = document.getElementById('map');
+    const mapRect = mapContainer.getBoundingClientRect();
+    
+    // Get the image position relative to the map
+    const imgRect = img.getBoundingClientRect();
+    const imgLeft = imgRect.left - mapRect.left;
+    
+    // Calculate the clip position relative to the image
+    const clipX = x - imgLeft;
+    
+    // Apply clip-path for better performance and accuracy
+    img.style.clipPath = `inset(0 ${img.width - clipX}px 0 0)`;
+    img.style.clip = 'auto'; // Remove old clip property
+}
+
+/**
+ * Remove swipe control
+ */
+function removeSwipeControl() {
+    if (AppState.swipeSlider) {
+        AppState.swipeSlider.remove();
+        AppState.swipeSlider = null;
+    }
+    
+    // Reset clip on overlay
+    if (AppState.imageOverlay && AppState.imageOverlay._image) {
+        AppState.imageOverlay._image.style.clipPath = 'none';
+        AppState.imageOverlay._image.style.clip = 'auto';
+    }
+    
+    // Re-enable map dragging if it was disabled
+    if (AppState.map && AppState.map.dragging) {
+        AppState.map.dragging.enable();
+    }
 }
