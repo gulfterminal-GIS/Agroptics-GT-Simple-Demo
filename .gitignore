@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# But not the exports folder
+!exports/
+!exports/**
+
+# Keep .gitignore itself
+!.gitignore
