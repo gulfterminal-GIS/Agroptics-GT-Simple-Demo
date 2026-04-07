@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agroptics - Satellite Imagery Field Monitoring</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar - Left side */
+        .sidebar {
+            width: 320px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        /* Right side container - Map and Analysis */
+        .right-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Map Section - Top 35% */
+        #map {
+            height: 35%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Analysis Section - Bottom 65% */
+        .analysis-section {
+            height: 65%;
+            background: white;
+            border-top: 3px solid #2c5f2d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .analysis-section.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .analysis-section.active .analysis-placeholder {
+            display: none;
+        }
+
+        .analysis-section.active .analysis-header,
+        .analysis-section.active .analysis-tabs,
+        .analysis-section.active .analysis-body {
+            display: flex;
+        }
+
+        .analysis-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .analysis-placeholder svg {
+            margin-bottom: 20px;
+        }
+
+        .analysis-placeholder-text {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .analysis-placeholder-subtext {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .analysis-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 16px 20px;
+            border-bottom: 2px solid #2c5f2d;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .analysis-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .analysis-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .analysis-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .analysis-tabs {
+            display: none;
+            background: #f5f5f5;
+            border-bottom: 1px solid #d0d0d0;
+        }
+
+        .analysis-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .analysis-tab:hover:not(.disabled) {
+            background: #e8e8e8;
+        }
+
+        .analysis-tab.active {
+            background: white;
+            color: #2c5f2d;
+            border-bottom: 3px solid #2c5f2d;
+        }
+
+        .analysis-tab.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .analysis-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .analysis-tab-content {
+            display: none;
+            width: 100%;
+        }
+
+        .analysis-tab-content.active {
+            display: block;
+            width: 100%;
+        }
+
+        /* Ensure image overlays appear above polygons */
+        .leaflet-image-layer,
+        .satellite-overlay {
+            z-index: 1000 !important;
+            pointer-events: none;
+        }
+
+        .leaflet-overlay-pane {
+            z-index: 400 !important;
+        }
+
+        .leaflet-pane {
+            z-index: 200;
+        }
+
+        /* Header */
+        .sidebar-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            border-bottom: 3px solid #2c5f2d;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.85;
+            color: #b0b0b0;
+        }
+
+        /* Field List */
+        .field-list-container {
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .field-list-title {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upload-field-btn {
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 6px 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .upload-field-btn:hover {
+            background: #234d24;
+        }
+
+        .upload-field-btn svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .field-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Image Overlay Controls */
+        .overlay-controls {
+            display: none;
+            padding: 15px;
+            background: #f9f9f9;
+            border-top: 2px solid #2c5f2d;
+            margin-top: 15px;
+        }
+
+        .overlay-controls.active {
+            display: block;
+        }
+
+        .overlay-controls-title {
+            font-size: 11px;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            margin-bottom: 15px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-month {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 5px;
+        }
+
+        .calendar-nav-btn {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 3px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background: #2c5f2d;
+            color: white;
+            border-color: #2c5f2d;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day-header {
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+            padding: 4px 0;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            border-radius: 3px;
+            cursor: default;
+            background: #f5f5f5;
+            color: #ccc;
+        }
+
+        .calendar-day.available {
+            background: white;
+            border: 1px solid #d0d0d0;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day.available:hover {
+            background: #e8f5e9;
+            border-color: #2c5f2d;
+            color: #2c5f2d;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected {
+            background: #2c5f2d;
+            border-color: #2c5f2d;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.today {
+            border: 2px solid #2c5f2d;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .control-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .control-select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .control-select:hover {
+            border-color: #2c5f2d;
+        }
+
+        .control-select:focus {
+            outline: none;
+            border-color: #2c5f2d;
+            box-shadow: 0 0 0 2px rgba(44, 95, 45, 0.1);
+        }
+
+        .overlay-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2c5f2d;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #234d24;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .overlay-info {
+            margin-top: 10px;
+            padding: 8px;
+            background: #e8f5e9;
+            border-left: 3px solid #2c5f2d;
+            font-size: 11px;
+            color: #1a1a1a;
+            border-radius: 2px;
+        }
+
+        .field-card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .field-card:hover {
+            background: #f0f0f0;
+            border-color: #2c5f2d;
+            transform: translateX(2px);
+        }
+
+        .field-card.active {
+            background: #e8f5e9;
+            border-color: #2c5f2d;
+            border-width: 2px;
+        }
+
+        .field-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .field-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .field-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .field-crop {
+            font-size: 12px;
+            color: #666;
+            margin-left: 4px;
+        }
+
+        .field-details {
+            font-size: 11px;
+            color: #888;
+            margin-left: 22px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 1000px;
+            height: 85vh;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px 24px;
+            border-bottom: 3px solid #2c5f2d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .modal-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #d0d0d0;
+        }
+
+        .modal-tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-tab:hover:not(.disabled) {
+            background: #e8e8e8;
+        }
+
+        .modal-tab.active {
+            background: white;
+            color: #2c5f2d;
+            border-bottom: 3px solid #2c5f2d;
+        }
+
+        .modal-tab.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .modal-tab-content {
+            display: none;
+        }
+
+        .modal-tab-content.active {
+            display: block;
+        }
+
+        /* Field Info */
+        .field-info {
+            background: #f9f9f9;
+            padding: 18px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2c5f2d;
+        }
+
+        .field-info h2 {
+            font-size: 19px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .category-tab {
+            padding: 12px 16px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
+
+        .category-tab:hover {
+            background: #e8e8e8;
+        }
+
+        .category-tab.active {
+            background: white;
+            color: #2c5f2d;
+            border-bottom-color: #2c5f2d;
+        }
+
+        /* Category Content */
+        .category-content-wrapper {
+            display: none;
+            width: 100%;
+        }
+
+        .category-content-wrapper.active {
+            display: block;
+            width: 100%;
+        }
+
+        /* Chart Section with Side Panel */
+        .chart-section {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .chart-main {
+            flex: 1;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-container {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            padding: 15px;
+            height: 450px;
+            position: relative;
+            width: 100%;
+        }
+
+        .category-chart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Data Toggles - Now on the right side */
+        .data-toggles {
+            width: 220px;
+            flex-shrink: 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            height: fit-content;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .toggles-title {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .toggle-item:hover {
+            background: #f0f0f0;
+        }
+
+        .toggle-checkbox {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .toggle-legend {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            margin-right: 8px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        .toggle-item span {
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .empty-state-subtext {
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        /* Custom Leaflet Popup */
+        .leaflet-popup-content-wrapper {
+            border-radius: 4px;
+        }
+
+        .leaflet-popup {
+            margin-bottom: 20px !important;
+        }
+
+        .leaflet-popup-tip-container {
+            display: block !important;
+        }
+
+        .field-popup {
+            text-align: center;
+            padding: 5px;
+        }
+
+        .field-popup h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .field-popup p {
+            margin: 3px 0;
+            color: #666;
+            font-size: 13px;
+        }
+
+        /* Custom Leaflet Tooltip */
+        .leaflet-tooltip.field-tooltip {
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid #2c5f2d;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            color: white;
+            font-weight: 500;
+            padding: 8px 12px;
+        }
+
+        .leaflet-tooltip.field-tooltip::before {
+            border-top-color: #2c5f2d;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 40vh;
+            }
+            
+            #map {
+                height: 60vh;
+            }
+
+            .modal-content {
+                width: 95%;
+                height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar - Left side -->
+        <div class="sidebar">
+            <!-- Header -->
+            <div class="sidebar-header">
+                <h1>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        <path d="M2 12h20"></path>
+                    </svg>
+                    Agroptics
+                </h1>
+                <p>Satellite Imagery Field Monitoring</p>
+            </div>
+
+            <!-- Field List -->
+            <div class="field-list-container">
+                <div class="field-list-title">
+                    <span>Select a Field</span>
+                    <button class="upload-field-btn" onclick="document.getElementById('fileInput').click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Upload
+                    </button>
+                </div>
+                <input type="file" id="fileInput" accept=".geojson,.json,.kml,.shp,.zip,.gml,.gpx" />
+                <div class="field-list">
+                    <!-- Field cards will be dynamically added here -->
+                </div>
+
+                <!-- Image Overlay Controls -->
+                <div id="overlayControls" class="overlay-controls">
+                    <div class="overlay-controls-title">View Satellite Image</div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Select Date</label>
+                        <div id="calendarContainer" class="calendar-container">
+                            <!-- Calendar will be generated here -->
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Select Index</label>
+                        <select id="indexSelect" class="control-select">
+                            <option value="NDVI">NDVI - Vegetation Index</option>
+                            <option value="ETc_NDVI">ETc_NDVI - Evapotranspiration</option>
+                            <option value="FC">FC - Fractional Cover</option>
+                            <option value="GCI">GCI - Green Chlorophyll Index</option>
+                            <option value="MSAVI">MSAVI - Soil-Adjusted VI</option>
+                            <option value="RECI">RECI - Red Edge Chlorophyll</option>
+                        </select>
+                    </div>
+
+                    <div class="overlay-actions">
+                        <button id="showImageBtn" class="btn btn-primary">Show Image</button>
+                        <button id="clearImageBtn" class="btn btn-secondary">Clear</button>
+                    </div>
+
+                    <div id="overlayInfo" class="overlay-info" style="display: none;">
+                        Image overlay active
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Container - Map and Analysis -->
+        <div class="right-container">
+            <!-- Map Section - Top 50% -->
+            <div id="map"></div>
+
+            <!-- Analysis Section - Bottom 70% -->
+            <div id="analysisSection" class="analysis-section empty">
+                <!-- Placeholder when no field selected -->
+                <div class="analysis-placeholder">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <div class="analysis-placeholder-text">Select a field to view analysis</div>
+                    <div class="analysis-placeholder-subtext">Click on any field card in the left panel</div>
+                </div>
+
+                <div class="analysis-header">
+                    <h2 id="analysisTitle" class="analysis-title">Field Analysis</h2>
+                    <button id="analysisClose" class="analysis-close">&times;</button>
+                </div>
+
+                <div class="analysis-tabs">
+                    <button class="analysis-tab" data-analysis-tab="field-info">Field Info</button>
+                    <button class="analysis-tab active" data-analysis-tab="planet">Planet</button>
+                    <button class="analysis-tab disabled" data-analysis-tab="sentinel">Sentinel</button>
+                    <button class="analysis-tab disabled" data-analysis-tab="landsat">Landsat</button>
+                </div>
+
+                <div class="analysis-body">
+                    <!-- Field Info Tab -->
+                    <div id="analysis-field-info-content" class="analysis-tab-content">
+                        <!-- Content will be dynamically added -->
+                    </div>
+
+                    <!-- Planet Tab -->
+                    <div id="analysis-planet-content" class="analysis-tab-content active">
+                        <!-- Content will be dynamically added -->
+                    </div>
+
+                    <!-- Sentinel Tab -->
+                    <div id="analysis-sentinel-content" class="analysis-tab-content">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                <path d="M2 12h20"></path>
+                            </svg>
+                            <div class="empty-state-text">Sentinel Data</div>
+                            <div class="empty-state-subtext">Coming soon...</div>
+                        </div>
+                    </div>
+
+                    <!-- Landsat Tab -->
+                    <div id="analysis-landsat-content" class="analysis-tab-content">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="4"></circle>
+                                <line x1="21.17" y1="8" x2="12" y2="8"></line>
+                                <line x1="3.95" y1="6.06" x2="8.54" y2="14"></line>
+                                <line x1="10.88" y1="21.94" x2="15.46" y2="14"></line>
+                            </svg>
+                            <div class="empty-state-text">Landsat Data</div>
+                            <div class="empty-state-subtext">Coming soon...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="fieldModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle" class="modal-title">Field Details</h2>
+                <button id="modalClose" class="modal-close">&times;</button>
+            </div>
+
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-modal-tab="field-info">Field Info</button>
+                <button class="modal-tab" data-modal-tab="planet">Planet</button>
+                <button class="modal-tab disabled" data-modal-tab="sentinel">Sentinel</button>
+                <button class="modal-tab disabled" data-modal-tab="landsat">Landsat</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Field Info Tab -->
+                <div id="field-info-content" class="modal-tab-content active">
+                    <!-- Content will be dynamically added -->
+                </div>
+
+                <!-- Planet Tab -->
+                <div id="planet-content" class="modal-tab-content">
+                    <!-- Content will be dynamically added -->
+                </div>
+
+                <!-- Sentinel Tab -->
+                <div id="sentinel-content" class="modal-tab-content">
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            <path d="M2 12h20"></path>
+                        </svg>
+                        <div class="empty-state-text">Sentinel Data</div>
+                        <div class="empty-state-subtext">Coming soon...</div>
+                    </div>
+                </div>
+
+                <!-- Landsat Tab -->
+                <div id="landsat-content" class="modal-tab-content">
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <line x1="21.17" y1="8" x2="12" y2="8"></line>
+                            <line x1="3.95" y1="6.06" x2="8.54" y2="14"></line>
+                            <line x1="10.88" y1="21.94" x2="15.46" y2="14"></line>
+                        </svg>
+                        <div class="empty-state-text">Landsat Data</div>
+                        <div class="empty-state-subtext">Coming soon...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
+    <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "type": "Feature",
+  "properties": {
+    "fieldID": "08d394a32e0cfd8b2dfec0b3b88ab997",
+    "fieldName": "Field 10",
+    "cropType": "sugarBeet",
+    "fieldSize": 7.41,
+    "irrigMethod": "Sprinkler",
+    "soilTexture": "siltClayLoam",
+    "cultivar": "",
+    "plantingDate": "2025-03-28"
+  },
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          -104.99549127776356,
+          40.61355640604182
+        ],
+        [
+          -104.99400404405847,
+          40.61355394545285
+        ],
+        [
+          -104.99409276196167,
+          40.61136566064559
+        ],
+        [
+          -104.99551519779183,
+          40.61136013430942
+        ],
+        [
+          -104.99549127776356,
+          40.61355640604182
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  }
+}

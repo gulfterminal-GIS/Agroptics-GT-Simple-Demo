@@ -1,9 +1,17 @@
 # Ignore everything
 *
 
-# But not the exports folder
+# But allow these specific files and folders
+!.gitignore
 !exports/
 !exports/**
-
-# Keep .gitignore itself
-!.gitignore
+!data/
+!data/**
+!app.js
+!Field_10.geojson
+!Field_11.geojson
+!Field_12_and_13.geojson
+!index.html
+!package.json
+!package-lock.json
+!preprocess-data-template.js

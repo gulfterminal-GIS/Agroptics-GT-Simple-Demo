@@ -1,0 +1,40 @@
+{
+  "type": "Feature",
+  "properties": {
+    "fieldID": "645ab6a89cf8a9135d3c8710ee1082a4",
+    "fieldName": "Field 11",
+    "cropType": "barley",
+    "fieldSize": 12.5,
+    "irrigMethod": "Sprinkler",
+    "soilTexture": "siltClayLoam",
+    "cultivar": "Claymore",
+    "plantingDate": "2025-02-27"
+  },
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          -104.993944592395,
+          40.613585468127496
+        ],
+        [
+          -104.99155885532586,
+          40.613573313404885
+        ],
+        [
+          -104.99157486698388,
+          40.611330729227575
+        ],
+        [
+          -104.99397661571149,
+          40.611336806793105
+        ],
+        [
+          -104.993944592395,
+          40.613585468127496
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  }
+}
