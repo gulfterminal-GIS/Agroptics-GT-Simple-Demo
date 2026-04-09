@@ -18,6 +18,7 @@ const AppState = {
     currentCalendarMonth: new Date(),
     uploadedLayers: [],
     swipeSlider: null,
+    mapLegend: null,
     comparisonMaps: {
         map1: null,
         map2: null,
@@ -1692,6 +1693,9 @@ async function showImageOverlay() {
         
         console.log('Image overlay added to map');
         
+        // Add legend to map
+        addLegendToMap(selectedIndex, stats);
+        
         // Initialize timeline player
         initializeTimelinePlayer();
         
@@ -1726,6 +1730,9 @@ function clearImageOverlay() {
         AppState.map.removeLayer(AppState.imageOverlay);
         AppState.imageOverlay = null;
     }
+    
+    // Remove legend
+    removeLegendFromMap();
     
     // Remove swipe control
     removeSwipeControl();
@@ -1815,6 +1822,104 @@ function getColorScale(indexName) {
     };
     
     return scales[indexName] || scales.NDVI;
+}
+
+/**
+ * Add legend to map
+ */
+function addLegendToMap(indexName, stats) {
+    // Remove existing legend if present
+    removeLegendFromMap();
+    
+    console.log('📊 [LEGEND] Adding legend for', indexName);
+    console.log('📊 [LEGEND] Stats:', stats);
+    
+    // Create legend control
+    const legend = L.control({ position: 'bottomleft' });
+    
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'map-legend');
+        
+        // Disable map dragging when interacting with legend
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
+        
+        // Prevent map panning when dragging on legend
+        div.addEventListener('mousedown', function(e) {
+            L.DomEvent.stopPropagation(e);
+        });
+        
+        div.addEventListener('touchstart', function(e) {
+            L.DomEvent.stopPropagation(e);
+        });
+        
+        // Create gradient canvas (horizontal)
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 30;
+        const ctx = canvas.getContext('2d');
+        
+        // Get color scale
+        const colorScale = getColorScale(indexName);
+        
+        // Draw horizontal gradient from left (low) to right (high)
+        for (let i = 0; i < 200; i++) {
+            const value = i / 200; // Left to right: 0 to 1
+            const color = colorScale(value);
+            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+            ctx.fillRect(i, 0, 1, 30);
+        }
+        
+        console.log('📊 [LEGEND] Canvas created:', canvas.width, 'x', canvas.height);
+        
+        // Calculate mean position on the gradient (0 to 200px)
+        const meanNormalized = (stats.mean - stats.min) / (stats.max - stats.min);
+        const meanPosition = meanNormalized * 200;
+        
+        console.log('📊 [LEGEND] Mean position:', meanPosition, 'px (normalized:', meanNormalized, ')');
+        
+        // Build legend HTML with min/max on top, mean on bottom
+        div.innerHTML = `
+            <div class="legend-title">${indexName}</div>
+            <div class="legend-content-horizontal">
+                <div class="legend-labels-top">
+                    <div class="legend-label-min">Min: ${stats.min.toFixed(3)}</div>
+                    <div class="legend-label-max">Max: ${stats.max.toFixed(3)}</div>
+                </div>
+                <div class="legend-gradient-horizontal"></div>
+                <div class="legend-mean-container">
+                    <div class="legend-mean-indicator" style="left: ${meanPosition}px;">
+                        <div class="legend-mean-line"></div>
+                    </div>
+                    <div class="legend-mean-label" style="left: ${meanPosition}px;">Mean: ${stats.mean.toFixed(3)}</div>
+                </div>
+            </div>
+        `;
+        
+        // Append canvas after div is created
+        const gradientContainer = div.querySelector('.legend-gradient-horizontal');
+        gradientContainer.appendChild(canvas);
+        
+        return div;
+    };
+    
+    legend.addTo(AppState.map);
+    
+    // Store reference
+    AppState.mapLegend = legend;
+    
+    console.log('✅ [LEGEND] Legend added successfully');
+}
+
+/**
+ * Remove legend from map
+ */
+function removeLegendFromMap() {
+    if (AppState.mapLegend) {
+        console.log('🗑️ [LEGEND] Removing existing legend');
+        AppState.map.removeControl(AppState.mapLegend);
+        AppState.mapLegend = null;
+    }
 }
 
 
@@ -2423,12 +2528,12 @@ async function showTimelineImage(dateStr) {
         
         if (TimelineState.preloadedImages[cacheKey]) {
             // Use cached image
-            updateImageOverlay(TimelineState.preloadedImages[cacheKey]);
+            updateImageOverlay(TimelineState.preloadedImages[cacheKey].dataUrl, selectedIndex, TimelineState.preloadedImages[cacheKey].stats);
         } else {
             // Load image
-            const dataUrl = await loadTimelineImage(fieldId, formattedDate, selectedIndex);
-            TimelineState.preloadedImages[cacheKey] = dataUrl;
-            updateImageOverlay(dataUrl);
+            const imageData = await loadTimelineImage(fieldId, formattedDate, selectedIndex);
+            TimelineState.preloadedImages[cacheKey] = imageData;
+            updateImageOverlay(imageData.dataUrl, selectedIndex, imageData.stats);
         }
     } catch (error) {
         console.error('Error loading timeline image:', error);
@@ -2488,13 +2593,18 @@ async function loadTimelineImage(fieldId, dateStr, selectedIndex) {
     }
     
     ctx.putImageData(imageData, 0, 0);
-    return canvas.toDataURL();
+    
+    // Return both dataUrl and stats
+    return {
+        dataUrl: canvas.toDataURL(),
+        stats: stats
+    };
 }
 
 /**
  * Update image overlay with new data
  */
-function updateImageOverlay(dataUrl) {
+function updateImageOverlay(dataUrl, indexName, stats) {
     if (!AppState.imageOverlay) return;
     
     const fieldId = AppState.selectedField;
@@ -2520,6 +2630,11 @@ function updateImageOverlay(dataUrl) {
     
     if (AppState.imageOverlay._image) {
         AppState.imageOverlay._image.style.zIndex = '1000';
+    }
+    
+    // Update legend with new stats
+    if (indexName && stats) {
+        addLegendToMap(indexName, stats);
     }
     
     // Reapply swipe if active

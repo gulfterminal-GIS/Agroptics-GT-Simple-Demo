@@ -1825,6 +1825,116 @@
             border-bottom: none;
         }
 
+        /* Map Legend Styles - Horizontal */
+        .map-legend {
+            background: rgba(26, 26, 26, 0.95);
+            padding: 10px 15px 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 2px solid #4CAF50;
+            backdrop-filter: blur(10px);
+            z-index: 1004 !important;
+            position: absolute !important;
+            bottom: 130px !important;
+            /* left: 10px !important; */
+            max-width: 300px;
+            cursor: default;
+        }
+
+        .legend-title {
+            color: #4CAF50;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .legend-content-horizontal {
+            position: relative;
+        }
+
+        /* Min/Max labels on top */
+        .legend-labels-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'SF Mono', Monaco, monospace;
+        }
+
+        .legend-label-min {
+            color: #f44336;
+        }
+
+        .legend-label-max {
+            color: #4CAF50;
+        }
+
+        .legend-gradient-horizontal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-gradient-horizontal canvas {
+            display: block;
+            border: 1px solid #555;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Mean container at bottom */
+        .legend-mean-container {
+            position: relative;
+            height: 20px;
+        }
+
+        .legend-mean-indicator {
+            position: absolute;
+            top: -8px;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .legend-mean-line {
+            width: 2px;
+            height: 8px;
+            background: white;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+            margin: 0 auto;
+        }
+
+        .legend-mean-label {
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            background: rgba(255, 193, 7, 0.95);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'SF Mono', Monaco, monospace;
+        }
+
+        /* Ensure legend is above timeline */
+        .leaflet-bottom.leaflet-left {
+            z-index: 1004 !important;
+            pointer-events: none;
+        }
+
+        .leaflet-bottom.leaflet-left .leaflet-control {
+            pointer-events: auto;
+        }
+
         /* Timeline Player Styles */
         .timeline-player {
             position: absolute;
