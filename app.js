@@ -3720,3 +3720,559 @@ function closeComparisonView() {
 document.addEventListener('DOMContentLoaded', () => {
     setupComparison();
 });
+
+
+/**
+ * ========================================
+ * TIMELINE EXPORT FUNCTIONALITY
+ * ========================================
+ */
+
+/**
+ * Export State
+ */
+const ExportState = {
+    isExporting: false,
+    format: 'gif',
+    startDate: null,
+    endDate: null,
+    speed: 1000,
+    quality: 20,
+    frames: [],
+    currentFrame: 0,
+    totalFrames: 0,
+    gif: null,
+    mediaRecorder: null,
+    recordedChunks: []
+};
+
+/**
+ * Initialize Export Modal
+ */
+function initializeExportModal() {
+    console.log('🎬 [EXPORT] Initializing export modal');
+    
+    const exportBtn = document.getElementById('timelineExport');
+    const exportModal = document.getElementById('exportModal');
+    const closeModal = document.getElementById('closeExportModal');
+    const cancelBtn = document.getElementById('cancelExport');
+    const startBtn = document.getElementById('startExport');
+    
+    // Format selection buttons
+    const formatBtns = document.querySelectorAll('.export-format-btn');
+    formatBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            formatBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ExportState.format = btn.dataset.format;
+            
+            // Show/hide quality section based on format
+            const qualitySection = document.getElementById('exportQualitySection');
+            if (ExportState.format === 'gif') {
+                qualitySection.style.display = 'block';
+            } else {
+                qualitySection.style.display = 'none';
+            }
+            
+            console.log(`🎬 [EXPORT] Format selected: ${ExportState.format}`);
+        });
+    });
+    
+    // Open modal
+    exportBtn.addEventListener('click', () => {
+        if (!TimelineState.dates || TimelineState.dates.length === 0) {
+            alert('⚠️ No timeline data available. Please select a field first.');
+            return;
+        }
+        
+        console.log('🎬 [EXPORT] Opening export modal');
+        populateExportDates();
+        exportModal.classList.remove('hidden');
+    });
+    
+    // Close modal
+    const closeExportModal = () => {
+        console.log('🎬 [EXPORT] Closing export modal');
+        
+        // Cancel export if in progress
+        if (ExportState.isExporting) {
+            ExportState.isExporting = false;
+            console.log('🛑 [EXPORT] Export cancelled');
+        }
+        
+        exportModal.classList.add('hidden');
+        resetExportProgress();
+    };
+    
+    closeModal.addEventListener('click', closeExportModal);
+    cancelBtn.addEventListener('click', closeExportModal);
+    
+    // Start export
+    startBtn.addEventListener('click', startExport);
+    
+    // Speed and quality changes
+    document.getElementById('exportSpeed').addEventListener('change', (e) => {
+        ExportState.speed = parseInt(e.target.value);
+        console.log(`🎬 [EXPORT] Speed changed: ${ExportState.speed}ms`);
+    });
+    
+    document.getElementById('exportQuality').addEventListener('change', (e) => {
+        ExportState.quality = parseInt(e.target.value);
+        console.log(`🎬 [EXPORT] Quality changed: ${ExportState.quality}`);
+    });
+    
+    console.log('✅ [EXPORT] Export modal initialized');
+}
+
+/**
+ * Populate date selectors
+ */
+function populateExportDates() {
+    const startSelect = document.getElementById('exportStartDate');
+    const endSelect = document.getElementById('exportEndDate');
+    
+    startSelect.innerHTML = '';
+    endSelect.innerHTML = '';
+    
+    TimelineState.dates.forEach((date, index) => {
+        const dateObj = new Date(date);
+        const dateStr = dateObj.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        
+        const startOption = document.createElement('option');
+        startOption.value = index;
+        startOption.textContent = dateStr;
+        startSelect.appendChild(startOption);
+        
+        const endOption = document.createElement('option');
+        endOption.value = index;
+        endOption.textContent = dateStr;
+        endSelect.appendChild(endOption);
+    });
+    
+    // Set default range (all dates)
+    startSelect.value = 0;
+    endSelect.value = TimelineState.dates.length - 1;
+    
+    console.log(`🎬 [EXPORT] Populated ${TimelineState.dates.length} dates`);
+}
+
+/**
+ * Start export process
+ */
+async function startExport() {
+    console.log('🎬 [EXPORT] Starting export process');
+    
+    const startIdx = parseInt(document.getElementById('exportStartDate').value);
+    const endIdx = parseInt(document.getElementById('exportEndDate').value);
+    
+    if (startIdx > endIdx) {
+        alert('⚠️ Start date must be before end date');
+        return;
+    }
+    
+    // Stop timeline playback if running
+    if (TimelineState.isPlaying) {
+        stopPlayback();
+        console.log('⏸️ [EXPORT] Stopped timeline playback');
+    }
+    
+    ExportState.isExporting = true;
+    ExportState.frames = [];
+    ExportState.currentFrame = 0;
+    ExportState.totalFrames = endIdx - startIdx + 1;
+    
+    // Disable start button, enable cancel
+    document.getElementById('startExport').disabled = true;
+    document.getElementById('cancelExport').disabled = false;
+    
+    // Show progress
+    const progressDiv = document.getElementById('exportProgress');
+    progressDiv.classList.remove('hidden');
+    
+    updateExportProgress(0, 'Preparing export...');
+    
+    console.log(`🎬 [EXPORT] Exporting ${ExportState.totalFrames} frames from ${startIdx} to ${endIdx}`);
+    
+    try {
+        // Capture frames
+        for (let i = startIdx; i <= endIdx; i++) {
+            // Check if export was cancelled
+            if (!ExportState.isExporting) {
+                console.log('🛑 [EXPORT] Export cancelled by user');
+                return;
+            }
+            
+            await goToFrame(i);
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait longer for render
+            
+            const canvas = await captureMapCanvas();
+            ExportState.frames.push(canvas);
+            ExportState.currentFrame++;
+            
+            const progress = (ExportState.currentFrame / ExportState.totalFrames) * 50;
+            updateExportProgress(progress, `Capturing frame ${ExportState.currentFrame}/${ExportState.totalFrames}...`);
+            
+            console.log(`📸 [EXPORT] Captured frame ${ExportState.currentFrame}/${ExportState.totalFrames}`);
+        }
+        
+        // Check if export was cancelled
+        if (!ExportState.isExporting) {
+            console.log('🛑 [EXPORT] Export cancelled by user');
+            return;
+        }
+        
+        // Generate export
+        if (ExportState.format === 'gif') {
+            await generateGIF();
+        } else {
+            await generateVideo();
+        }
+        
+    } catch (error) {
+        console.error('❌ [EXPORT] Export failed:', error);
+        alert('❌ Export failed: ' + error.message);
+        resetExportProgress();
+    }
+}
+
+/**
+ * Capture map as canvas - captures only the satellite overlay for the selected field
+ */
+async function captureMapCanvas() {
+    console.log('📸 [EXPORT] Capturing map canvas...');
+    
+    try {
+        // Get the current image overlay
+        const imageOverlay = AppState.imageOverlay;
+        if (!imageOverlay) {
+            throw new Error('No image overlay found');
+        }
+        
+        // Get the overlay image element
+        const overlayImage = imageOverlay._image;
+        if (!overlayImage) {
+            throw new Error('No overlay image element found');
+        }
+        
+        // Wait for image to be fully loaded
+        if (!overlayImage.complete) {
+            await new Promise((resolve) => {
+                overlayImage.onload = resolve;
+            });
+        }
+        
+        // Create HD canvas
+        const hdCanvas = document.createElement('canvas');
+        hdCanvas.width = 1920;
+        hdCanvas.height = 1080;
+        const ctx = hdCanvas.getContext('2d', { willReadFrequently: true });
+        
+        // Fill background with neutral color
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(0, 0, 1920, 1080);
+        
+        // Calculate dimensions to fit the overlay image centered
+        const imgWidth = overlayImage.naturalWidth || overlayImage.width;
+        const imgHeight = overlayImage.naturalHeight || overlayImage.height;
+        const aspectRatio = imgWidth / imgHeight;
+        
+        let drawWidth = 1920;
+        let drawHeight = 1080;
+        
+        // Maintain aspect ratio and fit within canvas
+        if (aspectRatio > 1920 / 1080) {
+            drawHeight = 1920 / aspectRatio;
+        } else {
+            drawWidth = 1080 * aspectRatio;
+        }
+        
+        const x = (1920 - drawWidth) / 2;
+        const y = (1080 - drawHeight) / 2;
+        
+        // Draw the satellite overlay image
+        ctx.drawImage(overlayImage, x, y, drawWidth, drawHeight);
+        
+        // Add information overlay at top
+        const currentDate = new Date(TimelineState.dates[TimelineState.currentIndex]);
+        const dateStr = currentDate.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        const indexSelect = document.getElementById('indexSelect');
+        const indexName = indexSelect.value;
+        const fieldId = AppState.selectedField;
+        
+        // Add semi-transparent overlay at top
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.fillRect(0, 0, 1920, 100);
+        
+        // Add field name
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.fillText(fieldId, 40, 50);
+        
+        // Add date
+        ctx.font = '26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.fillStyle = '#4CAF50';
+        ctx.fillText(dateStr, 40, 82);
+        
+        // Add index name at top right
+        ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.fillStyle = '#4CAF50';
+        const indexWidth = ctx.measureText(indexName).width;
+        ctx.fillText(indexName, 1920 - indexWidth - 40, 62);
+        
+        console.log('✅ [EXPORT] Canvas captured successfully');
+        return hdCanvas;
+        
+    } catch (error) {
+        console.error('❌ [EXPORT] Canvas capture failed:', error);
+        throw error;
+    }
+}
+
+/**
+ * Generate GIF
+ */
+async function generateGIF() {
+    console.log('🎨 [EXPORT] Generating GIF...');
+    updateExportProgress(50, 'Generating GIF...');
+    
+    return new Promise((resolve, reject) => {
+        try {
+            // Convert canvases to base64 images
+            const images = [];
+            
+            for (let i = 0; i < ExportState.frames.length; i++) {
+                try {
+                    const canvas = ExportState.frames[i];
+                    // Create a new clean canvas to avoid taint issues
+                    const cleanCanvas = document.createElement('canvas');
+                    cleanCanvas.width = canvas.width;
+                    cleanCanvas.height = canvas.height;
+                    const ctx = cleanCanvas.getContext('2d', { willReadFrequently: true });
+                    ctx.drawImage(canvas, 0, 0);
+                    
+                    const dataUrl = cleanCanvas.toDataURL('image/png');
+                    images.push(dataUrl);
+                    console.log(`🖼️ [EXPORT] Converted frame ${i + 1}/${ExportState.frames.length}`);
+                } catch (err) {
+                    console.error(`❌ [EXPORT] Failed to convert frame ${i + 1}:`, err);
+                    // Use a blank frame as fallback
+                    const blankCanvas = document.createElement('canvas');
+                    blankCanvas.width = 1920;
+                    blankCanvas.height = 1080;
+                    images.push(blankCanvas.toDataURL('image/png'));
+                }
+            }
+            
+            console.log(`🖼️ [EXPORT] Converting ${images.length} frames to GIF`);
+            
+            // Calculate interval from speed (convert ms to seconds)
+            const interval = ExportState.speed / 1000;
+            
+            // Use higher quality settings for GIF
+            gifshot.createGIF({
+                images: images,
+                gifWidth: 1920,
+                gifHeight: 1080,
+                interval: interval,
+                numFrames: images.length,
+                frameDuration: 1,
+                sampleInterval: 5, // Lower value = better quality (was 10)
+                numWorkers: 4, // Use multiple workers for faster processing
+                progressCallback: (captureProgress) => {
+                    const percent = 50 + (captureProgress * 50);
+                    updateExportProgress(percent, `Encoding GIF... ${Math.round(captureProgress * 100)}%`);
+                }
+            }, (obj) => {
+                if (!obj.error) {
+                    console.log('✅ [EXPORT] GIF generated successfully');
+                    
+                    // Convert base64 to blob
+                    const base64Data = obj.image.split(',')[1];
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'image/gif' });
+                    
+                    downloadExport(blob, 'gif');
+                    resolve();
+                } else {
+                    console.error('❌ [EXPORT] GIF generation failed:', obj.error);
+                    reject(new Error(obj.error));
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ [EXPORT] GIF generation error:', error);
+            reject(error);
+        }
+    });
+}
+
+/**
+ * Generate Video (MP4)
+ */
+async function generateVideo() {
+    console.log('🎥 [EXPORT] Generating video...');
+    updateExportProgress(50, 'Generating video...');
+    
+    return new Promise((resolve, reject) => {
+        try {
+            // Create video canvas
+            const videoCanvas = document.createElement('canvas');
+            videoCanvas.width = 1920;
+            videoCanvas.height = 1080;
+            const ctx = videoCanvas.getContext('2d');
+            
+            // Setup MediaRecorder with high quality settings
+            const stream = videoCanvas.captureStream(30); // 30 FPS
+            
+            // Try different codecs for better quality
+            let mimeType = 'video/webm;codecs=vp9';
+            let videoBitsPerSecond = 25000000; // 25 Mbps for high quality
+            
+            // Check if VP9 is supported, fallback to VP8
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'video/webm;codecs=vp8';
+                console.log('🎥 [EXPORT] VP9 not supported, using VP8');
+            }
+            
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: mimeType,
+                videoBitsPerSecond: videoBitsPerSecond
+            });
+            
+            ExportState.recordedChunks = [];
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    ExportState.recordedChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(ExportState.recordedChunks, { type: 'video/webm' });
+                console.log('✅ [EXPORT] Video generated successfully');
+                downloadExport(blob, 'webm');
+                resolve();
+            };
+            
+            mediaRecorder.onerror = (error) => {
+                console.error('❌ [EXPORT] Video generation failed:', error);
+                reject(error);
+            };
+            
+            // Start recording
+            mediaRecorder.start();
+            
+            // Draw frames
+            let frameIndex = 0;
+            const drawFrame = () => {
+                if (frameIndex < ExportState.frames.length) {
+                    ctx.drawImage(ExportState.frames[frameIndex], 0, 0);
+                    frameIndex++;
+                    
+                    const progress = 50 + ((frameIndex / ExportState.frames.length) * 50);
+                    updateExportProgress(progress, `Encoding video... ${frameIndex}/${ExportState.frames.length}`);
+                    
+                    setTimeout(drawFrame, ExportState.speed);
+                } else {
+                    mediaRecorder.stop();
+                }
+            };
+            
+            drawFrame();
+            
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+/**
+ * Download export file
+ */
+function downloadExport(blob, extension) {
+    const fieldId = AppState.selectedField;
+    const indexSelect = document.getElementById('indexSelect');
+    const indexName = indexSelect.value;
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    const filename = `${fieldId}_${indexName}_${timestamp}.${extension}`;
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log(`💾 [EXPORT] Downloaded: ${filename}`);
+    
+    updateExportProgress(100, `✅ Export complete! Downloaded: ${filename}`);
+    
+    // Reset after 2 seconds
+    setTimeout(() => {
+        resetExportProgress();
+        document.getElementById('exportModal').classList.add('hidden');
+    }, 2000);
+}
+
+/**
+ * Update export progress
+ */
+function updateExportProgress(percent, message) {
+    const progressFill = document.getElementById('exportProgressFill');
+    const progressText = document.getElementById('exportProgressText');
+    
+    progressFill.style.width = `${percent}%`;
+    progressText.textContent = message;
+    
+    console.log(`📊 [EXPORT] Progress: ${Math.round(percent)}% - ${message}`);
+}
+
+/**
+ * Reset export progress
+ */
+function resetExportProgress() {
+    ExportState.isExporting = false;
+    ExportState.frames = [];
+    ExportState.currentFrame = 0;
+    ExportState.totalFrames = 0;
+    ExportState.recordedChunks = [];
+    
+    const startBtn = document.getElementById('startExport');
+    const cancelBtn = document.getElementById('cancelExport');
+    
+    if (startBtn) startBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = false;
+    
+    const progressDiv = document.getElementById('exportProgress');
+    if (progressDiv) progressDiv.classList.add('hidden');
+    
+    const progressFill = document.getElementById('exportProgressFill');
+    if (progressFill) progressFill.style.width = '0%';
+    
+    const progressText = document.getElementById('exportProgressText');
+    if (progressText) progressText.textContent = 'Preparing export...';
+    
+    console.log('🔄 [EXPORT] Export state reset');
+}
+
+// Initialize export modal when timeline is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initializeExportModal();
+});
