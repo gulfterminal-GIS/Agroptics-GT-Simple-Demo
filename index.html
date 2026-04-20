@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Leaflet Draw CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <!-- html2canvas for capturing map -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- GIF.js for GIF export - using gifshot -->
+    <script src="https://unpkg.com/gifshot@0.4.5/dist/gifshot.min.js"></script>
     
     <style>
         * {
@@ -48,16 +52,16 @@
             height: 100vh;
         }
 
-        /* Map Section - Top 35% */
+        /* Map Section - Increased height */
         #map {
-            height: 40%;
+            height: 60%;
             position: relative;
             z-index: 1;
         }
 
-        /* Analysis Section - Bottom 65% */
+        /* Analysis Section - Reduced height with scroll */
         .analysis-section {
-            height: 60%;
+            height: 40%;
             background: white;
             border-top: 3px solid #2c5f2d;
             display: flex;
@@ -2026,6 +2030,16 @@
             background: #F57C00;
             border-color: #F57C00;
         }
+        
+        .timeline-btn-export {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .timeline-btn-export:hover {
+            background: #45a049;
+            border-color: #45a049;
+        }
 
         .timeline-divider {
             width: 1px;
@@ -2118,6 +2132,268 @@
             font-size: 10px;
             color: rgba(255,255,255,0.6);
             font-weight: 500;
+        }
+
+        /* Export Modal Styles */
+        .export-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .export-modal.hidden {
+            display: none;
+        }
+
+        .export-modal-content {
+            background: #1a1a1a;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 2px solid #4CAF50;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .export-modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .export-modal-header h3 {
+            margin: 0;
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .export-modal-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .export-modal-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .export-modal-body {
+            padding: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .export-section {
+            margin-bottom: 20px;
+        }
+
+        .export-label {
+            display: block;
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .export-format-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-format-btn {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .export-format-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #4CAF50;
+            color: white;
+        }
+
+        .export-format-btn.active {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .export-format-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .export-format-btn span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .export-date-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-range-separator {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+        }
+
+        .export-select {
+            flex: 1;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .export-select:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #4CAF50;
+        }
+
+        .export-select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .export-select option {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .export-progress {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+
+        .export-progress.hidden {
+            display: none;
+        }
+
+        .export-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .export-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .export-progress-text {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .export-modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn-cancel {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+        }
+
+        .export-btn-cancel:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .export-btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .export-btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .export-btn-primary:disabled {
+            background: rgba(76, 175, 80, 0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .export-btn svg {
+            width: 16px;
+            height: 16px;
         }
 
         /* Responsive */
@@ -2278,6 +2554,14 @@
                         
                         <div class="timeline-divider"></div>
                         
+                        <button id="timelineExport" class="timeline-btn timeline-btn-export" title="Export Animation">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        
                         <button id="swipeToggle" class="timeline-btn" title="Toggle Swipe Comparison">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="12" y1="2" x2="12" y2="22"></line>
@@ -2300,6 +2584,90 @@
             <!-- Drawing Tools Tooltip -->
             <div id="drawingToolsTooltip" class="drawing-tools-tooltip">
                 Drawing tools available
+            </div>
+            
+            <!-- Export Animation Modal -->
+            <div id="exportModal" class="export-modal hidden">
+                <div class="export-modal-content">
+                    <div class="export-modal-header">
+                        <h3>📹 Export Timeline Animation</h3>
+                        <button id="closeExportModal" class="export-modal-close">&times;</button>
+                    </div>
+                    
+                    <div class="export-modal-body">
+                        <!-- Format Selection -->
+                        <div class="export-section">
+                            <label class="export-label">Export Format</label>
+                            <div class="export-format-options">
+                                <button class="export-format-btn active" data-format="gif">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                    <span>GIF</span>
+                                </button>
+                                <button class="export-format-btn" data-format="mp4">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>MP4 Video</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Date Range -->
+                        <div class="export-section">
+                            <label class="export-label">Date Range</label>
+                            <div class="export-date-range">
+                                <select id="exportStartDate" class="export-select"></select>
+                                <span class="export-range-separator">to</span>
+                                <select id="exportEndDate" class="export-select"></select>
+                            </div>
+                        </div>
+                        
+                        <!-- Speed -->
+                        <div class="export-section">
+                            <label class="export-label">Animation Speed</label>
+                            <select id="exportSpeed" class="export-select">
+                                <option value="2000">Slow (0.5x)</option>
+                                <option value="1000" selected>Normal (1x)</option>
+                                <option value="500">Fast (2x)</option>
+                                <option value="250">Very Fast (4x)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Quality (GIF only) -->
+                        <div class="export-section" id="exportQualitySection">
+                            <label class="export-label">Quality</label>
+                            <select id="exportQuality" class="export-select">
+                                <option value="10">High (slower)</option>
+                                <option value="20" selected>Medium</option>
+                                <option value="30">Low (faster)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Progress -->
+                        <div class="export-progress hidden" id="exportProgress">
+                            <div class="export-progress-bar">
+                                <div class="export-progress-fill" id="exportProgressFill"></div>
+                            </div>
+                            <div class="export-progress-text" id="exportProgressText">Preparing export...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="export-modal-footer">
+                        <button id="cancelExport" class="export-btn export-btn-cancel">Cancel</button>
+                        <button id="startExport" class="export-btn export-btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <!-- Date Comparison Modal -->
