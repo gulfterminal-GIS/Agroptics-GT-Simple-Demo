@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Leaflet Libraries - GT Agroptics</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c5f2d;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f9f9f9;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #2c5f2d;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 10px 10px 0;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .download-btn:hover {
+            background: #45a049;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .file-structure {
+            background: #263238;
+            color: #aed581;
+            padding: 20px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌾 GT Agroptics - Download Libraries</h1>
+        <p class="subtitle">Download required Leaflet libraries for offline usage</p>
+
+        <div class="step">
+            <h3>Step 1: Download Leaflet Core</h3>
+            <p>Download Leaflet.js library (v1.9.4 or later)</p>
+            <a href="https://leafletjs.com/download.html" class="download-btn" target="_blank">
+                📥 Download Leaflet Core
+            </a>
+            <p><strong>Files needed:</strong></p>
+            <ul>
+                <li><code>leaflet.js</code></li>
+                <li><code>leaflet.css</code></li>
+                <li><code>images/</code> folder (marker icons)</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Download Leaflet.draw</h3>
+            <p>Download Leaflet.draw plugin (v1.0.4 or later)</p>
+            <a href="https://github.com/Leaflet/Leaflet.draw/releases" class="download-btn" target="_blank">
+                📥 Download Leaflet.draw
+            </a>
+            <p><strong>Files needed:</strong></p>
+            <ul>
+                <li><code>leaflet.draw.js</code></li>
+                <li><code>leaflet.draw.css</code></li>
+                <li><code>images/</code> folder (draw tool icons)</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Place Files in Correct Location</h3>
+            <p>Extract and copy all files to <code>js/lib/</code> folder</p>
+            <div class="file-structure">
+js/lib/
+├── leaflet.js
+├── leaflet.css
+├── leaflet.draw.js
+├── leaflet.draw.css
+└── images/
+    ├── marker-icon.png
+    ├── marker-shadow.png
+    ├── spritesheet.png
+    └── ... (other icons)
+            </div>
+        </div>
+
+        <div class="info">
+            <strong>💡 Alternative: Use CDN (Requires Internet)</strong>
+            <p>If you prefer to use CDN instead of local files, the application will automatically fall back to CDN links if local files are not found.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 4: Open Application</h3>
+            <p>Once files are in place, simply open <code>index.html</code> in your browser!</p>
+        </div>
+
+        <div class="info">
+            <strong>✅ Quick Test</strong>
+            <p>After setup, you should see:</p>
+            <ul>
+                <li>A satellite map centered on California</li>
+                <li>Drawing tools on the left side</li>
+                <li>Action buttons at the top</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        console.log('GT Agroptics - Library Download Helper');
+        console.log('Follow the steps above to download required libraries');
+    </script>
+</body>
+</html>

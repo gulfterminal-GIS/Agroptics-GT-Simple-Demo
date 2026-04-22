@@ -1,0 +1,129 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "field_001",
+        "name": "North Field",
+        "crop": "Wheat",
+        "area_hectares": "45.5",
+        "area_acres": "112.4",
+        "owner": "Sample Farm Inc.",
+        "plantingDate": "2024-03-15",
+        "color": "#4CAF50",
+        "fillColor": "#4CAF50",
+        "fillOpacity": 0.3,
+        "weight": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-119.4279, 36.7883],
+            [-119.4179, 36.7883],
+            [-119.4179, 36.7783],
+            [-119.4279, 36.7783],
+            [-119.4279, 36.7883]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "field_002",
+        "name": "South Field",
+        "crop": "Corn",
+        "area_hectares": "38.2",
+        "area_acres": "94.4",
+        "owner": "Sample Farm Inc.",
+        "plantingDate": "2024-04-01",
+        "color": "#2196F3",
+        "fillColor": "#2196F3",
+        "fillOpacity": 0.3,
+        "weight": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-119.4279, 36.7683],
+            [-119.4179, 36.7683],
+            [-119.4179, 36.7583],
+            [-119.4279, 36.7583],
+            [-119.4279, 36.7683]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "field_003",
+        "name": "East Field",
+        "crop": "Soybeans",
+        "area_hectares": "52.8",
+        "area_acres": "130.5",
+        "owner": "Sample Farm Inc.",
+        "plantingDate": "2024-03-20",
+        "color": "#FF9800",
+        "fillColor": "#FF9800",
+        "fillOpacity": 0.3,
+        "weight": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-119.4079, 36.7883],
+            [-119.3979, 36.7883],
+            [-119.3979, 36.7783],
+            [-119.4079, 36.7783],
+            [-119.4079, 36.7883]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "irrigation_line_001",
+        "name": "Main Irrigation Line",
+        "type": "irrigation",
+        "length_km": "2.5",
+        "material": "PVC",
+        "color": "#00BCD4",
+        "weight": 3
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-119.4279, 36.7850],
+          [-119.4229, 36.7850],
+          [-119.4229, 36.7800],
+          [-119.4179, 36.7800],
+          [-119.4179, 36.7750]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "irrigation_circle_001",
+        "name": "Center Pivot Irrigation",
+        "type": "irrigation",
+        "radius_meters": "400",
+        "area_hectares": "50.3",
+        "color": "#9C27B0",
+        "fillColor": "#9C27B0",
+        "fillOpacity": 0.2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-119.4129, 36.7633],
+        "radius": 400
+      }
+    }
+  ]
+}

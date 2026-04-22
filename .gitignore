@@ -16,6 +16,10 @@
 !package-lock.json
 !preprocess-data-template.js
 
+# Allow Building our production app folder
+!Building our production app/
+!Building our production app/**
+
 # Allow only these specific documentation files
 !README.md
 !SYSTEM_DOCUMENTATION.md

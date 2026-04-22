@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GT Agroptics - Field Management System</title>
+    
+    <!-- Leaflet CSS (Local) -->
+    <link rel="stylesheet" href="js/lib/leaflet.css" />
+    <!-- Leaflet Draw CSS (Local) -->
+    <link rel="stylesheet" href="js/lib/leaflet.draw.css" />
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🌾 GT Agroptics - Field Management</h1>
+                <div class="header-actions">
+                    <button id="displayFieldsBtn" class="btn btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        Display Sample Fields
+                    </button>
+                    <button id="uploadFileBtn" class="btn btn-secondary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Upload GIS File
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Info Panel -->
+        <div id="infoPanel" class="info-panel hidden">
+            <div class="info-header">
+                <h3>Feature Information</h3>
+                <button id="closeInfoPanel" class="close-btn">&times;</button>
+            </div>
+            <div id="infoPanelContent" class="info-content"></div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="fileInput" accept=".geojson,.json,.kml" style="display: none;" />
+    </div>
+
+    <!-- Leaflet JS (Local) -->
+    <script src="js/lib/leaflet.js"></script>
+    <!-- Leaflet Draw JS (Local) -->
+    <script src="js/lib/leaflet.draw.js"></script>
+    
+    <!-- Application JS Files -->
+    <script src="js/GTAgropticsLeaflet.js"></script>
+    <script src="js/draw.js"></script>
+    <script src="js/edit.js"></script>
+    <script src="js/display.js"></script>
+    <script src="js/data.js"></script>
+    
+    <!-- Initialize App -->
+    <script>
+        // Configuration from backend (example)
+        const config = {
+            center: [36.7783, -119.4179], // California Central Valley
+            zoom: 10,
+            satellite: true
+        };
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            GTAgropticsLeaflet.init(config);
+        });
+    </script>
+</body>
+</html>
