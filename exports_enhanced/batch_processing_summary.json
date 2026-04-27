@@ -1,0 +1,7343 @@
+{
+  "total_fields": 3,
+  "total_images": 562,
+  "total_success": 562,
+  "total_errors": 0,
+  "processing_time_seconds": 43.88,
+  "average_time_per_image": 0.08,
+  "fields": [
+    {
+      "field": "Field_10",
+      "total": 223,
+      "success": 223,
+      "errors": 0,
+      "results": [
+        {
+          "date": "2025-03-29",
+          "folder": "20250329_180511_67_2516",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-29",
+          "folder": "20250329_180758_07_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-01",
+          "folder": "20250401_180618_39_24e5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-01",
+          "folder": "20250401_180620_61_24e5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-04",
+          "folder": "20250404_180429_39_24d1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-05",
+          "folder": "20250405_180844_89_24fa",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-06",
+          "folder": "20250406_180817_38_251b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-07",
+          "folder": "20250407_180515_67_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-07",
+          "folder": "20250407_181850_46_253d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-08",
+          "folder": "20250408_181515_90_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-09",
+          "folder": "20250409_181819_93_24b8",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-09",
+          "folder": "20250409_181822_30_24b8",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-10",
+          "folder": "20250410_180511_23_251a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-11",
+          "folder": "20250411_180611_09_24e5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-11",
+          "folder": "20250411_180841_38_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-11",
+          "folder": "20250411_180843_66_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-13",
+          "folder": "20250413_181518_55_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-13",
+          "folder": "20250413_181520_92_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-14",
+          "folder": "20250414_173221_94_24a7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-14",
+          "folder": "20250414_180802_46_24e1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-15",
+          "folder": "20250415_180811_71_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-19",
+          "folder": "20250419_181548_25_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-20",
+          "folder": "20250420_180716_41_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-20",
+          "folder": "20250420_180800_47_2507",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-21",
+          "folder": "20250421_181738_87_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-23",
+          "folder": "20250423_181558_28_253e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-27",
+          "folder": "20250427_173711_88_24b4",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-28",
+          "folder": "20250428_181752_97_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-29",
+          "folder": "20250429_180722_67_2511",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-02",
+          "folder": "20250502_181636_63_24cb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-02",
+          "folder": "20250502_181921_35_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-03",
+          "folder": "20250503_181710_00_2535",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-03",
+          "folder": "20250503_181833_79_253d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-04",
+          "folder": "20250504_181742_76_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-04",
+          "folder": "20250504_181745_12_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-05",
+          "folder": "20250505_180644_18_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-08",
+          "folder": "20250508_181755_18_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-08",
+          "folder": "20250508_181835_93_2532",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-09",
+          "folder": "20250509_180844_01_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-10",
+          "folder": "20250510_180614_02_24d9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-10",
+          "folder": "20250510_181640_91_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-11",
+          "folder": "20250511_181809_07_2526",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-12",
+          "folder": "20250512_181157_52_24ed",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-13",
+          "folder": "20250513_181925_55_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-13",
+          "folder": "20250513_181927_91_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-14",
+          "folder": "20250514_180900_94_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-14",
+          "folder": "20250514_181248_93_24aa",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-15",
+          "folder": "20250515_174304_12_24a1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-20",
+          "folder": "20250520_180907_13_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-27",
+          "folder": "20250527_181823_61_2534",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-28",
+          "folder": "20250528_180855_61_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-30",
+          "folder": "20250530_181708_82_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-31",
+          "folder": "20250531_181911_46_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180641_15_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180752_39_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180754_60_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-02",
+          "folder": "20250602_181837_84_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-05",
+          "folder": "20250605_180727_95_2500",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-05",
+          "folder": "20250605_181632_73_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-07",
+          "folder": "20250607_181651_66_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181027_47_2518",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181606_96_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181609_28_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-10",
+          "folder": "20250610_181822_96_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-12",
+          "folder": "20250612_181624_32_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-12",
+          "folder": "20250612_181626_66_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181001_01_24d1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181737_98_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181740_12_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-15",
+          "folder": "20250615_181426_82_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-15",
+          "folder": "20250615_181428_97_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-18",
+          "folder": "20250618_181711_84_24fb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181615_71_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181626_88_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181657_30_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-21",
+          "folder": "20250621_181603_45_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-21",
+          "folder": "20250621_181605_57_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_180856_09_251b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_181611_17_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_181618_47_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-26",
+          "folder": "20250626_180900_96_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_180858_44_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_180900_68_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_181305_75_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-28",
+          "folder": "20250628_181710_70_252e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-29",
+          "folder": "20250629_181646_06_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-30",
+          "folder": "20250630_181635_89_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-30",
+          "folder": "20250630_181638_00_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-01",
+          "folder": "20250701_174432_76_2417",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-02",
+          "folder": "20250702_181731_25_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-03",
+          "folder": "20250703_181021_43_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181618_17_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181620_28_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181635_84_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-05",
+          "folder": "20250705_181018_75_2521",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-05",
+          "folder": "20250705_181020_97_2521",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-07",
+          "folder": "20250707_181134_87_2500",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-08",
+          "folder": "20250708_181455_47_252e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_180852_57_2516",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_181608_06_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_181610_40_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-13",
+          "folder": "20250713_181429_19_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-13",
+          "folder": "20250713_181431_40_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-14",
+          "folder": "20250714_181206_09_250b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-14",
+          "folder": "20250714_181832_93_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-15",
+          "folder": "20250715_181105_44_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-20",
+          "folder": "20250720_181542_09_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-21",
+          "folder": "20250721_180756_64_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-22",
+          "folder": "20250722_180624_95_2515",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-22",
+          "folder": "20250722_181638_22_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-23",
+          "folder": "20250723_180833_43_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-24",
+          "folder": "20250724_180935_90_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-25",
+          "folder": "20250725_181446_08_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-26",
+          "folder": "20250726_181245_56_24ee",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-26",
+          "folder": "20250726_181734_78_24e9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-26",
+          "folder": "20250726_181737_12_24e9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_181103_29_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_181631_97_2535",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_182221_63_24b7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_182223_69_24b7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-28",
+          "folder": "20250728_180959_04_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-31",
+          "folder": "20250731_181557_33_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-31",
+          "folder": "20250731_181713_81_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-01",
+          "folder": "20250801_180920_62_2507",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-01",
+          "folder": "20250801_180922_74_2507",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-03",
+          "folder": "20250803_181842_94_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-03",
+          "folder": "20250803_181845_07_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-04",
+          "folder": "20250804_180833_92_2409",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-05",
+          "folder": "20250805_181803_76_24d5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-06",
+          "folder": "20250806_181748_50_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-08",
+          "folder": "20250808_181551_83_2539",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-09",
+          "folder": "20250809_181018_59_251b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-11",
+          "folder": "20250811_181122_08_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-12",
+          "folder": "20250812_181810_61_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-13",
+          "folder": "20250813_181509_86_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-15",
+          "folder": "20250815_181640_81_2534",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-17",
+          "folder": "20250817_181858_61_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-17",
+          "folder": "20250817_182009_38_24fb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-18",
+          "folder": "20250818_182022_39_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-18",
+          "folder": "20250818_182024_45_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-19",
+          "folder": "20250819_181514_18_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-19",
+          "folder": "20250819_181619_02_2526",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-20",
+          "folder": "20250820_180643_15_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-20",
+          "folder": "20250820_180645_40_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-26",
+          "folder": "20250826_181757_08_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-26",
+          "folder": "20250826_181759_20_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_180805_68_251a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_180807_88_251a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_181535_52_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_181537_84_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-31",
+          "folder": "20250831_180922_01_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-01",
+          "folder": "20250901_181303_57_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-01",
+          "folder": "20250901_181305_79_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-01",
+          "folder": "20250901_182302_81_24d5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-02",
+          "folder": "20250902_181317_03_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-03",
+          "folder": "20250903_181040_05_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-04",
+          "folder": "20250904_180913_82_2512",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-04",
+          "folder": "20250904_180916_03_2512",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-06",
+          "folder": "20250906_181639_30_2527",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-10",
+          "folder": "20250910_181639_78_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-11",
+          "folder": "20250911_182204_52_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-11",
+          "folder": "20250911_182206_60_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-13",
+          "folder": "20250913_181810_16_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-15",
+          "folder": "20250915_180815_96_2515",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-16",
+          "folder": "20250916_181222_29_2409",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-16",
+          "folder": "20250916_181644_94_253b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-17",
+          "folder": "20250917_181446_61_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-17",
+          "folder": "20250917_181448_92_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-18",
+          "folder": "20250918_182314_18_24ed",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-22",
+          "folder": "20250922_181410_44_24ae",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-22",
+          "folder": "20250922_182556_05_24d5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-24",
+          "folder": "20250924_181743_54_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-26",
+          "folder": "20250926_181402_38_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-28",
+          "folder": "20250928_182527_06_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181711_97_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181714_27_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181847_62_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181849_77_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-30",
+          "folder": "20250930_181746_11_24e9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-02",
+          "folder": "20251002_182418_16_24fd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-02",
+          "folder": "20251002_182420_24_24fd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-03",
+          "folder": "20251003_181721_43_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-08",
+          "folder": "20251008_181826_96_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-08",
+          "folder": "20251008_181829_25_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-09",
+          "folder": "20251009_181333_53_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-09",
+          "folder": "20251009_182722_63_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-12",
+          "folder": "20251012_182845_55_24f5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-14",
+          "folder": "20251014_182655_42_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-15",
+          "folder": "20251015_181900_07_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-16",
+          "folder": "20251016_181155_56_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-16",
+          "folder": "20251016_181157_74_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-17",
+          "folder": "20251017_181757_43_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-17",
+          "folder": "20251017_181954_79_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-17",
+          "folder": "20251017_181957_08_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-19",
+          "folder": "20251019_181224_41_24da",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-19",
+          "folder": "20251019_181735_54_252a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-20",
+          "folder": "20251020_181622_06_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-22",
+          "folder": "20251022_181220_20_2516",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-23",
+          "folder": "20251023_181245_34_2506",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-24",
+          "folder": "20251024_181726_05_2534",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-24",
+          "folder": "20251024_181820_57_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-24",
+          "folder": "20251024_181822_65_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_181838_63_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_181840_95_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_182049_97_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_182052_10_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-28",
+          "folder": "20251028_181452_04_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-28",
+          "folder": "20251028_182742_58_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-28",
+          "folder": "20251028_182744_63_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-30",
+          "folder": "20251030_181829_92_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-31",
+          "folder": "20251031_182914_34_24f4",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-02",
+          "folder": "20251102_181728_71_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-04",
+          "folder": "20251104_181332_99_250a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-05",
+          "folder": "20251105_181824_25_2526",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-06",
+          "folder": "20251106_181825_65_2535",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181557_14_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181559_46_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181930_57_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181932_88_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_181800_55_24fe",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_181802_86_24fe",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_182508_36_24ee",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_182510_41_24ee",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        }
+      ],
+      "processing_time_seconds": 17.7
+    },
+    {
+      "field": "Field_11",
+      "total": 262,
+      "success": 262,
+      "errors": 0,
+      "results": [
+        {
+          "date": "2025-02-27",
+          "folder": "20250227_180236_48_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-02-27",
+          "folder": "20250227_181919_34_24e9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-02-28",
+          "folder": "20250228_180601_39_24d9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-02-28",
+          "folder": "20250228_180603_65_24d9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-01",
+          "folder": "20250301_172719_01_24b2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-01",
+          "folder": "20250301_172720_97_24b2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-02",
+          "folder": "20250302_181601_53_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-05",
+          "folder": "20250305_173121_08_24ca",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-05",
+          "folder": "20250305_180636_20_2507",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-05",
+          "folder": "20250305_181433_87_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-07",
+          "folder": "20250307_180742_58_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-09",
+          "folder": "20250309_180646_62_24f0",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-11",
+          "folder": "20250311_172646_98_24a7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-11",
+          "folder": "20250311_181603_34_252e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-12",
+          "folder": "20250312_180407_73_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-12",
+          "folder": "20250312_180410_02_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-16",
+          "folder": "20250316_181907_68_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-16",
+          "folder": "20250316_181910_05_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-17",
+          "folder": "20250317_173009_36_24b3",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-17",
+          "folder": "20250317_180809_15_2506",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-17",
+          "folder": "20250317_181742_74_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-19",
+          "folder": "20250319_180448_22_250e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-19",
+          "folder": "20250319_180544_35_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-19",
+          "folder": "20250319_180546_60_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-21",
+          "folder": "20250321_180344_23_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-21",
+          "folder": "20250321_180409_40_24fa",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-21",
+          "folder": "20250321_180411_64_24fa",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-23",
+          "folder": "20250323_173811_59_24c8",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-23",
+          "folder": "20250323_173813_39_24c8",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-23",
+          "folder": "20250323_180258_06_2515",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-25",
+          "folder": "20250325_180823_39_24db",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-25",
+          "folder": "20250325_180831_54_24fb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-25",
+          "folder": "20250325_181348_83_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-26",
+          "folder": "20250326_173518_73_24ba",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-26",
+          "folder": "20250326_180544_61_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-27",
+          "folder": "20250327_181803_37_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-29",
+          "folder": "20250329_180511_67_2516",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-03-29",
+          "folder": "20250329_180758_07_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-01",
+          "folder": "20250401_180618_39_24e5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-01",
+          "folder": "20250401_180620_61_24e5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-04",
+          "folder": "20250404_180429_39_24d1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-05",
+          "folder": "20250405_180844_89_24fa",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-06",
+          "folder": "20250406_180817_38_251b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-07",
+          "folder": "20250407_180515_67_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-07",
+          "folder": "20250407_181850_46_253d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-08",
+          "folder": "20250408_181515_90_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-09",
+          "folder": "20250409_181819_93_24b8",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-09",
+          "folder": "20250409_181822_30_24b8",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-10",
+          "folder": "20250410_180511_23_251a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-11",
+          "folder": "20250411_180611_09_24e5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-11",
+          "folder": "20250411_180841_38_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-11",
+          "folder": "20250411_180843_66_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-13",
+          "folder": "20250413_181518_55_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-13",
+          "folder": "20250413_181520_92_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-14",
+          "folder": "20250414_173221_94_24a7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-14",
+          "folder": "20250414_180802_46_24e1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-15",
+          "folder": "20250415_180811_71_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-19",
+          "folder": "20250419_181548_25_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-20",
+          "folder": "20250420_180716_41_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-20",
+          "folder": "20250420_180800_47_2507",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-21",
+          "folder": "20250421_181738_87_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-23",
+          "folder": "20250423_181558_28_253e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-27",
+          "folder": "20250427_173711_88_24b4",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-28",
+          "folder": "20250428_181752_97_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-04-29",
+          "folder": "20250429_180722_67_2511",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-02",
+          "folder": "20250502_181636_63_24cb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-02",
+          "folder": "20250502_181921_35_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-03",
+          "folder": "20250503_181710_00_2535",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-03",
+          "folder": "20250503_181833_79_253d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-04",
+          "folder": "20250504_181742_76_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-04",
+          "folder": "20250504_181745_12_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-05",
+          "folder": "20250505_180644_18_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-08",
+          "folder": "20250508_181755_18_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-08",
+          "folder": "20250508_181835_93_2532",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-09",
+          "folder": "20250509_180844_01_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-10",
+          "folder": "20250510_180614_02_24d9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-10",
+          "folder": "20250510_181640_91_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-11",
+          "folder": "20250511_181809_07_2526",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-12",
+          "folder": "20250512_181157_52_24ed",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-13",
+          "folder": "20250513_181925_55_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-13",
+          "folder": "20250513_181927_91_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-14",
+          "folder": "20250514_180900_94_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-14",
+          "folder": "20250514_181248_93_24aa",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-15",
+          "folder": "20250515_174304_12_24a1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-20",
+          "folder": "20250520_180907_13_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-27",
+          "folder": "20250527_181823_61_2534",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-28",
+          "folder": "20250528_180855_61_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-30",
+          "folder": "20250530_181708_82_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-31",
+          "folder": "20250531_181911_46_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180641_15_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180752_39_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180754_60_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-02",
+          "folder": "20250602_181837_84_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-05",
+          "folder": "20250605_180727_95_2500",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-05",
+          "folder": "20250605_181632_73_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-07",
+          "folder": "20250607_181651_66_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181027_47_2518",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181606_96_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181609_28_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-10",
+          "folder": "20250610_181822_96_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-12",
+          "folder": "20250612_181624_32_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-12",
+          "folder": "20250612_181626_66_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181001_01_24d1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181737_98_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181740_12_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-15",
+          "folder": "20250615_181426_82_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-15",
+          "folder": "20250615_181428_97_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-18",
+          "folder": "20250618_181711_84_24fb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181615_71_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181626_88_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181657_30_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-20",
+          "folder": "20250620_181529_88_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-21",
+          "folder": "20250621_181603_45_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-21",
+          "folder": "20250621_181605_57_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_180856_09_251b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_181611_17_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_181618_47_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-26",
+          "folder": "20250626_180900_96_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_180858_44_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_180900_68_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_181305_75_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-28",
+          "folder": "20250628_181710_70_252e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-29",
+          "folder": "20250629_181646_06_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-30",
+          "folder": "20250630_181635_89_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-30",
+          "folder": "20250630_181638_00_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-01",
+          "folder": "20250701_174432_76_2417",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-02",
+          "folder": "20250702_181731_25_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-03",
+          "folder": "20250703_181021_43_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181618_17_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181620_28_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181635_84_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-05",
+          "folder": "20250705_181018_75_2521",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-05",
+          "folder": "20250705_181020_97_2521",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-07",
+          "folder": "20250707_181134_87_2500",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-08",
+          "folder": "20250708_181455_47_252e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_180852_57_2516",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_181608_06_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_181610_40_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-13",
+          "folder": "20250713_181429_19_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-13",
+          "folder": "20250713_181431_40_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-14",
+          "folder": "20250714_181206_09_250b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-14",
+          "folder": "20250714_181832_93_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-15",
+          "folder": "20250715_181105_44_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-20",
+          "folder": "20250720_181542_09_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-21",
+          "folder": "20250721_180756_64_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-22",
+          "folder": "20250722_180624_95_2515",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-22",
+          "folder": "20250722_181638_22_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-23",
+          "folder": "20250723_180833_43_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-24",
+          "folder": "20250724_180935_90_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-25",
+          "folder": "20250725_181446_08_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-26",
+          "folder": "20250726_181245_56_24ee",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-26",
+          "folder": "20250726_181734_78_24e9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-26",
+          "folder": "20250726_181737_12_24e9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_181103_29_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_181631_97_2535",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_182221_63_24b7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "folder": "20250727_182223_69_24b7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-28",
+          "folder": "20250728_180959_04_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-30",
+          "folder": "20250730_182144_88_24f8",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-31",
+          "folder": "20250731_181557_33_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-31",
+          "folder": "20250731_181713_81_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-01",
+          "folder": "20250801_180920_62_2507",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-01",
+          "folder": "20250801_180922_74_2507",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-03",
+          "folder": "20250803_181842_94_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-03",
+          "folder": "20250803_181845_07_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-04",
+          "folder": "20250804_180833_92_2409",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-05",
+          "folder": "20250805_181803_76_24d5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-06",
+          "folder": "20250806_181748_50_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-08",
+          "folder": "20250808_181551_83_2539",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-09",
+          "folder": "20250809_181018_59_251b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-11",
+          "folder": "20250811_181122_08_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-12",
+          "folder": "20250812_181810_61_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-13",
+          "folder": "20250813_181509_86_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-15",
+          "folder": "20250815_181640_81_2534",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-17",
+          "folder": "20250817_181858_61_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-17",
+          "folder": "20250817_182009_38_24fb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-18",
+          "folder": "20250818_182022_39_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-18",
+          "folder": "20250818_182024_45_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-19",
+          "folder": "20250819_181514_18_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-19",
+          "folder": "20250819_181619_02_2526",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-20",
+          "folder": "20250820_180643_15_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-20",
+          "folder": "20250820_180645_40_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-26",
+          "folder": "20250826_181757_08_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-26",
+          "folder": "20250826_181759_20_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_180805_68_251a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_180807_88_251a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_181535_52_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-27",
+          "folder": "20250827_181537_84_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-08-31",
+          "folder": "20250831_180922_01_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-01",
+          "folder": "20250901_181303_57_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-01",
+          "folder": "20250901_181305_79_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-01",
+          "folder": "20250901_182302_81_24d5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-02",
+          "folder": "20250902_181317_03_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-03",
+          "folder": "20250903_181040_05_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-04",
+          "folder": "20250904_180913_82_2512",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-04",
+          "folder": "20250904_180916_03_2512",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-06",
+          "folder": "20250906_181639_30_2527",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-10",
+          "folder": "20250910_181639_78_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-11",
+          "folder": "20250911_182204_52_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-11",
+          "folder": "20250911_182206_60_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-13",
+          "folder": "20250913_181810_16_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-15",
+          "folder": "20250915_180815_96_2515",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-16",
+          "folder": "20250916_181222_29_2409",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-16",
+          "folder": "20250916_181644_94_253b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-17",
+          "folder": "20250917_181446_61_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-17",
+          "folder": "20250917_181448_92_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-18",
+          "folder": "20250918_182314_18_24ed",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-21",
+          "folder": "20250921_181732_39_253a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-22",
+          "folder": "20250922_181410_44_24ae",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-22",
+          "folder": "20250922_182556_05_24d5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-24",
+          "folder": "20250924_181743_54_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-26",
+          "folder": "20250926_181402_38_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-28",
+          "folder": "20250928_182527_06_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181711_97_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181714_27_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181847_62_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-29",
+          "folder": "20250929_181849_77_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-09-30",
+          "folder": "20250930_181746_11_24e9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-02",
+          "folder": "20251002_182418_16_24fd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-02",
+          "folder": "20251002_182420_24_24fd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-03",
+          "folder": "20251003_181721_43_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-08",
+          "folder": "20251008_181826_96_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-08",
+          "folder": "20251008_181829_25_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-09",
+          "folder": "20251009_181333_53_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-09",
+          "folder": "20251009_182722_63_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-12",
+          "folder": "20251012_182845_55_24f5",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-14",
+          "folder": "20251014_182655_42_24c6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-15",
+          "folder": "20251015_181900_07_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-16",
+          "folder": "20251016_181155_56_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-16",
+          "folder": "20251016_181157_74_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-17",
+          "folder": "20251017_181757_43_2547",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-17",
+          "folder": "20251017_181954_79_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-17",
+          "folder": "20251017_181957_08_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-19",
+          "folder": "20251019_181224_41_24da",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-19",
+          "folder": "20251019_181735_54_252a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-20",
+          "folder": "20251020_181622_06_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-22",
+          "folder": "20251022_181220_20_2516",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-23",
+          "folder": "20251023_181245_34_2506",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-24",
+          "folder": "20251024_181726_05_2534",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-24",
+          "folder": "20251024_181820_57_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-24",
+          "folder": "20251024_181822_65_2546",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_181838_63_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_181840_95_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_182049_97_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-27",
+          "folder": "20251027_182052_10_2508",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-28",
+          "folder": "20251028_181452_04_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-28",
+          "folder": "20251028_182742_58_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-28",
+          "folder": "20251028_182744_63_24f6",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-30",
+          "folder": "20251030_181829_92_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-10-31",
+          "folder": "20251031_182914_34_24f4",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-02",
+          "folder": "20251102_181728_71_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-04",
+          "folder": "20251104_181332_99_250a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-05",
+          "folder": "20251105_181824_25_2526",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-06",
+          "folder": "20251106_181825_65_2535",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181557_14_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181559_46_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181930_57_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-09",
+          "folder": "20251109_181932_88_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_181800_55_24fe",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_181802_86_24fe",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_182508_36_24ee",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-11-13",
+          "folder": "20251113_182510_41_24ee",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        }
+      ],
+      "processing_time_seconds": 20.27
+    },
+    {
+      "field": "Field_12_and_13",
+      "total": 77,
+      "success": 77,
+      "errors": 0,
+      "results": [
+        {
+          "date": "2025-05-02",
+          "folder": "20250502_181636_63_24cb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-02",
+          "folder": "20250502_181921_35_2531",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-03",
+          "folder": "20250503_181710_00_2535",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-03",
+          "folder": "20250503_181833_79_253d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-04",
+          "folder": "20250504_181742_76_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-04",
+          "folder": "20250504_181745_12_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-05",
+          "folder": "20250505_180644_18_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-08",
+          "folder": "20250508_181755_18_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-08",
+          "folder": "20250508_181835_93_2532",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-09",
+          "folder": "20250509_180844_01_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-09",
+          "folder": "20250509_180846_24_250d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-10",
+          "folder": "20250510_180614_02_24d9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-10",
+          "folder": "20250510_181640_91_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-11",
+          "folder": "20250511_181809_07_2526",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-12",
+          "folder": "20250512_181157_52_24ed",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-13",
+          "folder": "20250513_181925_55_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-13",
+          "folder": "20250513_181927_91_2549",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-14",
+          "folder": "20250514_180900_94_24de",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-14",
+          "folder": "20250514_181248_93_24aa",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-15",
+          "folder": "20250515_174304_12_24a1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-20",
+          "folder": "20250520_180907_13_251f",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-27",
+          "folder": "20250527_181823_61_2534",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-30",
+          "folder": "20250530_181708_82_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-05-31",
+          "folder": "20250531_181911_46_2540",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180641_15_251d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180752_39_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-01",
+          "folder": "20250601_180754_60_24f7",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-02",
+          "folder": "20250602_181837_84_253c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-05",
+          "folder": "20250605_180727_95_2500",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-05",
+          "folder": "20250605_181632_73_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-07",
+          "folder": "20250607_181651_66_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181027_47_2518",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181606_96_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-09",
+          "folder": "20250609_181609_28_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-10",
+          "folder": "20250610_181822_96_2530",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-12",
+          "folder": "20250612_181624_32_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-12",
+          "folder": "20250612_181626_66_252d",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181001_01_24d1",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-14",
+          "folder": "20250614_181740_12_24f2",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-15",
+          "folder": "20250615_181426_82_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-15",
+          "folder": "20250615_181428_97_24df",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-18",
+          "folder": "20250618_181711_84_24fb",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181615_71_251e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181626_88_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-19",
+          "folder": "20250619_181657_30_252b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-20",
+          "folder": "20250620_181529_88_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-21",
+          "folder": "20250621_181603_45_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-21",
+          "folder": "20250621_181605_57_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_180856_09_251b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_181611_17_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-25",
+          "folder": "20250625_181618_47_2533",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-26",
+          "folder": "20250626_180900_96_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_180900_68_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-27",
+          "folder": "20250627_181305_75_24bd",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-28",
+          "folder": "20250628_181710_70_252e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-29",
+          "folder": "20250629_181646_06_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-30",
+          "folder": "20250630_181635_89_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-06-30",
+          "folder": "20250630_181638_00_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-01",
+          "folder": "20250701_174432_76_2417",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-02",
+          "folder": "20250702_181731_25_24f9",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-03",
+          "folder": "20250703_181021_43_2514",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181618_17_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181620_28_2541",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-04",
+          "folder": "20250704_181635_84_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-05",
+          "folder": "20250705_181018_75_2521",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-05",
+          "folder": "20250705_181020_97_2521",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-07",
+          "folder": "20250707_181134_87_2500",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-08",
+          "folder": "20250708_181455_47_252e",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_180852_57_2516",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_181608_06_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-09",
+          "folder": "20250709_181610_40_254a",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-13",
+          "folder": "20250713_181429_19_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-13",
+          "folder": "20250713_181431_40_24dc",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-14",
+          "folder": "20250714_181206_09_250b",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-15",
+          "folder": "20250715_181105_44_251c",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-20",
+          "folder": "20250720_181542_09_2522",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        },
+        {
+          "date": "2025-07-21",
+          "folder": "20250721_180756_64_2523",
+          "status": "success",
+          "indices_exported": [
+            "NDVI",
+            "SAVI",
+            "FC",
+            "GCI",
+            "RECI",
+            "MSAVI"
+          ]
+        }
+      ],
+      "processing_time_seconds": 5.9
+    }
+  ]
+}

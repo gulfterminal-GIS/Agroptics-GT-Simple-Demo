@@ -1,0 +1,31 @@
+{
+  "total_fields": 3,
+  "fields_processed": 3,
+  "total_dates": 340,
+  "fields": [
+    {
+      "field": "Field_10",
+      "dates_count": 136,
+      "date_range": {
+        "start": "2025-03-29",
+        "end": "2025-11-13"
+      }
+    },
+    {
+      "field": "Field_11",
+      "dates_count": 156,
+      "date_range": {
+        "start": "2025-02-27",
+        "end": "2025-11-13"
+      }
+    },
+    {
+      "field": "Field_12_and_13",
+      "dates_count": 48,
+      "date_range": {
+        "start": "2025-05-02",
+        "end": "2025-07-21"
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "type": "Feature",
+  "properties": {
+    "fieldID": "50faa72b4566d4eda7e2de967b36a063",
+    "fieldName": "Field 12 and 13",
+    "cropType": "grainCorn",
+    "fieldSize": 9.89,
+    "irrigMethod": "Sprinkler",
+    "soilTexture": "siltClayLoam",
+    "cultivar": "",
+    "plantingDate": "2025-05-02"
+  },
+  "geometry": {
+    "coordinates": [
+      [
+        [
+          -104.99549382212251,
+          40.61126918256724
+        ],
+        [
+          -104.99550906934537,
+          40.61019259126098
+        ],
+        [
+          -104.99155563911974,
+          40.6101766245292
+        ],
+        [
+          -104.99156447527666,
+          40.61125861040958
+        ],
+        [
+          -104.99549382212251,
+          40.61126918256724
+        ]
+      ]
+    ],
+    "type": "Polygon"
+  }
+}

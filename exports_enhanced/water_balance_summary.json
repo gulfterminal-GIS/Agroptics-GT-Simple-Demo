@@ -1,0 +1,27 @@
+{
+  "total_fields": 3,
+  "fields_processed": 3,
+  "fields": [
+    {
+      "field": "Field_11",
+      "crop": "barley",
+      "dates_count": 156,
+      "planting_date": "2025-02-27",
+      "first_irrig": "2025-06-13"
+    },
+    {
+      "field": "Field_10",
+      "crop": "sugarBeet",
+      "dates_count": 136,
+      "planting_date": "2025-03-28",
+      "first_irrig": "2025-06-13"
+    },
+    {
+      "field": "Field_12_and_13",
+      "crop": "grainCorn",
+      "dates_count": 48,
+      "planting_date": "2025-05-02",
+      "first_irrig": "2025-06-13"
+    }
+  ]
+}

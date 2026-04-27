@@ -1,0 +1,4577 @@
+/**
+ * Agroptics Satellite Imagery Demo
+ * Main Application Script - Restructured with Modal
+ */
+
+// Global state
+const AppState = {
+    map: null,
+    selectedField: null,
+    fieldLayers: {},
+    fieldData: {},
+    charts: {},
+    currentCategory: 'et',
+    categoryData: null,
+    imageOverlay: null,
+    availableDates: [],
+    selectedDate: null,
+    currentCalendarMonth: new Date(),
+    uploadedLayers: [],
+    swipeSlider: null,
+    mapLegend: null,
+    comparisonMaps: {
+        map1: null,
+        map2: null,
+        mapDiff: null
+    },
+    comparisonData: {
+        date1: null,
+        date2: null,
+        index: null,
+        data1: null,
+        data2: null,
+        overlays: {}
+    }
+};
+
+// Field configurations
+const FIELD_CONFIGS = {
+    'Field_10': {
+        color: '#4CAF50',
+        name: 'Field 10',
+        geojsonFile: 'Field_10.geojson'
+    },
+    'Field_11': {
+        color: '#2196F3',
+        name: 'Field 11',
+        geojsonFile: 'Field_11.geojson'
+    },
+    'Field_12_and_13': {
+        color: '#FF9800',
+        name: 'Field 12 & 13',
+        geojsonFile: 'Field_12_and_13.geojson'
+    }
+};
+
+// Initialize application
+document.addEventListener('DOMContentLoaded', () => {
+    initializeMap();
+    loadAllFields();
+    setupAnalysisSection();
+    setupImageOverlayControls();
+    setupFileUpload();
+});
+
+/**
+ * Initialize Leaflet map
+ */
+function initializeMap() {
+    AppState.map = L.map('map').setView([40.6135, -104.9945], 14);
+
+    // Define base layers
+    const streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    });
+
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri',
+        maxZoom: 19
+    });
+
+    // Add satellite as default
+    satellite.addTo(AppState.map);
+
+    const baseMaps = {
+        "Satellite": satellite,
+        "Street Map": streetMap
+    };
+
+    // Layer control hidden - basemap switching disabled
+    // L.control.layers(baseMaps).addTo(AppState.map);
+
+    // Initialize drawing controls
+    initializeDrawingControls();
+}
+
+/**
+ * Initialize drawing controls with custom styling
+ */
+function initializeDrawingControls() {
+    // Create a feature group to store drawn items
+    const drawnItems = new L.FeatureGroup();
+    AppState.map.addLayer(drawnItems);
+    AppState.drawnItems = drawnItems;
+
+    // Configure draw control options with area display
+    const drawControl = new L.Control.Draw({
+        position: 'topright',
+        draw: {
+            polyline: {
+                shapeOptions: {
+                    color: '#FF9800',
+                    weight: 3
+                },
+                showLength: true,
+                metric: true,
+                feet: false
+            },
+            rectangle: false,
+            marker: false,
+            circlemarker: false,
+            polygon: {
+                allowIntersection: false,
+                showArea: true,
+                metric: ['km', 'm'],
+                feet: false,
+                shapeOptions: {
+                    color: '#2196F3',
+                    weight: 3,
+                    fillColor: '#2196F3',
+                    fillOpacity: 0.3
+                },
+                drawError: {
+                    color: '#d32f2f',
+                    timeout: 1000
+                }
+            },
+            circle: {
+                shapeOptions: {
+                    color: '#2196F3',
+                    weight: 3,
+                    fillColor: '#2196F3',
+                    fillOpacity: 0.3
+                },
+                showRadius: true,
+                metric: true,
+                feet: false
+            }
+        },
+        edit: {
+            featureGroup: drawnItems,
+            edit: {
+                selectedPathOptions: {
+                    maintainColor: true,
+                    opacity: 0.6,
+                    dashArray: '10, 10'
+                }
+            }
+        }
+    });
+
+    AppState.map.addControl(drawControl);
+
+    // Custom area calculation function
+    function calculateArea(latlngs) {
+        let area = 0;
+        if (latlngs && latlngs.length > 2) {
+            for (let i = 0; i < latlngs.length; i++) {
+                const j = (i + 1) % latlngs.length;
+                const xi = latlngs[i].lng;
+                const yi = latlngs[i].lat;
+                const xj = latlngs[j].lng;
+                const yj = latlngs[j].lat;
+                area += xi * yj - xj * yi;
+            }
+            area = Math.abs(area / 2);
+            // Convert to square meters (approximate)
+            const metersPerDegree = 111320;
+            area = area * metersPerDegree * metersPerDegree;
+        }
+        return area;
+    }
+
+    // Handle draw created event
+    AppState.map.on(L.Draw.Event.CREATED, function (event) {
+        const layer = event.layer;
+        const type = event.layerType;
+        
+        // Apply styling to drawn shapes
+        if (type === 'polyline') {
+            layer.setStyle({
+                color: '#FF9800',
+                weight: 3
+            });
+        } else if (layer.setStyle) {
+            layer.setStyle({
+                color: '#2196F3',
+                weight: 3,
+                fillColor: '#2196F3',
+                fillOpacity: 0.3
+            });
+        }
+        
+        drawnItems.addLayer(layer);
+        
+        // Add popup with enhanced styling
+        let popupContent = `<div class="field-popup">
+            <h3>${type.charAt(0).toUpperCase() + type.slice(1)}</h3>`;
+        
+        if (type === 'polyline') {
+            // Calculate distance
+            const latlngs = layer.getLatLngs();
+            let totalDistance = 0;
+            
+            for (let i = 0; i < latlngs.length - 1; i++) {
+                totalDistance += latlngs[i].distanceTo(latlngs[i + 1]);
+            }
+            
+            const meters = totalDistance.toFixed(2);
+            const kilometers = (totalDistance / 1000).toFixed(2);
+            const miles = (totalDistance * 0.000621371).toFixed(2);
+            const feet = (totalDistance * 3.28084).toFixed(2);
+            
+            popupContent += `
+                <div class="metric-row">
+                    <span class="metric-label">Meters</span>
+                    <span class="metric-value">${meters} m</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Kilometers</span>
+                    <span class="metric-value">${kilometers} km</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Miles</span>
+                    <span class="metric-value">${miles} mi</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Feet</span>
+                    <span class="metric-value">${feet} ft</span>
+                </div>`;
+        } else if (type === 'polygon') {
+            const latlngs = layer.getLatLngs()[0];
+            const area = calculateArea(latlngs);
+            const acres = (area * 0.000247105).toFixed(2);
+            const hectares = (area / 10000).toFixed(2);
+            const sqMeters = area.toFixed(0);
+            
+            popupContent += `
+                <div class="metric-row">
+                    <span class="metric-label">Acres</span>
+                    <span class="metric-value">${acres} ac</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Hectares</span>
+                    <span class="metric-value">${hectares} ha</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Square Meters</span>
+                    <span class="metric-value">${sqMeters} m²</span>
+                </div>`;
+        } else if (type === 'circle') {
+            const radius = layer.getRadius();
+            const area = Math.PI * radius * radius;
+            const acres = (area * 0.000247105).toFixed(2);
+            const hectares = (area / 10000).toFixed(2);
+            const sqMeters = area.toFixed(0);
+            
+            popupContent += `
+                <div class="metric-row">
+                    <span class="metric-label">Radius</span>
+                    <span class="metric-value">${radius.toFixed(2)} m</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Acres</span>
+                    <span class="metric-value">${acres} ac</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Hectares</span>
+                    <span class="metric-value">${hectares} ha</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Square Meters</span>
+                    <span class="metric-value">${sqMeters} m²</span>
+                </div>`;
+        }
+        
+        popupContent += '</div>';
+        layer.bindPopup(popupContent);
+        layer.openPopup();
+    });
+
+    // Handle draw edited event
+    AppState.map.on(L.Draw.Event.EDITED, function (event) {
+        const layers = event.layers;
+        layers.eachLayer(function (layer) {
+            // Update popup content for polyline (distance)
+            if (layer instanceof L.Polyline && !(layer instanceof L.Polygon)) {
+                const latlngs = layer.getLatLngs();
+                let totalDistance = 0;
+                
+                for (let i = 0; i < latlngs.length - 1; i++) {
+                    totalDistance += latlngs[i].distanceTo(latlngs[i + 1]);
+                }
+                
+                const meters = totalDistance.toFixed(2);
+                const kilometers = (totalDistance / 1000).toFixed(2);
+                const miles = (totalDistance * 0.000621371).toFixed(2);
+                const feet = (totalDistance * 3.28084).toFixed(2);
+                
+                const popupContent = `<div class="field-popup">
+                    <h3>Edited Distance</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Meters</span>
+                        <span class="metric-value">${meters} m</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Kilometers</span>
+                        <span class="metric-value">${kilometers} km</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Miles</span>
+                        <span class="metric-value">${miles} mi</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Feet</span>
+                        <span class="metric-value">${feet} ft</span>
+                    </div>
+                </div>`;
+                layer.setPopupContent(popupContent);
+            }
+            // Update popup content if it's a polygon
+            else if (layer instanceof L.Polygon && !(layer instanceof L.Circle)) {
+                const latlngs = layer.getLatLngs()[0];
+                const area = calculateArea(latlngs);
+                const acres = (area * 0.000247105).toFixed(2);
+                const hectares = (area / 10000).toFixed(2);
+                const sqMeters = area.toFixed(0);
+                
+                const popupContent = `<div class="field-popup">
+                    <h3>Edited Polygon</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Acres</span>
+                        <span class="metric-value">${acres} ac</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Hectares</span>
+                        <span class="metric-value">${hectares} ha</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Square Meters</span>
+                        <span class="metric-value">${sqMeters} m²</span>
+                    </div>
+                </div>`;
+                layer.setPopupContent(popupContent);
+            } else if (layer instanceof L.Circle) {
+                const radius = layer.getRadius();
+                const area = Math.PI * radius * radius;
+                const acres = (area * 0.000247105).toFixed(2);
+                const hectares = (area / 10000).toFixed(2);
+                const sqMeters = area.toFixed(0);
+                
+                const popupContent = `<div class="field-popup">
+                    <h3>Edited Circle</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Radius</span>
+                        <span class="metric-value">${radius.toFixed(2)} m</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Acres</span>
+                        <span class="metric-value">${acres} ac</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Hectares</span>
+                        <span class="metric-value">${hectares} ha</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Square Meters</span>
+                        <span class="metric-value">${sqMeters} m²</span>
+                    </div>
+                </div>`;
+                layer.setPopupContent(popupContent);
+            }
+        });
+    });
+
+    // Handle draw deleted event
+    AppState.map.on(L.Draw.Event.DELETED, function (event) {
+        console.log('Shapes deleted:', event.layers.getLayers().length);
+    });
+
+    // Show area while drawing polygon
+    AppState.map.on('draw:drawvertex', function (e) {
+        const layers = e.layers;
+        layers.eachLayer(function (layer) {
+            if (layer instanceof L.Polygon) {
+                const latlngs = layer.getLatLngs()[0];
+                if (latlngs.length > 2) {
+                    const area = calculateArea(latlngs);
+                    const acres = (area * 0.000247105).toFixed(2);
+                    console.log(`Current area: ${acres} acres`);
+                }
+            }
+        });
+    });
+
+    // Show drawing tools tooltip on load
+    showDrawingToolsTooltip();
+}
+
+/**
+ * Show tooltip pointing to drawing tools
+ */
+function showDrawingToolsTooltip() {
+    const tooltip = document.getElementById('drawingToolsTooltip');
+    if (!tooltip) return;
+
+    // Show tooltip after a short delay
+    setTimeout(() => {
+        tooltip.classList.remove('hidden');
+    }, 1000);
+
+    // Hide tooltip after 5 seconds
+    setTimeout(() => {
+        tooltip.classList.add('hidden');
+    }, 6000);
+
+    // Hide tooltip when user clicks on drawing tools
+    const drawToolbar = document.querySelector('.leaflet-draw-toolbar');
+    if (drawToolbar) {
+        drawToolbar.addEventListener('click', () => {
+            tooltip.classList.add('hidden');
+        });
+    }
+
+    // Hide tooltip when user starts drawing
+    AppState.map.on('draw:drawstart', () => {
+        tooltip.classList.add('hidden');
+    });
+}
+
+/**
+ * Load all field GeoJSON files
+ */
+async function loadAllFields() {
+    const fieldListContainer = document.querySelector('.field-list');
+    
+    for (const [fieldId, config] of Object.entries(FIELD_CONFIGS)) {
+        try {
+            const response = await fetch(config.geojsonFile);
+            const geojson = await response.json();
+            
+            AppState.fieldData[fieldId] = geojson.properties;
+            addFieldToMap(fieldId, geojson, config);
+            addFieldCard(fieldId, geojson.properties, config);
+        } catch (error) {
+            console.error(`Error loading ${config.name}:`, error);
+        }
+    }
+}
+
+/**
+ * Add field card to sidebar
+ */
+function addFieldCard(fieldId, properties, config) {
+    const fieldListContainer = document.querySelector('.field-list');
+    
+    const card = document.createElement('div');
+    card.className = 'field-card';
+    card.dataset.fieldId = fieldId;
+    
+    card.innerHTML = `
+        <div class="field-card-header">
+            <div class="field-color" style="background: ${config.color};"></div>
+            <div>
+                <span class="field-name">${properties.fieldName}</span>
+                <span class="field-crop">(${formatCropName(properties.cropType)})</span>
+            </div>
+        </div>
+        <div class="field-details">
+            ${properties.fieldSize} acres • Planted ${formatDate(properties.plantingDate)}
+        </div>
+    `;
+    
+    card.addEventListener('click', () => {
+        zoomToField(fieldId);
+    });
+    
+    fieldListContainer.appendChild(card);
+}
+
+/**
+ * Zoom to field with animation and flash
+ */
+function zoomToField(fieldId) {
+    const layer = AppState.fieldLayers[fieldId];
+    if (!layer) return;
+    
+    AppState.selectedField = fieldId;
+    
+    document.querySelectorAll('.field-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    document.querySelector(`[data-field-id="${fieldId}"]`).classList.add('active');
+    
+    const bounds = layer.getBounds();
+    AppState.map.flyToBounds(bounds, {
+        padding: [50, 50],
+        duration: 1.5
+    });
+    
+    setTimeout(() => {
+        flashField(fieldId);
+        loadFieldDates(fieldId);
+        
+        // Open analysis section with field data
+        const fieldData = AppState.fieldData[fieldId];
+        openAnalysisSection(fieldId, fieldData);
+    }, 1500);
+}
+
+/**
+ * Flash field polygon
+ */
+function flashField(fieldId) {
+    const layer = AppState.fieldLayers[fieldId];
+    if (!layer) return;
+    
+    let flashCount = 0;
+    const maxFlashes = 6;
+    const flashInterval = setInterval(() => {
+        if (flashCount >= maxFlashes) {
+            clearInterval(flashInterval);
+            layer.setStyle({ fillOpacity: 0.4 });
+            return;
+        }
+        
+        const opacity = flashCount % 2 === 0 ? 0.1 : 0.7;
+        layer.setStyle({ fillOpacity: opacity });
+        flashCount++;
+    }, 250);
+}
+
+/**
+ * Add field polygon to map
+ */
+function addFieldToMap(fieldId, geojson, config) {
+    const layer = L.geoJSON(geojson, {
+        style: {
+            color: config.color,
+            weight: 3,
+            opacity: 0.8,
+            fillOpacity: 0.2
+        },
+        onEachFeature: (feature, layer) => {
+            const props = feature.properties;
+            
+            // Tooltip content for hover
+            const tooltipContent = `
+                <div style="font-size: 12px; padding: 4px;">
+                    <strong>${props.fieldName}</strong><br>
+                    ${formatCropName(props.cropType)} • ${props.fieldSize} acres
+                </div>
+            `;
+            layer.bindTooltip(tooltipContent, {
+                permanent: false,
+                direction: 'top',
+                className: 'field-tooltip',
+                offset: [0, -10],
+                opacity: 1
+            });
+
+            // Clicking polygon does nothing now - use field cards instead
+            layer.on('click', () => {
+                // Optional: could zoom to field or show a message
+            });
+
+            layer.on('mouseover', function() {
+                this.setStyle({
+                    fillOpacity: 0.4,
+                    weight: 4
+                });
+            });
+
+            layer.on('mouseout', function() {
+                this.setStyle({
+                    fillOpacity: 0.2,
+                    weight: 3
+                });
+            });
+        }
+    }).addTo(AppState.map);
+
+    AppState.fieldLayers[fieldId] = layer;
+}
+
+/**
+ * Setup analysis section functionality
+ */
+function setupAnalysisSection() {
+    const closeBtn = document.getElementById('analysisClose');
+    const analysisTabs = document.querySelectorAll('.analysis-tab');
+    
+    closeBtn.addEventListener('click', closeAnalysisSection);
+    
+    analysisTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (tab.classList.contains('disabled')) return;
+            
+            analysisTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            document.querySelectorAll('.analysis-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const tabName = tab.dataset.analysisTab;
+            document.getElementById(`analysis-${tabName}-content`).classList.add('active');
+        });
+    });
+}
+
+/**
+ * Open analysis section
+ */
+function openAnalysisSection(fieldId, properties) {
+    AppState.selectedField = fieldId;
+    AppState.selectedFieldProperties = properties; // Store properties for export
+    
+    const analysisSection = document.getElementById('analysisSection');
+    const analysisTitle = document.getElementById('analysisTitle');
+    
+    analysisTitle.textContent = properties.fieldName;
+    
+    // Remove empty state
+    analysisSection.classList.remove('empty');
+    analysisSection.classList.add('active');
+    
+    // Populate tabs
+    populateFieldInfo(properties, 'analysis-field-info-content');
+    populatePlanetTab(fieldId, properties, 'analysis-planet-content');
+    
+    // Switch to Planet tab by default
+    document.querySelectorAll('.analysis-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-analysis-tab="planet"]').classList.add('active');
+    
+    document.querySelectorAll('.analysis-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('analysis-planet-content').classList.add('active');
+}
+
+/**
+ * Close analysis section
+ */
+function closeAnalysisSection() {
+    const analysisSection = document.getElementById('analysisSection');
+    analysisSection.classList.remove('active');
+    analysisSection.classList.add('empty');
+}
+
+/**
+ * Populate field info tab
+ */
+function populateFieldInfo(properties, containerId = 'field-info-content') {
+    const content = `
+        <div class="field-info">
+            <h2>${properties.fieldName}</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Crop Type</span>
+                    <span class="info-value">${formatCropName(properties.cropType)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Field Size</span>
+                    <span class="info-value">${properties.fieldSize} acres</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Planting Date</span>
+                    <span class="info-value">${formatDate(properties.plantingDate)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Irrigation Method</span>
+                    <span class="info-value">${properties.irrigMethod}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Soil Texture</span>
+                    <span class="info-value">${formatSoilTexture(properties.soilTexture)}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Cultivar</span>
+                    <span class="info-value">${properties.cultivar || 'N/A'}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById(containerId).innerHTML = content;
+}
+
+/**
+ * Populate planet tab with category tabs and charts
+ */
+async function populatePlanetTab(fieldId, properties, containerId = 'planet-content') {
+    const content = `
+        <div class="category-tabs">
+            <div class="category-tabs-wrapper">
+                <button class="category-tab active" data-category="et">ET</button>
+                <button class="category-tab" data-category="crop">Crop Coefficient</button>
+                <button class="category-tab" data-category="irrigation">Irrigation</button>
+                <button class="category-tab" data-category="additional">Additional Variables</button>
+                <button class="category-tab" data-category="depletion">Depletion</button>
+                <button class="category-tab" data-category="awc">Available Water Content</button>
+            </div>
+            <button id="exportExcelBtn" class="export-excel-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export to Excel
+            </button>
+        </div>
+        
+        ${generateCategoryContent('et')}
+        ${generateCategoryContent('crop')}
+        ${generateCategoryContent('irrigation')}
+        ${generateCategoryContent('additional')}
+        ${generateCategoryContent('depletion')}
+        ${generateCategoryContent('awc')}
+    `;
+    
+    document.getElementById(containerId).innerHTML = content;
+    
+    await loadFieldData(fieldId);
+    
+    setupCategoryTabs();
+    setupToggleButtons();
+    initializeExcelExport(); // Initialize export button after content is loaded
+}
+
+/**
+ * Generate content for each category
+ */
+function generateCategoryContent(category) {
+    const categoryConfig = {
+        et: {
+            title: 'ET Values (mm/day)',
+            indices: [
+                { name: 'ETc_Andy', color: '#2c5f2d' },
+                { name: 'ETc_NDVI', color: '#4CAF50' },
+                { name: 'ETc_SAVI', color: '#66BB6A' },
+                { name: 'ETc_FC', color: '#8BC34A' },
+                { name: 'ETc_Ensemble', color: '#CDDC39' },
+                { name: 'ETc_FAO56', color: '#FFC107' }
+            ]
+        },
+        crop: {
+            title: 'Crop Coefficient (Kcb)',
+            indices: [
+                { name: 'Kcb_Andy', color: '#FF9800' },
+                { name: 'Kcb_NDVI', color: '#FF5722' },
+                { name: 'Kcb_SAVI', color: '#FF7043' },
+                { name: 'Kcb_FC', color: '#F44336' },
+                { name: 'Kcb_Ensemble', color: '#E91E63' },
+                { name: 'Kcb_FAO56', color: '#9C27B0' }
+            ]
+        },
+        irrigation: {
+            title: 'Irrigation and Precipitation',
+            indices: [
+                { name: 'Applied Irrigation', color: '#2196F3' },
+                { name: 'Precipitation', color: '#3F51B5' }
+            ]
+        },
+        additional: {
+            title: 'Vegetation Indices',
+            indices: [
+                { name: 'NDVI', color: '#4CAF50' },
+                { name: 'SAVI', color: '#66BB6A' },
+                { name: 'FC', color: '#8BC34A' },
+                { name: 'GCI', color: '#CDDC39' },
+                { name: 'MSAVI', color: '#9CCC65' },
+                { name: 'RECI', color: '#AED581' }
+            ]
+        },
+        depletion: {
+            title: 'Water Depletion',
+            indices: [
+                { name: 'Dr (Depletion)', color: '#FF5722' },
+                { name: 'fDr (Fractional)', color: '#FF9800' },
+                { name: 'ETAW', color: '#FFC107' }
+            ]
+        },
+        awc: {
+            title: 'Available Water Content',
+            indices: [
+                { name: 'AWC', color: '#2196F3' },
+                { name: 'TAW', color: '#03A9F4' }
+            ]
+        }
+    };
+    
+    const config = categoryConfig[category];
+    const isActive = category === 'et' ? 'active' : '';
+    
+    return `
+        <div class="category-content-wrapper ${isActive}" data-category-content="${category}">
+            <div class="chart-section">
+                <div class="chart-main">
+                    <div class="chart-title">${config.title}</div>
+                    <div class="chart-container">
+                        <canvas id="chart-${category}" class="category-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="data-toggles">
+                    <div class="toggles-title">Toggle Data Series</div>
+                    <div class="toggle-group">
+                        ${config.indices.map((index, i) => `
+                            <label class="toggle-item">
+                                <input type="checkbox" class="toggle-checkbox" data-category="${category}" data-index="${index.name}" ${i === 0 ? 'checked' : ''}>
+                                <div class="toggle-legend" style="background: ${index.color};"></div>
+                                <span>${index.name}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Setup category tab functionality
+ */
+function setupCategoryTabs() {
+    const tabs = document.querySelectorAll('.category-tab');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const category = tab.dataset.category;
+            
+            // Update active tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Update active content
+            document.querySelectorAll('.category-content-wrapper').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelector(`[data-category-content="${category}"]`).classList.add('active');
+            
+            AppState.currentCategory = category;
+        });
+    });
+}
+
+async function loadFieldData(fieldId) {
+    try {
+        // Load both timeseries and water balance data from exports_enhanced
+        const [timeseriesResponse, waterBalanceResponse] = await Promise.all([
+            fetch(`exports_enhanced/${fieldId}_timeseries.json`),
+            fetch(`exports_enhanced/${fieldId}_water_balance.json`)
+        ]);
+        
+        if (!timeseriesResponse.ok || !waterBalanceResponse.ok) {
+            throw new Error(`Failed to load data for ${fieldId}`);
+        }
+        
+        const timeseriesData = await timeseriesResponse.json();
+        const waterBalanceData = await waterBalanceResponse.json();
+        
+        const processedData = processTimeSeriesData(timeseriesData, waterBalanceData);
+        
+        AppState.categoryData = processedData;
+        
+        // Create charts for all categories
+        createCategoryChart('et', processedData);
+        createCategoryChart('crop', processedData);
+        createCategoryChart('irrigation', processedData);
+        createCategoryChart('additional', processedData);
+        createCategoryChart('depletion', processedData);
+        createCategoryChart('awc', processedData);
+    } catch (error) {
+        console.error('Error loading field data:', error);
+        // Fallback to sample data if real data fails
+        const sampleData = generateSampleData(fieldId);
+        AppState.categoryData = sampleData;
+        
+        createCategoryChart('et', sampleData);
+        createCategoryChart('crop', sampleData);
+        createCategoryChart('irrigation', sampleData);
+        createCategoryChart('additional', sampleData);
+        createCategoryChart('depletion', sampleData);
+        createCategoryChart('awc', sampleData);
+    }
+}
+
+/**
+ * Process the loaded JSON timeseries and water balance data into chart-ready format
+ */
+function processTimeSeriesData(timeseriesData, waterBalanceData) {
+    // Extract timeseries from the array structure
+    const timeseriesArray = Array.isArray(timeseriesData) ? timeseriesData[0].timeSeries : timeseriesData.timeSeries;
+    
+    // Create a map of water balance data by date for quick lookup
+    const waterBalanceMap = {};
+    waterBalanceData.forEach(entry => {
+        waterBalanceMap[entry.Date] = entry;
+    });
+    
+    const timeSeries = timeseriesArray.map(entry => {
+        const date = new Date(entry.date);
+        const dateStr = entry.date;
+        const indices = entry.indices;
+        const waterBalance = waterBalanceMap[dateStr] || {};
+        
+        // Extract mean values from vegetation indices
+        const ndvi = indices.NDVI?.mean || 0;
+        const savi = indices.SAVI?.mean || 0;
+        const fc = indices.FC?.mean || 0;
+        const gci = indices.GCI?.mean || 0;
+        const msavi = indices.MSAVI?.mean || 0;
+        const reci = indices.RECI?.mean || 0;
+        
+        // Extract water balance values
+        const etcAndy = waterBalance.ETc_Andy || 0;
+        const etcNdvi = waterBalance.ETc_NDVI || 0;
+        const etcSavi = waterBalance.ETc_SAVI || 0;
+        const etcFc = waterBalance.ETc_FC || 0;
+        const etcEnsemble = waterBalance.ETc_Ensemble || 0;
+        const etcFao56 = waterBalance.ETc_FAO56 || 0;
+        
+        const kcbAndy = waterBalance.Kcb_Andy || 0;
+        const kcbNdvi = waterBalance.Kcb_NDVI || 0;
+        const kcbSavi = waterBalance.Kcb_SAVI || 0;
+        const kcbFc = waterBalance.Kcb_FC || 0;
+        const kcbEnsemble = waterBalance.Kcb_Ensemble || 0;
+        const kcbFao56 = waterBalance.Kcb_FAO56 || 0;
+        
+        const awc = waterBalance.AWC || 0;
+        const taw = waterBalance.TAW || 0;
+        const dr = waterBalance.Dr || 0;
+        const fDr = waterBalance.fDr || 0;
+        const etaw = waterBalance.ETAW || 0;
+        const appliedIrrig = waterBalance.AppliedIrrig || 0;
+        const eto = waterBalance.ETo || 0;
+        const etr = waterBalance.ETr || 0;
+        const interpolated = waterBalance.Interpolated || 0;
+        const predicted = waterBalance.Predicted || 0;
+        const daysSincePlanting = waterBalance.DaysSincePlanting || 0;
+        const rootDepth = waterBalance.RootDepth_m || 0;
+        
+        return {
+            date: date,
+            // ET Category - All ETc values
+            etcAndy: etcAndy,
+            etcNdvi: etcNdvi,
+            etcSavi: etcSavi,
+            etcFc: etcFc,
+            etcEnsemble: etcEnsemble,
+            etcFao56: etcFao56,
+            // Crop Coefficient - All Kcb values
+            kcbAndy: kcbAndy,
+            kcbNdvi: kcbNdvi,
+            kcbSavi: kcbSavi,
+            kcbFc: kcbFc,
+            kcbEnsemble: kcbEnsemble,
+            kcbFao56: kcbFao56,
+            // Vegetation indices
+            ndvi: ndvi,
+            savi: savi,
+            fc: fc,
+            gci: gci,
+            msavi: msavi,
+            reci: reci,
+            // Water balance
+            awc: awc,
+            taw: taw,
+            dr: dr,
+            fDr: fDr,
+            etaw: etaw,
+            appliedIrrig: appliedIrrig,
+            eto: eto,
+            etr: etr,
+            interpolated: interpolated,
+            predicted: predicted,
+            daysSincePlanting: daysSincePlanting,
+            rootDepth: rootDepth,
+            precipitation: 0 // Can be added if available
+        };
+    });
+    
+    // Get irrigation dates from water balance data
+    const irrigationDates = waterBalanceData
+        .filter(entry => entry.AppliedIrrig > 0)
+        .map(entry => new Date(entry.Date));
+    
+    return {
+        timeSeries: timeSeries,
+        irrigationDates: irrigationDates
+    };
+}
+
+function generateSampleData(fieldId) {
+    const startDate = new Date('2025-03-01');
+    const endDate = new Date('2026-01-10');
+    const data = [];
+    
+    let currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+        const dayOfYear = getDayOfYear(currentDate);
+        const growthFactor = Math.sin((dayOfYear - 60) / 365 * Math.PI * 2) * 0.5 + 0.5;
+        
+        data.push({
+            date: new Date(currentDate),
+            andy: Math.max(0, 0.05 + growthFactor * 0.28 + (Math.random() - 0.5) * 0.04),
+            ndvi: Math.max(0, Math.min(1, 0.2 + growthFactor * 0.6 + (Math.random() - 0.5) * 0.1)),
+            fc: Math.max(0, Math.min(1, growthFactor * 0.8 + (Math.random() - 0.5) * 0.1)),
+            ensemble: Math.max(0, 0.05 + growthFactor * 0.32 + (Math.random() - 0.5) * 0.05),
+            fao56: Math.max(0, 0.05 + growthFactor * 0.29 + (Math.random() - 0.5) * 0.04),
+            gci: growthFactor * 2.5 + (Math.random() - 0.5) * 0.3,
+            savi: Math.max(0, Math.min(1, growthFactor * 0.65 + (Math.random() - 0.5) * 0.1)),
+            awc: Math.max(0, Math.min(1, 0.7 - (1 - growthFactor) * 0.4 + (Math.random() - 0.5) * 0.1)),
+            precipitation: Math.random() > 0.9 ? Math.random() * 0.5 : 0
+        });
+        
+        currentDate.setDate(currentDate.getDate() + (Math.random() > 0.5 ? 3 : 5));
+    }
+    
+    const irrigationDates = getIrrigationDates(fieldId);
+    return { timeSeries: data, irrigationDates };
+}
+
+function getIrrigationDates(fieldId) {
+    const irrigationData = {
+        'Field_10': ['2025-06-13', '2025-09-09'],
+        'Field_11': ['2025-06-13', '2025-07-07'],
+        'Field_12_and_13': ['2025-06-13', '2025-08-30']
+    };
+    
+    return (irrigationData[fieldId] || []).map(date => new Date(date));
+}
+
+/**
+ * Create Chart.js chart for a specific category
+ */
+function createCategoryChart(category, data) {
+    const canvasId = `chart-${category}`;
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    
+    if (AppState.charts[category]) {
+        AppState.charts[category].destroy();
+    }
+    
+    const dates = data.timeSeries.map(d => d.date);
+    let datasets = [];
+    
+    // Define datasets based on category
+    switch(category) {
+        case 'et':
+            datasets = [
+                {
+                    label: 'ETc_Andy',
+                    data: data.timeSeries.map(d => d.etcAndy),
+                    borderColor: '#2c5f2d',
+                    backgroundColor: 'rgba(44, 95, 45, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: false
+                },
+                {
+                    label: 'ETc_NDVI',
+                    data: data.timeSeries.map(d => d.etcNdvi),
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'ETc_SAVI',
+                    data: data.timeSeries.map(d => d.etcSavi),
+                    borderColor: '#66BB6A',
+                    backgroundColor: 'rgba(102, 187, 106, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'ETc_FC',
+                    data: data.timeSeries.map(d => d.etcFc),
+                    borderColor: '#8BC34A',
+                    backgroundColor: 'rgba(139, 195, 74, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'ETc_Ensemble',
+                    data: data.timeSeries.map(d => d.etcEnsemble),
+                    borderColor: '#CDDC39',
+                    backgroundColor: 'rgba(205, 220, 57, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'ETc_FAO56',
+                    data: data.timeSeries.map(d => d.etcFao56),
+                    borderColor: '#FFC107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                }
+            ];
+            break;
+            
+        case 'crop':
+            datasets = [
+                {
+                    label: 'Kcb_Andy',
+                    data: data.timeSeries.map(d => d.kcbAndy),
+                    borderColor: '#FF9800',
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: false
+                },
+                {
+                    label: 'Kcb_NDVI',
+                    data: data.timeSeries.map(d => d.kcbNdvi),
+                    borderColor: '#FF5722',
+                    backgroundColor: 'rgba(255, 87, 34, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'Kcb_SAVI',
+                    data: data.timeSeries.map(d => d.kcbSavi),
+                    borderColor: '#FF7043',
+                    backgroundColor: 'rgba(255, 112, 67, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'Kcb_FC',
+                    data: data.timeSeries.map(d => d.kcbFc),
+                    borderColor: '#F44336',
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'Kcb_Ensemble',
+                    data: data.timeSeries.map(d => d.kcbEnsemble),
+                    borderColor: '#E91E63',
+                    backgroundColor: 'rgba(233, 30, 99, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'Kcb_FAO56',
+                    data: data.timeSeries.map(d => d.kcbFao56),
+                    borderColor: '#9C27B0',
+                    backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                }
+            ];
+            break;
+            
+        case 'irrigation':
+            datasets = [
+                {
+                    label: 'Applied Irrigation',
+                    data: data.timeSeries.map(d => d.appliedIrrig),
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.5)',
+                    borderWidth: 2,
+                    type: 'bar',
+                    hidden: false
+                },
+                {
+                    label: 'Precipitation',
+                    data: data.timeSeries.map(d => d.precipitation),
+                    borderColor: '#3F51B5',
+                    backgroundColor: 'rgba(63, 81, 181, 0.5)',
+                    borderWidth: 2,
+                    type: 'bar',
+                    hidden: true
+                }
+            ];
+            break;
+            
+        case 'additional':
+            datasets = [
+                {
+                    label: 'NDVI',
+                    data: data.timeSeries.map(d => d.ndvi),
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: false
+                },
+                {
+                    label: 'SAVI',
+                    data: data.timeSeries.map(d => d.savi),
+                    borderColor: '#66BB6A',
+                    backgroundColor: 'rgba(102, 187, 106, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'FC',
+                    data: data.timeSeries.map(d => d.fc),
+                    borderColor: '#8BC34A',
+                    backgroundColor: 'rgba(139, 195, 74, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'GCI',
+                    data: data.timeSeries.map(d => d.gci),
+                    borderColor: '#CDDC39',
+                    backgroundColor: 'rgba(205, 220, 57, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'MSAVI',
+                    data: data.timeSeries.map(d => d.msavi),
+                    borderColor: '#9CCC65',
+                    backgroundColor: 'rgba(156, 204, 101, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'RECI',
+                    data: data.timeSeries.map(d => d.reci),
+                    borderColor: '#AED581',
+                    backgroundColor: 'rgba(174, 213, 129, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                }
+            ];
+            break;
+            
+        case 'depletion':
+            datasets = [
+                {
+                    label: 'Dr (Depletion)',
+                    data: data.timeSeries.map(d => d.dr),
+                    borderColor: '#FF5722',
+                    backgroundColor: 'rgba(255, 87, 34, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: false
+                },
+                {
+                    label: 'fDr (Fractional)',
+                    data: data.timeSeries.map(d => d.fDr),
+                    borderColor: '#FF9800',
+                    backgroundColor: 'rgba(255, 152, 0, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                },
+                {
+                    label: 'ETAW',
+                    data: data.timeSeries.map(d => d.etaw),
+                    borderColor: '#FFC107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                }
+            ];
+            break;
+            
+        case 'awc':
+            datasets = [
+                {
+                    label: 'AWC',
+                    data: data.timeSeries.map(d => d.awc),
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: false
+                },
+                {
+                    label: 'TAW',
+                    data: data.timeSeries.map(d => d.taw),
+                    borderColor: '#03A9F4',
+                    backgroundColor: 'rgba(3, 169, 244, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    hidden: true
+                }
+            ];
+            break;
+    }
+    
+    AppState.charts[category] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y.toFixed(3)}`;
+                        }
+                    }
+                },
+                annotation: {
+                    annotations: data.irrigationDates.map((date, index) => ({
+                        type: 'line',
+                        xMin: date,
+                        xMax: date,
+                        borderColor: 'rgba(33, 150, 243, 0.8)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                            display: true,
+                            content: 'Irrigation',
+                            position: 'start'
+                        }
+                    }))
+                }
+            },
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'month',
+                        displayFormats: {
+                            month: 'MMM yyyy'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Setup toggle button functionality
+ */
+function setupToggleButtons() {
+    const checkboxes = document.querySelectorAll('.toggle-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const category = e.target.dataset.category;
+            const index = e.target.dataset.index;
+            updateChartVisibility(category, index, e.target.checked);
+        });
+    });
+}
+
+/**
+ * Update chart dataset visibility
+ */
+function updateChartVisibility(category, index, visible) {
+    const chart = AppState.charts[category];
+    if (!chart) return;
+    
+    const dataset = chart.data.datasets.find(ds => ds.label === index);
+    if (dataset) {
+        dataset.hidden = !visible;
+        chart.update();
+    }
+}
+
+/**
+ * Utility: Format crop name
+ */
+function formatCropName(crop) {
+    const cropNames = {
+        'barley': 'Barley',
+        'wheat': 'Wheat',
+        'corn': 'Corn',
+        'soybean': 'Soybean'
+    };
+    return cropNames[crop?.toLowerCase()] || crop;
+}
+
+/**
+ * Utility: Format soil texture
+ */
+function formatSoilTexture(texture) {
+    const textureMap = {
+        'silt_clay_loam': 'Silt Clay Loam',
+        'clay_loam': 'Clay Loam',
+        'sandy_loam': 'Sandy Loam',
+        'loam': 'Loam'
+    };
+    return textureMap[texture] || texture;
+}
+
+/**
+ * Utility: Format date
+ */
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+/**
+ * Utility: Get day of year
+ */
+function getDayOfYear(date) {
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start;
+    const oneDay = 1000 * 60 * 60 * 24;
+    return Math.floor(diff / oneDay);
+}
+
+
+/**
+ * Setup image overlay controls
+ */
+function setupImageOverlayControls() {
+    const showBtn = document.getElementById('showImageBtn');
+    const clearBtn = document.getElementById('clearImageBtn');
+    
+    showBtn.addEventListener('click', showImageOverlay);
+    clearBtn.addEventListener('click', clearImageOverlay);
+}
+
+/**
+ * Load available dates for selected field
+ */
+async function loadFieldDates(fieldId) {
+    try {
+        const response = await fetch(`exports_enhanced/${fieldId}_dates.json`);
+        if (!response.ok) throw new Error('Failed to load dates');
+        
+        const dates = await response.json();
+        AppState.availableDates = dates.map(d => new Date(d));
+        
+        // Set initial calendar month to first available date
+        if (AppState.availableDates.length > 0) {
+            AppState.currentCalendarMonth = new Date(AppState.availableDates[0]);
+        }
+        
+        // Generate calendar
+        generateCalendar();
+        
+        // Show overlay controls
+        document.getElementById('overlayControls').classList.add('active');
+        
+    } catch (error) {
+        console.error('Error loading dates:', error);
+        alert('Failed to load available dates for this field.');
+    }
+}
+
+/**
+ * Generate calendar UI
+ */
+function generateCalendar() {
+    const container = document.getElementById('calendarContainer');
+    const month = AppState.currentCalendarMonth.getMonth();
+    const year = AppState.currentCalendarMonth.getFullYear();
+    
+    // Month names
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Create calendar HTML
+    let html = `
+        <div class="calendar-header">
+            <div class="calendar-month">${monthNames[month]} ${year}</div>
+            <div class="calendar-nav">
+                <button class="calendar-nav-btn" onclick="changeCalendarMonth(-1)">‹</button>
+                <button class="calendar-nav-btn" onclick="changeCalendarMonth(1)">›</button>
+            </div>
+        </div>
+        <div class="calendar-grid">
+            <div class="calendar-day-header">Su</div>
+            <div class="calendar-day-header">Mo</div>
+            <div class="calendar-day-header">Tu</div>
+            <div class="calendar-day-header">We</div>
+            <div class="calendar-day-header">Th</div>
+            <div class="calendar-day-header">Fr</div>
+            <div class="calendar-day-header">Sa</div>
+    `;
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div class="calendar-day"></div>';
+    }
+    
+    // Add days of month
+    const today = new Date();
+    for (let day = 1; day <= daysInMonth; day++) {
+        const currentDate = new Date(year, month, day);
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        // Check if this date has data
+        const hasData = AppState.availableDates.some(d => 
+            d.toISOString().split('T')[0] === dateStr
+        );
+        
+        const isSelected = AppState.selectedDate && 
+            AppState.selectedDate.toISOString().split('T')[0] === dateStr;
+        
+        const isToday = today.toISOString().split('T')[0] === dateStr;
+        
+        let classes = 'calendar-day';
+        if (hasData) classes += ' available';
+        if (isSelected) classes += ' selected';
+        if (isToday) classes += ' today';
+        
+        const onclick = hasData ? `onclick="selectDate('${dateStr}')"` : '';
+        
+        html += `<div class="${classes}" ${onclick}>${day}</div>`;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+/**
+ * Change calendar month
+ */
+window.changeCalendarMonth = function(delta) {
+    const newMonth = new Date(AppState.currentCalendarMonth);
+    newMonth.setMonth(newMonth.getMonth() + delta);
+    AppState.currentCalendarMonth = newMonth;
+    generateCalendar();
+}
+
+/**
+ * Select a date from calendar
+ */
+window.selectDate = function(dateStr) {
+    AppState.selectedDate = new Date(dateStr);
+    generateCalendar();
+}
+
+/**
+ * Show image overlay on map
+ */
+async function showImageOverlay() {
+    const fieldId = AppState.selectedField;
+    if (!fieldId) {
+        alert('Please select a field first');
+        return;
+    }
+    
+    if (!AppState.selectedDate) {
+        alert('Please select a date from the calendar');
+        return;
+    }
+    
+    const indexSelect = document.getElementById('indexSelect');
+    const selectedIndex = indexSelect.value;
+    const selectedDateStr = AppState.selectedDate.toISOString().split('T')[0];
+    
+    // Clear existing overlay
+    clearImageOverlay();
+    
+    // Make polygon completely transparent (no fill, only border) while showing image
+    const layer = AppState.fieldLayers[fieldId];
+    if (layer) {
+        layer.setStyle({ 
+            fillOpacity: 0,      // No fill
+            opacity: 1,          // Full border opacity
+            weight: 2,           // Thinner border
+            color: '#2c5f2d'     // Green border
+        });
+    }
+    
+    try {
+        // Construct path to TIF file
+        const tifPath = `exports_enhanced/${fieldId}/${selectedDateStr}/${selectedIndex}.tif`;
+        
+        console.log('Loading image from:', tifPath);
+        
+        // Load and display the GeoTIFF
+        const response = await fetch(tifPath);
+        if (!response.ok) {
+            throw new Error(`Image not found: ${tifPath}\nThe file may not exist for this date/index combination.`);
+        }
+        
+        const arrayBuffer = await response.arrayBuffer();
+        const tiff = await GeoTIFF.fromArrayBuffer(arrayBuffer);
+        const image = await tiff.getImage();
+        const rasters = await image.readRasters();
+        const data = rasters[0];
+        
+        // Get image bounds
+        const bbox = image.getBoundingBox();
+        console.log('Image bbox:', bbox);
+        
+        // Check if we need to get the coordinate system
+        const geoKeys = image.getGeoKeys();
+        console.log('GeoKeys:', geoKeys);
+        
+        // The bbox is in projected coordinates (UTM), we need to use the field bounds instead
+        // Get the field layer bounds
+        const fieldLayer = AppState.fieldLayers[fieldId];
+        const fieldBounds = fieldLayer.getBounds();
+        
+        // Use field bounds for the overlay
+        const bounds = [
+            [fieldBounds.getSouth(), fieldBounds.getWest()],
+            [fieldBounds.getNorth(), fieldBounds.getEast()]
+        ];
+        
+        console.log('Using field bounds:', bounds);
+        
+        // Create canvas for visualization
+        const canvas = document.createElement('canvas');
+        const width = image.getWidth();
+        const height = image.getHeight();
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.createImageData(width, height);
+        
+        // Apply color scale based on index type
+        const colorScale = getColorScale(selectedIndex);
+        const stats = calculateImageStats(data);
+        
+        console.log('Image stats:', stats);
+        console.log('Image dimensions:', width, 'x', height);
+        
+        // Handle negative values for NDVI
+        let validPixels = 0;
+        for (let i = 0; i < data.length; i++) {
+            const value = data[i];
+            
+            // Skip no-data values
+            if (isNaN(value) || !isFinite(value) || value === -9999 || value < -1 || value > 1) {
+                const idx = i * 4;
+                imageData.data[idx] = 0;
+                imageData.data[idx + 1] = 0;
+                imageData.data[idx + 2] = 0;
+                imageData.data[idx + 3] = 0;
+                continue;
+            }
+            
+            validPixels++;
+            
+            // Normalize value between 0 and 1
+            const normalized = Math.max(0, Math.min(1, (value - stats.min) / (stats.max - stats.min)));
+            const color = colorScale(normalized);
+            
+            const idx = i * 4;
+            imageData.data[idx] = color.r;
+            imageData.data[idx + 1] = color.g;
+            imageData.data[idx + 2] = color.b;
+            imageData.data[idx + 3] = 220; // Opaque
+        }
+        
+        console.log('Valid pixels:', validPixels, 'out of', data.length);
+        
+        ctx.putImageData(imageData, 0, 0);
+        
+        // Create data URL from canvas
+        const dataUrl = canvas.toDataURL();
+        console.log('Canvas data URL length:', dataUrl.length);
+        
+        // Add overlay to map
+        AppState.imageOverlay = L.imageOverlay(dataUrl, bounds, {
+            opacity: 0.8,
+            interactive: false,
+            className: 'satellite-overlay'
+        }).addTo(AppState.map);
+        
+        // Force the overlay to the top
+        if (AppState.imageOverlay._image) {
+            AppState.imageOverlay._image.style.zIndex = '1000';
+        }
+        
+        console.log('Image overlay added to map');
+        
+        // Add legend to map
+        addLegendToMap(selectedIndex, stats);
+        
+        // Initialize timeline player
+        initializeTimelinePlayer();
+        
+        // Show info
+        const overlayInfo = document.getElementById('overlayInfo');
+        overlayInfo.style.display = 'block';
+        overlayInfo.textContent = `Showing ${selectedIndex} for ${formatDate(selectedDateStr)} (${validPixels} pixels)`;
+        
+    } catch (error) {
+        console.error('Error displaying image:', error);
+        alert(`Failed to load image:\n\n${error.message}\n\nPossible reasons:\n- Image file doesn't exist for this date\n- Index not available for this date\n- File format issue`);
+        
+        // Restore polygon to normal style
+        const layer = AppState.fieldLayers[fieldId];
+        if (layer) {
+            const config = FIELD_CONFIGS[fieldId];
+            layer.setStyle({ 
+                fillOpacity: 0.2,
+                opacity: 0.8,
+                weight: 3,
+                color: config.color
+            });
+        }
+    }
+}
+
+/**
+ * Clear image overlay from map
+ */
+function clearImageOverlay() {
+    if (AppState.imageOverlay) {
+        AppState.map.removeLayer(AppState.imageOverlay);
+        AppState.imageOverlay = null;
+    }
+    
+    // Remove legend
+    removeLegendFromMap();
+    
+    // Remove swipe control
+    removeSwipeControl();
+    
+    // Hide timeline player
+    hideTimelinePlayer();
+    
+    // Restore polygon to normal style
+    const fieldId = AppState.selectedField;
+    if (fieldId && AppState.fieldLayers[fieldId]) {
+        const config = FIELD_CONFIGS[fieldId];
+        AppState.fieldLayers[fieldId].setStyle({ 
+            fillOpacity: 0.2,
+            opacity: 0.8,
+            weight: 3,
+            color: config.color
+        });
+    }
+    
+    const overlayInfo = document.getElementById('overlayInfo');
+    overlayInfo.style.display = 'none';
+}
+
+/**
+ * Calculate statistics for image data
+ */
+function calculateImageStats(data) {
+    const validData = Array.from(data).filter(v => 
+        !isNaN(v) && isFinite(v) && v !== -9999
+    );
+    
+    return {
+        min: Math.min(...validData),
+        max: Math.max(...validData),
+        mean: validData.reduce((a, b) => a + b, 0) / validData.length
+    };
+}
+
+/**
+ * Get color scale for different indices
+ */
+function getColorScale(indexName) {
+    // Color scales for different vegetation indices
+    const scales = {
+        'NDVI': (value) => {
+            // Red to Yellow to Green scale
+            if (value < 0.33) {
+                return { r: 255, g: Math.floor(value * 3 * 255), b: 0 };
+            } else if (value < 0.66) {
+                return { r: Math.floor((1 - (value - 0.33) * 3) * 255), g: 255, b: 0 };
+            } else {
+                return { r: 0, g: 255, b: Math.floor((value - 0.66) * 3 * 255) };
+            }
+        },
+        'ETc_NDVI': (value) => {
+            // Blue to Cyan to Yellow to Red
+            const r = Math.floor(value * 255);
+            const g = Math.floor(Math.sin(value * Math.PI) * 255);
+            const b = Math.floor((1 - value) * 255);
+            return { r, g, b };
+        },
+        'FC': (value) => {
+            // Brown to Green scale
+            const r = Math.floor((1 - value) * 139 + value * 34);
+            const g = Math.floor((1 - value) * 90 + value * 139);
+            const b = Math.floor((1 - value) * 43 + value * 34);
+            return { r, g, b };
+        },
+        'GCI': (value) => {
+            // Purple to Green scale
+            const r = Math.floor((1 - value) * 128);
+            const g = Math.floor(value * 255);
+            const b = Math.floor((1 - value) * 128);
+            return { r, g, b };
+        },
+        'MSAVI': (value) => {
+            // Similar to NDVI
+            return scales.NDVI(value);
+        },
+        'RECI': (value) => {
+            // Red to Green scale
+            const r = Math.floor((1 - value) * 255);
+            const g = Math.floor(value * 255);
+            const b = 0;
+            return { r, g, b };
+        }
+    };
+    
+    return scales[indexName] || scales.NDVI;
+}
+
+/**
+ * Add legend to map
+ */
+function addLegendToMap(indexName, stats) {
+    // Remove existing legend if present
+    removeLegendFromMap();
+    
+    console.log('📊 [LEGEND] Adding legend for', indexName);
+    console.log('📊 [LEGEND] Stats:', stats);
+    
+    // Create legend control
+    const legend = L.control({ position: 'bottomleft' });
+    
+    legend.onAdd = function(map) {
+        const div = L.DomUtil.create('div', 'map-legend');
+        
+        // Disable map dragging when interacting with legend
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
+        
+        // Prevent map panning when dragging on legend
+        div.addEventListener('mousedown', function(e) {
+            L.DomEvent.stopPropagation(e);
+        });
+        
+        div.addEventListener('touchstart', function(e) {
+            L.DomEvent.stopPropagation(e);
+        });
+        
+        // Create gradient canvas (horizontal)
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 30;
+        const ctx = canvas.getContext('2d');
+        
+        // Get color scale
+        const colorScale = getColorScale(indexName);
+        
+        // Draw horizontal gradient from left (low) to right (high)
+        for (let i = 0; i < 200; i++) {
+            const value = i / 200; // Left to right: 0 to 1
+            const color = colorScale(value);
+            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+            ctx.fillRect(i, 0, 1, 30);
+        }
+        
+        console.log('📊 [LEGEND] Canvas created:', canvas.width, 'x', canvas.height);
+        
+        // Calculate mean position on the gradient (0 to 200px)
+        const meanNormalized = (stats.mean - stats.min) / (stats.max - stats.min);
+        const meanPosition = meanNormalized * 200;
+        
+        console.log('📊 [LEGEND] Mean position:', meanPosition, 'px (normalized:', meanNormalized, ')');
+        
+        // Build legend HTML with min/max on top, mean on bottom
+        div.innerHTML = `
+            <div class="legend-title">${indexName}</div>
+            <div class="legend-content-horizontal">
+                <div class="legend-labels-top">
+                    <div class="legend-label-min">Min: ${stats.min.toFixed(3)}</div>
+                    <div class="legend-label-max">Max: ${stats.max.toFixed(3)}</div>
+                </div>
+                <div class="legend-gradient-horizontal"></div>
+                <div class="legend-mean-container">
+                    <div class="legend-mean-indicator" style="left: ${meanPosition}px;">
+                        <div class="legend-mean-line"></div>
+                    </div>
+                    <div class="legend-mean-label" style="left: ${meanPosition}px;">Mean: ${stats.mean.toFixed(3)}</div>
+                </div>
+            </div>
+        `;
+        
+        // Append canvas after div is created
+        const gradientContainer = div.querySelector('.legend-gradient-horizontal');
+        gradientContainer.appendChild(canvas);
+        
+        return div;
+    };
+    
+    legend.addTo(AppState.map);
+    
+    // Store reference
+    AppState.mapLegend = legend;
+    
+    console.log('✅ [LEGEND] Legend added successfully');
+}
+
+/**
+ * Remove legend from map
+ */
+function removeLegendFromMap() {
+    if (AppState.mapLegend) {
+        console.log('🗑️ [LEGEND] Removing existing legend');
+        AppState.map.removeControl(AppState.mapLegend);
+        AppState.mapLegend = null;
+    }
+}
+
+
+/**
+ * Setup file upload functionality
+ */
+function setupFileUpload() {
+    const fileInput = document.getElementById('fileInput');
+    
+    fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            await handleFileUpload(file);
+            // Reset input so same file can be uploaded again
+            fileInput.value = '';
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert(`Failed to upload file:\n\n${error.message}`);
+            fileInput.value = '';
+        }
+    });
+}
+
+/**
+ * Handle file upload based on file type
+ */
+async function handleFileUpload(file) {
+    const fileName = file.name.toLowerCase();
+    let geojson = null;
+    
+    if (fileName.endsWith('.geojson') || fileName.endsWith('.json')) {
+        // GeoJSON
+        geojson = await readGeoJSON(file);
+    } else if (fileName.endsWith('.kml')) {
+        // KML
+        geojson = await readKML(file);
+    } else if (fileName.endsWith('.zip') || fileName.endsWith('.shp')) {
+        // Shapefile (zipped)
+        geojson = await readShapefile(file);
+    } else if (fileName.endsWith('.gpx')) {
+        // GPX
+        geojson = await readGPX(file);
+    } else if (fileName.endsWith('.gml')) {
+        // GML
+        alert('GML format is not fully supported yet. Please convert to GeoJSON.');
+        return;
+    } else {
+        throw new Error('Unsupported file format. Please upload: GeoJSON, KML, Shapefile (zip), or GPX');
+    }
+    
+    if (geojson) {
+        displayUploadedLayer(geojson, file.name);
+    }
+}
+
+/**
+ * Read GeoJSON file
+ */
+async function readGeoJSON(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const geojson = JSON.parse(e.target.result);
+                resolve(geojson);
+            } catch (error) {
+                reject(new Error('Invalid GeoJSON file'));
+            }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Read KML file
+ */
+async function readKML(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const kmlText = e.target.result;
+                const parser = new DOMParser();
+                const kml = parser.parseFromString(kmlText, 'text/xml');
+                const geojson = toGeoJSON.kml(kml);
+                resolve(geojson);
+            } catch (error) {
+                reject(new Error('Invalid KML file'));
+            }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Read Shapefile (zipped)
+ */
+async function readShapefile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const arrayBuffer = e.target.result;
+                const geojson = await shp(arrayBuffer);
+                resolve(geojson);
+            } catch (error) {
+                reject(new Error('Invalid Shapefile. Make sure it\'s a complete zipped shapefile.'));
+            }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+/**
+ * Read GPX file
+ */
+async function readGPX(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const gpxText = e.target.result;
+                const parser = new DOMParser();
+                const gpx = parser.parseFromString(gpxText, 'text/xml');
+                const geojson = toGeoJSON.gpx(gpx);
+                resolve(geojson);
+            } catch (error) {
+                reject(new Error('Invalid GPX file'));
+            }
+        };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file);
+    });
+}
+
+/**
+ * Display uploaded layer on map
+ */
+function displayUploadedLayer(geojson, fileName) {
+    // Random color for uploaded layer
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    
+    const layer = L.geoJSON(geojson, {
+        style: {
+            color: color,
+            weight: 3,
+            opacity: 0.8,
+            fillOpacity: 0.2
+        },
+        onEachFeature: (feature, layer) => {
+            // Add popup with feature properties
+            let popupContent = `<div style="font-size: 12px;"><strong>${fileName}</strong><br>`;
+            
+            if (feature.properties) {
+                const props = feature.properties;
+                const keys = Object.keys(props).slice(0, 5); // Show first 5 properties
+                keys.forEach(key => {
+                    popupContent += `<br><strong>${key}:</strong> ${props[key]}`;
+                });
+                if (Object.keys(props).length > 5) {
+                    popupContent += `<br><em>... and ${Object.keys(props).length - 5} more</em>`;
+                }
+            }
+            
+            popupContent += '</div>';
+            
+            // Bind popup with options to display above the feature
+            layer.bindPopup(popupContent, {
+                autoPan: true,
+                autoPanPadding: [50, 50],
+                offset: [0, -10],
+                closeButton: true,
+                autoClose: true,
+                className: 'custom-popup'
+            });
+        }
+    }).addTo(AppState.map);
+    
+    // Store reference
+    AppState.uploadedLayers.push({
+        layer: layer,
+        name: fileName,
+        color: color
+    });
+    
+    // Zoom to uploaded layer
+    const bounds = layer.getBounds();
+    AppState.map.flyToBounds(bounds, {
+        padding: [50, 50],
+        duration: 1.5
+    });
+    
+    console.log(`Uploaded layer: ${fileName}`);
+}
+
+/**
+ * Initialize swipe control for comparing base map with overlay
+ */
+function initializeSwipeControl() {
+    // Remove existing swipe control if any
+    removeSwipeControl();
+    
+    const mapContainer = document.getElementById('map');
+    
+    // Create swipe slider
+    const swipeSlider = document.createElement('div');
+    swipeSlider.id = 'swipeSlider';
+    swipeSlider.className = 'swipe-slider';
+    
+    // Create slider handle
+    const sliderHandle = document.createElement('div');
+    sliderHandle.className = 'swipe-handle';
+    sliderHandle.innerHTML = '<div class="swipe-handle-line"></div><div class="swipe-handle-grip">⬌</div><div class="swipe-handle-line"></div>';
+    
+    swipeSlider.appendChild(sliderHandle);
+    mapContainer.appendChild(swipeSlider);
+    
+    // Store reference
+    AppState.swipeSlider = swipeSlider;
+    
+    // Set initial position (middle)
+    const mapWidth = mapContainer.offsetWidth;
+    const initialX = mapWidth / 2;
+    swipeSlider.style.left = initialX + 'px';
+    
+    // Wait for overlay image to be ready
+    setTimeout(() => {
+        updateSwipeClip(initialX);
+    }, 100);
+    
+    // Add drag functionality
+    let isDragging = false;
+    
+    const startDrag = (e) => {
+        isDragging = true;
+        // Disable map dragging
+        AppState.map.dragging.disable();
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    
+    const stopDrag = () => {
+        if (isDragging) {
+            isDragging = false;
+            // Re-enable map dragging
+            AppState.map.dragging.enable();
+        }
+    };
+    
+    const onDrag = (clientX) => {
+        if (!isDragging) return;
+        
+        const mapRect = mapContainer.getBoundingClientRect();
+        let x = clientX - mapRect.left;
+        
+        // Constrain to map bounds
+        x = Math.max(0, Math.min(x, mapRect.width));
+        
+        swipeSlider.style.left = x + 'px';
+        updateSwipeClip(x);
+    };
+    
+    // Mouse events
+    sliderHandle.addEventListener('mousedown', startDrag);
+    
+    document.addEventListener('mousemove', (e) => {
+        onDrag(e.clientX);
+    });
+    
+    document.addEventListener('mouseup', stopDrag);
+    
+    // Touch events
+    sliderHandle.addEventListener('touchstart', (e) => {
+        startDrag(e);
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length > 0) {
+            onDrag(e.touches[0].clientX);
+        }
+    });
+    
+    document.addEventListener('touchend', stopDrag);
+}
+
+/**
+ * Update the clip path for the overlay based on swipe position
+ */
+function updateSwipeClip(x) {
+    if (!AppState.imageOverlay || !AppState.imageOverlay._image) return;
+    
+    const img = AppState.imageOverlay._image;
+    const mapContainer = document.getElementById('map');
+    const mapRect = mapContainer.getBoundingClientRect();
+    
+    // Get the image position relative to the map
+    const imgRect = img.getBoundingClientRect();
+    const imgLeft = imgRect.left - mapRect.left;
+    
+    // Calculate the clip position relative to the image
+    const clipX = x - imgLeft;
+    
+    // Apply clip-path for better performance and accuracy
+    img.style.clipPath = `inset(0 ${img.width - clipX}px 0 0)`;
+    img.style.clip = 'auto'; // Remove old clip property
+}
+
+/**
+ * Remove swipe control
+ */
+function removeSwipeControl() {
+    if (AppState.swipeSlider) {
+        AppState.swipeSlider.remove();
+        AppState.swipeSlider = null;
+    }
+    
+    // Reset clip on overlay
+    if (AppState.imageOverlay && AppState.imageOverlay._image) {
+        AppState.imageOverlay._image.style.clipPath = 'none';
+        AppState.imageOverlay._image.style.clip = 'auto';
+    }
+    
+    // Re-enable map dragging if it was disabled
+    if (AppState.map && AppState.map.dragging) {
+        AppState.map.dragging.enable();
+    }
+}
+
+/**
+ * Toggle swipe control on/off
+ */
+function toggleSwipeControl() {
+    const swipeBtn = document.getElementById('swipeToggle');
+    
+    if (AppState.swipeSlider) {
+        // Swipe is active, remove it
+        removeSwipeControl();
+        swipeBtn.classList.remove('active');
+    } else {
+        // Swipe is not active, initialize it
+        if (AppState.imageOverlay) {
+            initializeSwipeControl();
+            swipeBtn.classList.add('active');
+        }
+    }
+}
+
+/**
+ * Timeline Player State
+ */
+const TimelineState = {
+    isPlaying: false,
+    currentIndex: 0,
+    dates: [],
+    playInterval: null,
+    speed: 1000,
+    loop: false,
+    preloadedImages: {}
+};
+
+/**
+ * Initialize Timeline Player
+ */
+function initializeTimelinePlayer() {
+    // console.log('[TIMELINE] Initializing timeline player');
+    
+    const fieldId = AppState.selectedField;
+    if (!fieldId || !AppState.availableDates || AppState.availableDates.length === 0) {
+        // console.log('[TIMELINE] Cannot initialize - missing field or dates');
+        return;
+    }
+
+    // Get available dates
+    TimelineState.dates = AppState.availableDates.sort((a, b) => new Date(a) - new Date(b));
+    TimelineState.currentIndex = 0;
+    
+    // console.log(`[TIMELINE] Loaded ${TimelineState.dates.length} dates for ${fieldId}`);
+
+    // Show timeline player
+    const player = document.getElementById('timelinePlayer');
+    player.classList.remove('hidden');
+
+    // Setup slider
+    const slider = document.getElementById('timelineSlider');
+    slider.max = TimelineState.dates.length - 1;
+    slider.value = 0;
+
+    // Setup labels
+    setupTimelineLabels();
+
+    // Setup event listeners
+    setupTimelineControls();
+
+    // Update display
+    updateTimelineDisplay();
+
+    // Preload first few images
+    preloadTimelineImages();
+    
+    // console.log('[TIMELINE] Timeline player initialized successfully');
+}
+
+/**
+ * Setup timeline labels
+ */
+function setupTimelineLabels() {
+    const labelsContainer = document.getElementById('timelineLabels');
+    labelsContainer.innerHTML = '';
+
+    const dates = TimelineState.dates;
+    const maxLabels = 6;
+    const step = Math.ceil(dates.length / maxLabels);
+
+    for (let i = 0; i < dates.length; i += step) {
+        const label = document.createElement('div');
+        label.className = 'timeline-label';
+        const date = new Date(dates[i]);
+        label.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        labelsContainer.appendChild(label);
+    }
+}
+
+/**
+ * Setup timeline controls
+ */
+function setupTimelineControls() {
+    // Play/Pause
+    document.getElementById('timelinePlay').addEventListener('click', togglePlayPause);
+
+    // Navigation
+    document.getElementById('timelineFirst').addEventListener('click', () => goToFrame(0));
+    document.getElementById('timelinePrev').addEventListener('click', () => goToFrame(TimelineState.currentIndex - 1));
+    document.getElementById('timelineNext').addEventListener('click', () => goToFrame(TimelineState.currentIndex + 1));
+    document.getElementById('timelineLast').addEventListener('click', () => goToFrame(TimelineState.dates.length - 1));
+
+    // Speed
+    document.getElementById('timelineSpeed').addEventListener('change', (e) => {
+        TimelineState.speed = parseInt(e.target.value);
+        if (TimelineState.isPlaying) {
+            stopPlayback();
+            startPlayback();
+        }
+    });
+
+    // Loop
+    document.getElementById('timelineLoop').addEventListener('click', () => {
+        TimelineState.loop = !TimelineState.loop;
+        document.getElementById('timelineLoop').classList.toggle('active', TimelineState.loop);
+    });
+    
+    // Swipe Toggle
+    document.getElementById('swipeToggle').addEventListener('click', toggleSwipeControl);
+
+    // Slider
+    document.getElementById('timelineSlider').addEventListener('input', (e) => {
+        goToFrame(parseInt(e.target.value));
+    });
+    
+    // Prevent map panning when interacting with timeline slider
+    const timelineSlider = document.getElementById('timelineSlider');
+    const timelinePlayer = document.getElementById('timelinePlayer');
+    
+    // Disable map dragging when mouse is over timeline
+    timelinePlayer.addEventListener('mouseenter', () => {
+        if (AppState.map && AppState.map.dragging) {
+            AppState.map.dragging.disable();
+        }
+    });
+    
+    // Re-enable map dragging when mouse leaves timeline
+    timelinePlayer.addEventListener('mouseleave', () => {
+        if (AppState.map && AppState.map.dragging && !AppState.swipeSlider) {
+            AppState.map.dragging.enable();
+        }
+    });
+    
+    // Also prevent map events on slider specifically
+    timelineSlider.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+    });
+    
+    timelineSlider.addEventListener('touchstart', (e) => {
+        e.stopPropagation();
+    });
+}
+
+/**
+ * Toggle play/pause
+ */
+function togglePlayPause() {
+    if (TimelineState.isPlaying) {
+        stopPlayback();
+    } else {
+        startPlayback();
+    }
+}
+
+/**
+ * Start playback
+ */
+function startPlayback() {
+    TimelineState.isPlaying = true;
+    
+    // Update button
+    const playBtn = document.getElementById('timelinePlay');
+    playBtn.querySelector('.play-icon').style.display = 'none';
+    playBtn.querySelector('.pause-icon').style.display = 'block';
+
+    // Start interval
+    TimelineState.playInterval = setInterval(() => {
+        let nextIndex = TimelineState.currentIndex + 1;
+        
+        if (nextIndex >= TimelineState.dates.length) {
+            if (TimelineState.loop) {
+                nextIndex = 0;
+            } else {
+                stopPlayback();
+                return;
+            }
+        }
+        
+        goToFrame(nextIndex);
+    }, TimelineState.speed);
+}
+
+/**
+ * Stop playback
+ */
+function stopPlayback() {
+    TimelineState.isPlaying = false;
+    
+    // Update button
+    const playBtn = document.getElementById('timelinePlay');
+    playBtn.querySelector('.play-icon').style.display = 'block';
+    playBtn.querySelector('.pause-icon').style.display = 'none';
+
+    // Clear interval
+    if (TimelineState.playInterval) {
+        clearInterval(TimelineState.playInterval);
+        TimelineState.playInterval = null;
+    }
+}
+
+/**
+ * Go to specific frame
+ */
+async function goToFrame(index) {
+    if (index < 0 || index >= TimelineState.dates.length) return;
+
+    // console.log(`[TIMELINE] Going to frame ${index + 1}/${TimelineState.dates.length}`);
+    
+    TimelineState.currentIndex = index;
+    
+    // Update slider
+    document.getElementById('timelineSlider').value = index;
+    
+    // Update display
+    updateTimelineDisplay();
+    
+    // Load and show image
+    await showTimelineImage(TimelineState.dates[index]);
+    
+    // Update charts with current date marker
+    // console.log(`[TIMELINE] Triggering chart update for date: ${TimelineState.dates[index]}`);
+    updateChartsWithTimelineDate(TimelineState.dates[index]);
+    
+    // Preload next images
+    preloadTimelineImages();
+}
+
+/**
+ * Update timeline display
+ */
+function updateTimelineDisplay() {
+    const date = new Date(TimelineState.dates[TimelineState.currentIndex]);
+    const dateStr = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    document.getElementById('timelineCurrentDate').textContent = dateStr;
+}
+
+/**
+ * Show image for specific date
+ */
+async function showTimelineImage(dateStr) {
+    const fieldId = AppState.selectedField;
+    const indexSelect = document.getElementById('indexSelect');
+    const selectedIndex = indexSelect.value;
+
+    // Convert date to YYYY-MM-DD format
+    const date = new Date(dateStr);
+    const formattedDate = date.toISOString().split('T')[0];
+
+    try {
+        // Check if image is preloaded
+        const cacheKey = `${fieldId}_${formattedDate}_${selectedIndex}`;
+        
+        if (TimelineState.preloadedImages[cacheKey]) {
+            // Use cached image
+            updateImageOverlay(TimelineState.preloadedImages[cacheKey].dataUrl, selectedIndex, TimelineState.preloadedImages[cacheKey].stats);
+        } else {
+            // Load image
+            const imageData = await loadTimelineImage(fieldId, formattedDate, selectedIndex);
+            TimelineState.preloadedImages[cacheKey] = imageData;
+            updateImageOverlay(imageData.dataUrl, selectedIndex, imageData.stats);
+        }
+    } catch (error) {
+        console.error('Error loading timeline image:', error);
+    }
+}
+
+/**
+ * Load timeline image
+ */
+async function loadTimelineImage(fieldId, dateStr, selectedIndex) {
+    const tifPath = `exports_enhanced/${fieldId}/${dateStr}/${selectedIndex}.tif`;
+    
+    const response = await fetch(tifPath);
+    if (!response.ok) {
+        throw new Error(`Image not found: ${tifPath}`);
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const tiff = await GeoTIFF.fromArrayBuffer(arrayBuffer);
+    const image = await tiff.getImage();
+    const rasters = await image.readRasters();
+    const data = rasters[0];
+    
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    const width = image.getWidth();
+    const height = image.getHeight();
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(width, height);
+    
+    // Apply color scale
+    const colorScale = getColorScale(selectedIndex);
+    const stats = calculateImageStats(data);
+    
+    for (let i = 0; i < data.length; i++) {
+        const value = data[i];
+        
+        if (isNaN(value) || !isFinite(value) || value === -9999 || value < -1 || value > 1) {
+            const idx = i * 4;
+            imageData.data[idx] = 0;
+            imageData.data[idx + 1] = 0;
+            imageData.data[idx + 2] = 0;
+            imageData.data[idx + 3] = 0;
+            continue;
+        }
+        
+        const normalized = Math.max(0, Math.min(1, (value - stats.min) / (stats.max - stats.min)));
+        const color = colorScale(normalized);
+        
+        const idx = i * 4;
+        imageData.data[idx] = color.r;
+        imageData.data[idx + 1] = color.g;
+        imageData.data[idx + 2] = color.b;
+        imageData.data[idx + 3] = 220;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    // Return both dataUrl and stats
+    return {
+        dataUrl: canvas.toDataURL(),
+        stats: stats
+    };
+}
+
+/**
+ * Update image overlay with new data
+ */
+function updateImageOverlay(dataUrl, indexName, stats) {
+    if (!AppState.imageOverlay) return;
+    
+    const fieldId = AppState.selectedField;
+    const fieldLayer = AppState.fieldLayers[fieldId];
+    const fieldBounds = fieldLayer.getBounds();
+    
+    const bounds = [
+        [fieldBounds.getSouth(), fieldBounds.getWest()],
+        [fieldBounds.getNorth(), fieldBounds.getEast()]
+    ];
+    
+    // Remove old overlay
+    if (AppState.imageOverlay) {
+        AppState.map.removeLayer(AppState.imageOverlay);
+    }
+    
+    // Add new overlay
+    AppState.imageOverlay = L.imageOverlay(dataUrl, bounds, {
+        opacity: 0.8,
+        interactive: false,
+        className: 'satellite-overlay'
+    }).addTo(AppState.map);
+    
+    if (AppState.imageOverlay._image) {
+        AppState.imageOverlay._image.style.zIndex = '1000';
+    }
+    
+    // Update legend with new stats
+    if (indexName && stats) {
+        addLegendToMap(indexName, stats);
+    }
+    
+    // Reapply swipe if active
+    if (AppState.swipeSlider) {
+        setTimeout(() => {
+            const sliderPos = parseInt(AppState.swipeSlider.style.left);
+            updateSwipeClip(sliderPos);
+        }, 50);
+    }
+}
+
+/**
+ * Preload timeline images
+ */
+function preloadTimelineImages() {
+    const fieldId = AppState.selectedField;
+    const indexSelect = document.getElementById('indexSelect');
+    const selectedIndex = indexSelect.value;
+    
+    // Preload next 3 images
+    for (let i = 1; i <= 3; i++) {
+        const nextIndex = TimelineState.currentIndex + i;
+        if (nextIndex < TimelineState.dates.length) {
+            const dateStr = TimelineState.dates[nextIndex];
+            // Convert to YYYY-MM-DD format
+            const date = new Date(dateStr);
+            const formattedDate = date.toISOString().split('T')[0];
+            const cacheKey = `${fieldId}_${formattedDate}_${selectedIndex}`;
+            
+            if (!TimelineState.preloadedImages[cacheKey]) {
+                loadTimelineImage(fieldId, formattedDate, selectedIndex)
+                    .then(dataUrl => {
+                        TimelineState.preloadedImages[cacheKey] = dataUrl;
+                    })
+                    .catch(err => console.log('Preload failed:', err));
+            }
+        }
+    }
+}
+
+/**
+ * Hide timeline player
+ */
+function hideTimelinePlayer() {
+    const player = document.getElementById('timelinePlayer');
+    player.classList.add('hidden');
+    stopPlayback();
+    TimelineState.preloadedImages = {};
+    
+    // Remove timeline markers from charts
+    removeTimelineMarkersFromCharts();
+}
+
+/**
+ * Update charts with timeline date marker
+ */
+function updateChartsWithTimelineDate(dateStr) {
+    const currentDate = new Date(dateStr);
+    // console.log('[TIMELINE-CHART] Updating charts with date:', currentDate.toISOString().split('T')[0]);
+    
+    let chartsUpdated = 0;
+    
+    // Update all category charts
+    Object.keys(AppState.charts).forEach(category => {
+        const chart = AppState.charts[category];
+        if (!chart) {
+            // console.log(`[TIMELINE-CHART] Chart not found for category: ${category}`);
+            return;
+        }
+        
+        // Filter data to show only up to current date
+        const fullData = AppState.categoryData.timeSeries;
+        const filteredData = fullData.filter(d => new Date(d.date) <= currentDate);
+        
+        // console.log(`[TIMELINE-CHART] ${category}: Showing ${filteredData.length}/${fullData.length} data points`);
+        
+        // Update chart data
+        chart.data.labels = filteredData.map(d => d.date);
+        
+        // Update each dataset based on category
+        chart.data.datasets.forEach(dataset => {
+            const label = dataset.label;
+            
+            switch(category) {
+                case 'et':
+                    if (label === 'ETc_Andy') dataset.data = filteredData.map(d => d.etcAndy);
+                    else if (label === 'ETc_NDVI') dataset.data = filteredData.map(d => d.etcNdvi);
+                    else if (label === 'ETc_SAVI') dataset.data = filteredData.map(d => d.etcSavi);
+                    else if (label === 'ETc_FC') dataset.data = filteredData.map(d => d.etcFc);
+                    else if (label === 'ETc_Ensemble') dataset.data = filteredData.map(d => d.etcEnsemble);
+                    else if (label === 'ETc_FAO56') dataset.data = filteredData.map(d => d.etcFao56);
+                    break;
+                    
+                case 'crop':
+                    if (label === 'Kcb_Andy') dataset.data = filteredData.map(d => d.kcbAndy);
+                    else if (label === 'Kcb_NDVI') dataset.data = filteredData.map(d => d.kcbNdvi);
+                    else if (label === 'Kcb_SAVI') dataset.data = filteredData.map(d => d.kcbSavi);
+                    else if (label === 'Kcb_FC') dataset.data = filteredData.map(d => d.kcbFc);
+                    else if (label === 'Kcb_Ensemble') dataset.data = filteredData.map(d => d.kcbEnsemble);
+                    else if (label === 'Kcb_FAO56') dataset.data = filteredData.map(d => d.kcbFao56);
+                    break;
+                    
+                case 'irrigation':
+                    if (label === 'Applied Irrigation') dataset.data = filteredData.map(d => d.appliedIrrig);
+                    else if (label === 'Precipitation') dataset.data = filteredData.map(d => d.precipitation);
+                    break;
+                    
+                case 'additional':
+                    if (label === 'NDVI') dataset.data = filteredData.map(d => d.ndvi);
+                    else if (label === 'SAVI') dataset.data = filteredData.map(d => d.savi);
+                    else if (label === 'FC') dataset.data = filteredData.map(d => d.fc);
+                    else if (label === 'GCI') dataset.data = filteredData.map(d => d.gci);
+                    else if (label === 'MSAVI') dataset.data = filteredData.map(d => d.msavi);
+                    else if (label === 'RECI') dataset.data = filteredData.map(d => d.reci);
+                    break;
+                    
+                case 'depletion':
+                    if (label === 'Dr') dataset.data = filteredData.map(d => d.dr);
+                    else if (label === 'fDr') dataset.data = filteredData.map(d => d.fDr);
+                    else if (label === 'ETAW') dataset.data = filteredData.map(d => d.etaw);
+                    break;
+                    
+                case 'awc':
+                    if (label === 'AWC') dataset.data = filteredData.map(d => d.awc);
+                    else if (label === 'TAW') dataset.data = filteredData.map(d => d.taw);
+                    break;
+            }
+        });
+        
+        // Update irrigation annotations to only show those before current date
+        if (chart.options.plugins.annotation && chart.options.plugins.annotation.annotations) {
+            const irrigationDates = AppState.categoryData.irrigationDates || [];
+            chart.options.plugins.annotation.annotations = irrigationDates
+                .filter(date => new Date(date) <= currentDate)
+                .map(date => ({
+                    type: 'line',
+                    xMin: date,
+                    xMax: date,
+                    borderColor: 'rgba(33, 150, 243, 0.8)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        display: true,
+                        content: 'Irrigation',
+                        position: 'start'
+                    }
+                }));
+        }
+        
+        // Update chart with no animation for smooth playback
+        chart.update('none');
+        chartsUpdated++;
+        
+        // console.log(`[TIMELINE-CHART] Updated ${category} chart data`);
+    });
+    
+    // console.log(`[TIMELINE-CHART] Updated ${chartsUpdated} charts total`);
+}
+
+/**
+ * Remove timeline markers from all charts and restore full data
+ */
+function removeTimelineMarkersFromCharts() {
+    // console.log('[TIMELINE-CHART] Restoring full chart data');
+    
+    if (!AppState.categoryData) {
+        // console.log('[TIMELINE-CHART] No category data available');
+        return;
+    }
+    
+    let chartsRestored = 0;
+    const fullData = AppState.categoryData.timeSeries;
+    
+    Object.keys(AppState.charts).forEach(category => {
+        const chart = AppState.charts[category];
+        if (!chart) return;
+        
+        // Restore full data
+        chart.data.labels = fullData.map(d => d.date);
+        
+        // Restore each dataset
+        chart.data.datasets.forEach(dataset => {
+            const label = dataset.label;
+            
+            switch(category) {
+                case 'et':
+                    if (label === 'ETc_Andy') dataset.data = fullData.map(d => d.etcAndy);
+                    else if (label === 'ETc_NDVI') dataset.data = fullData.map(d => d.etcNdvi);
+                    else if (label === 'ETc_SAVI') dataset.data = fullData.map(d => d.etcSavi);
+                    else if (label === 'ETc_FC') dataset.data = fullData.map(d => d.etcFc);
+                    else if (label === 'ETc_Ensemble') dataset.data = fullData.map(d => d.etcEnsemble);
+                    else if (label === 'ETc_FAO56') dataset.data = fullData.map(d => d.etcFao56);
+                    break;
+                    
+                case 'crop':
+                    if (label === 'Kcb_Andy') dataset.data = fullData.map(d => d.kcbAndy);
+                    else if (label === 'Kcb_NDVI') dataset.data = fullData.map(d => d.kcbNdvi);
+                    else if (label === 'Kcb_SAVI') dataset.data = fullData.map(d => d.kcbSavi);
+                    else if (label === 'Kcb_FC') dataset.data = fullData.map(d => d.kcbFc);
+                    else if (label === 'Kcb_Ensemble') dataset.data = fullData.map(d => d.kcbEnsemble);
+                    else if (label === 'Kcb_FAO56') dataset.data = fullData.map(d => d.kcbFao56);
+                    break;
+                    
+                case 'irrigation':
+                    if (label === 'Applied Irrigation') dataset.data = fullData.map(d => d.appliedIrrig);
+                    else if (label === 'Precipitation') dataset.data = fullData.map(d => d.precipitation);
+                    break;
+                    
+                case 'additional':
+                    if (label === 'NDVI') dataset.data = fullData.map(d => d.ndvi);
+                    else if (label === 'SAVI') dataset.data = fullData.map(d => d.savi);
+                    else if (label === 'FC') dataset.data = fullData.map(d => d.fc);
+                    else if (label === 'GCI') dataset.data = fullData.map(d => d.gci);
+                    else if (label === 'MSAVI') dataset.data = fullData.map(d => d.msavi);
+                    else if (label === 'RECI') dataset.data = fullData.map(d => d.reci);
+                    break;
+                    
+                case 'depletion':
+                    if (label === 'Dr') dataset.data = fullData.map(d => d.dr);
+                    else if (label === 'fDr') dataset.data = fullData.map(d => d.fDr);
+                    else if (label === 'ETAW') dataset.data = fullData.map(d => d.etaw);
+                    break;
+                    
+                case 'awc':
+                    if (label === 'AWC') dataset.data = fullData.map(d => d.awc);
+                    else if (label === 'TAW') dataset.data = fullData.map(d => d.taw);
+                    break;
+            }
+        });
+        
+        // Restore all irrigation annotations
+        if (chart.options.plugins.annotation && chart.options.plugins.annotation.annotations) {
+            const irrigationDates = AppState.categoryData.irrigationDates || [];
+            chart.options.plugins.annotation.annotations = irrigationDates.map(date => ({
+                type: 'line',
+                xMin: date,
+                xMax: date,
+                borderColor: 'rgba(33, 150, 243, 0.8)',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                label: {
+                    display: true,
+                    content: 'Irrigation',
+                    position: 'start'
+                }
+            }));
+        }
+        
+        chart.update('none');
+        chartsRestored++;
+        
+        // console.log(`[TIMELINE-CHART] Restored ${category} chart to full data (${fullData.length} points)`);
+    });
+    
+    // console.log(`[TIMELINE-CHART] Restored ${chartsRestored} charts`);
+}
+
+
+/**
+ * ========================================
+ * DATE COMPARISON SYSTEM
+ * ========================================
+ */
+
+/**
+ * Setup comparison button and modal
+ */
+function setupComparison() {
+    const compareBtn = document.getElementById('compareBtn');
+    const comparisonModal = document.getElementById('comparisonModal');
+    const closeModalBtn = document.getElementById('closeComparisonModal');
+    const cancelBtn = document.getElementById('cancelComparisonBtn');
+    const startBtn = document.getElementById('startComparisonBtn');
+    
+    // Open modal
+    compareBtn.addEventListener('click', openComparisonModal);
+    
+    // Close modal
+    closeModalBtn.addEventListener('click', closeComparisonModal);
+    cancelBtn.addEventListener('click', closeComparisonModal);
+    
+    // Start comparison
+    startBtn.addEventListener('click', startComparison);
+    
+    // Close comparison view
+    document.getElementById('closeComparisonView').addEventListener('click', closeComparisonView);
+    
+    // Update comparison button in the view
+    document.getElementById('updateComparisonBtn').addEventListener('click', updateComparison);
+}
+
+/**
+ * Open comparison modal
+ */
+function openComparisonModal() {
+    if (!AppState.selectedField || !AppState.availableDates || AppState.availableDates.length < 2) {
+        alert('Please select a field with at least 2 available dates first.');
+        return;
+    }
+    
+    // Populate date selectors
+    const date1Select = document.getElementById('compareDate1');
+    const date2Select = document.getElementById('compareDate2');
+    
+    // Clear existing options
+    date1Select.innerHTML = '<option value="">Select date...</option>';
+    date2Select.innerHTML = '<option value="">Select date...</option>';
+    
+    // Add dates
+    const sortedDates = [...AppState.availableDates].sort((a, b) => new Date(a) - new Date(b));
+    sortedDates.forEach(date => {
+        const dateStr = new Date(date).toISOString().split('T')[0];
+        const displayDate = formatDate(dateStr);
+        
+        const option1 = document.createElement('option');
+        option1.value = dateStr;
+        option1.textContent = displayDate;
+        date1Select.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = dateStr;
+        option2.textContent = displayDate;
+        date2Select.appendChild(option2);
+    });
+    
+    // Set default values (first and last date)
+    if (sortedDates.length >= 2) {
+        date1Select.value = new Date(sortedDates[0]).toISOString().split('T')[0];
+        date2Select.value = new Date(sortedDates[sortedDates.length - 1]).toISOString().split('T')[0];
+    }
+    
+    // Show modal
+    document.getElementById('comparisonModal').classList.remove('hidden');
+}
+
+/**
+ * Close comparison modal
+ */
+function closeComparisonModal() {
+    document.getElementById('comparisonModal').classList.add('hidden');
+}
+
+/**
+ * Start comparison
+ */
+async function startComparison() {
+    const date1 = document.getElementById('compareDate1').value;
+    const date2 = document.getElementById('compareDate2').value;
+    const index = document.getElementById('compareIndex').value;
+    
+    if (!date1 || !date2) {
+        alert('Please select both dates.');
+        return;
+    }
+    
+    if (date1 === date2) {
+        alert('Please select different dates.');
+        return;
+    }
+    
+    // Store comparison data
+    AppState.comparisonData.date1 = date1;
+    AppState.comparisonData.date2 = date2;
+    AppState.comparisonData.index = index;
+    
+    // Close modal
+    closeComparisonModal();
+    
+    // Show comparison view
+    await showComparisonView();
+}
+
+/**
+ * Show comparison view
+ */
+async function showComparisonView() {
+    const comparisonView = document.getElementById('comparisonView');
+    comparisonView.classList.remove('hidden');
+    
+    // Populate date selectors in the view
+    populateComparisonSelectors();
+    
+    // Update title
+    const title = document.getElementById('comparisonViewTitle');
+    title.textContent = `Comparing ${AppState.comparisonData.index} - ${formatDate(AppState.comparisonData.date1)} vs ${formatDate(AppState.comparisonData.date2)}`;
+    
+    // Update labels
+    document.getElementById('comparisonLabel1').textContent = `${formatDate(AppState.comparisonData.date1)} - ${AppState.comparisonData.index}`;
+    document.getElementById('comparisonLabel2').textContent = `${formatDate(AppState.comparisonData.date2)} - ${AppState.comparisonData.index}`;
+    
+    // Initialize maps
+    setTimeout(async () => {
+        await initializeComparisonMaps();
+        await loadComparisonData();
+    }, 100);
+}
+
+/**
+ * Populate comparison selectors in the view
+ */
+function populateComparisonSelectors() {
+    const date1Select = document.getElementById('comparisonDate1Select');
+    const date2Select = document.getElementById('comparisonDate2Select');
+    const indexSelect = document.getElementById('comparisonIndexSelect');
+    
+    // Clear existing options
+    date1Select.innerHTML = '<option value="">Select date...</option>';
+    date2Select.innerHTML = '<option value="">Select date...</option>';
+    
+    // Add dates
+    const sortedDates = [...AppState.availableDates].sort((a, b) => new Date(a) - new Date(b));
+    sortedDates.forEach(date => {
+        const dateStr = new Date(date).toISOString().split('T')[0];
+        const displayDate = formatDate(dateStr);
+        
+        const option1 = document.createElement('option');
+        option1.value = dateStr;
+        option1.textContent = displayDate;
+        date1Select.appendChild(option1);
+        
+        const option2 = document.createElement('option');
+        option2.value = dateStr;
+        option2.textContent = displayDate;
+        date2Select.appendChild(option2);
+    });
+    
+    // Set current values
+    date1Select.value = AppState.comparisonData.date1;
+    date2Select.value = AppState.comparisonData.date2;
+    indexSelect.value = AppState.comparisonData.index;
+}
+
+/**
+ * Update comparison with new selections
+ */
+async function updateComparison() {
+    const date1 = document.getElementById('comparisonDate1Select').value;
+    const date2 = document.getElementById('comparisonDate2Select').value;
+    const index = document.getElementById('comparisonIndexSelect').value;
+    
+    if (!date1 || !date2) {
+        alert('Please select both dates.');
+        return;
+    }
+    
+    if (date1 === date2) {
+        alert('Please select different dates.');
+        return;
+    }
+    
+    // Update comparison data
+    AppState.comparisonData.date1 = date1;
+    AppState.comparisonData.date2 = date2;
+    AppState.comparisonData.index = index;
+    
+    // Update title and labels
+    const title = document.getElementById('comparisonViewTitle');
+    title.textContent = `Comparing ${index} - ${formatDate(date1)} vs ${formatDate(date2)}`;
+    
+    document.getElementById('comparisonLabel1').textContent = `${formatDate(date1)} - ${index}`;
+    document.getElementById('comparisonLabel2').textContent = `${formatDate(date2)} - ${index}`;
+    
+    // Reload comparison data
+    await loadComparisonData();
+}
+
+/**
+ * Initialize comparison maps
+ */
+async function initializeComparisonMaps() {
+    const fieldId = AppState.selectedField;
+    const fieldLayer = AppState.fieldLayers[fieldId];
+    const bounds = fieldLayer.getBounds();
+    const center = bounds.getCenter();
+    const zoom = AppState.map.getZoom();
+    
+    // Initialize map 1
+    if (AppState.comparisonMaps.map1) {
+        AppState.comparisonMaps.map1.remove();
+    }
+    AppState.comparisonMaps.map1 = L.map('comparisonMap1', {
+        zoomControl: true,
+        attributionControl: false
+    }).setView([center.lat, center.lng], zoom);
+    
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19
+    }).addTo(AppState.comparisonMaps.map1);
+    
+    // Initialize map 2
+    if (AppState.comparisonMaps.map2) {
+        AppState.comparisonMaps.map2.remove();
+    }
+    AppState.comparisonMaps.map2 = L.map('comparisonMap2', {
+        zoomControl: true,
+        attributionControl: false
+    }).setView([center.lat, center.lng], zoom);
+    
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19
+    }).addTo(AppState.comparisonMaps.map2);
+    
+    // Synchronize map movements
+    AppState.comparisonMaps.map1.sync(AppState.comparisonMaps.map2);
+    AppState.comparisonMaps.map2.sync(AppState.comparisonMaps.map1);
+}
+
+/**
+ * Load comparison data and display
+ */
+async function loadComparisonData() {
+    const fieldId = AppState.selectedField;
+    const date1 = AppState.comparisonData.date1;
+    const date2 = AppState.comparisonData.date2;
+    const index = AppState.comparisonData.index;
+    
+    console.log('🔄 [COMPARISON] Loading comparison data...');
+    console.log('   Field:', fieldId);
+    console.log('   Date 1:', date1);
+    console.log('   Date 2:', date2);
+    console.log('   Index:', index);
+    
+    try {
+        // Clear existing overlays first
+        console.log('🧹 [COMPARISON] Clearing existing overlays...');
+        clearComparisonOverlays();
+        
+        // Load both images
+        console.log('📥 [COMPARISON] Loading image 1...');
+        const data1 = await loadComparisonImage(fieldId, date1, index);
+        console.log('✅ [COMPARISON] Image 1 loaded successfully');
+        
+        console.log('📥 [COMPARISON] Loading image 2...');
+        const data2 = await loadComparisonImage(fieldId, date2, index);
+        console.log('✅ [COMPARISON] Image 2 loaded successfully');
+        
+        AppState.comparisonData.data1 = data1;
+        AppState.comparisonData.data2 = data2;
+        
+        // Display images
+        console.log('🗺️ [COMPARISON] Displaying image 1 on map 1...');
+        displayComparisonImage(AppState.comparisonMaps.map1, data1.dataUrl, data1.bounds, 'overlay1');
+        console.log('✅ [COMPARISON] Image 1 displayed');
+        
+        console.log('🗺️ [COMPARISON] Displaying image 2 on map 2...');
+        displayComparisonImage(AppState.comparisonMaps.map2, data2.dataUrl, data2.bounds, 'overlay2');
+        console.log('✅ [COMPARISON] Image 2 displayed');
+        
+        // Calculate difference statistics
+        const diffStats = calculateDifferenceStats(data1, data2);
+        
+        // Display enhanced statistics and insights
+        displayEnhancedStats(data1, data2, diffStats, index);
+        
+        console.log('✅ [COMPARISON] Comparison loaded successfully');
+        
+    } catch (error) {
+        console.error('❌ [COMPARISON] Error loading comparison data:', error);
+        alert('Failed to load comparison data. Please try again.');
+        closeComparisonView();
+    }
+}
+
+/**
+ * Load comparison image
+ */
+async function loadComparisonImage(fieldId, dateStr, selectedIndex) {
+    const tifPath = `exports_enhanced/${fieldId}/${dateStr}/${selectedIndex}.tif`;
+    
+    const response = await fetch(tifPath);
+    if (!response.ok) {
+        throw new Error(`Image not found: ${tifPath}`);
+    }
+    
+    const arrayBuffer = await response.arrayBuffer();
+    const tiff = await GeoTIFF.fromArrayBuffer(arrayBuffer);
+    const image = await tiff.getImage();
+    const rasters = await image.readRasters();
+    const data = rasters[0];
+    
+    // Get bounds
+    const fieldLayer = AppState.fieldLayers[fieldId];
+    const fieldBounds = fieldLayer.getBounds();
+    const bounds = [
+        [fieldBounds.getSouth(), fieldBounds.getWest()],
+        [fieldBounds.getNorth(), fieldBounds.getEast()]
+    ];
+    
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    const width = image.getWidth();
+    const height = image.getHeight();
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(width, height);
+    
+    // Apply color scale
+    const colorScale = getColorScale(selectedIndex);
+    const stats = calculateImageStats(data);
+    
+    for (let i = 0; i < data.length; i++) {
+        const value = data[i];
+        
+        if (isNaN(value) || !isFinite(value) || value === -9999 || value < -1 || value > 1) {
+            const idx = i * 4;
+            imageData.data[idx] = 0;
+            imageData.data[idx + 1] = 0;
+            imageData.data[idx + 2] = 0;
+            imageData.data[idx + 3] = 0;
+            continue;
+        }
+        
+        const normalized = Math.max(0, Math.min(1, (value - stats.min) / (stats.max - stats.min)));
+        const color = colorScale(normalized);
+        
+        const idx = i * 4;
+        imageData.data[idx] = color.r;
+        imageData.data[idx + 1] = color.g;
+        imageData.data[idx + 2] = color.b;
+        imageData.data[idx + 3] = 220;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    return {
+        dataUrl: canvas.toDataURL(),
+        bounds: bounds,
+        data: data,
+        stats: stats,
+        width: width,
+        height: height
+    };
+}
+
+/**
+ * Display comparison image on map
+ */
+function displayComparisonImage(map, dataUrl, bounds, overlayKey) {
+    // Store reference to overlay in AppState
+    if (!AppState.comparisonData.overlays) {
+        AppState.comparisonData.overlays = {};
+    }
+    
+    // Remove existing overlay for this map if it exists
+    if (AppState.comparisonData.overlays[overlayKey]) {
+        console.log(`🗑️ [COMPARISON] Removing existing overlay: ${overlayKey}`);
+        map.removeLayer(AppState.comparisonData.overlays[overlayKey]);
+    }
+    
+    // Create and add new overlay
+    const overlay = L.imageOverlay(dataUrl, bounds, {
+        opacity: 0.8,
+        interactive: false
+    }).addTo(map);
+    
+    // Store reference
+    AppState.comparisonData.overlays[overlayKey] = overlay;
+    console.log(`✅ [COMPARISON] Added overlay: ${overlayKey}`);
+}
+
+/**
+ * Clear all comparison overlays
+ */
+function clearComparisonOverlays() {
+    if (AppState.comparisonData.overlays) {
+        Object.keys(AppState.comparisonData.overlays).forEach(key => {
+            const overlay = AppState.comparisonData.overlays[key];
+            if (overlay) {
+                // Determine which map this overlay belongs to
+                if (key === 'overlay1' && AppState.comparisonMaps.map1) {
+                    AppState.comparisonMaps.map1.removeLayer(overlay);
+                    console.log(`🗑️ [COMPARISON] Removed overlay1 from map1`);
+                } else if (key === 'overlay2' && AppState.comparisonMaps.map2) {
+                    AppState.comparisonMaps.map2.removeLayer(overlay);
+                    console.log(`🗑️ [COMPARISON] Removed overlay2 from map2`);
+                }
+            }
+        });
+        AppState.comparisonData.overlays = {};
+    }
+}
+
+/**
+ * Calculate difference statistics between two images
+ */
+function calculateDifferenceStats(data1, data2) {
+    const diffData = new Float32Array(data1.data.length);
+    let validCount = 0;
+    let sumDiff = 0;
+    let minDiff = Infinity;
+    let maxDiff = -Infinity;
+    let positiveCount = 0;
+    let negativeCount = 0;
+    let unchangedCount = 0;
+    let sumPositive = 0;
+    let sumNegative = 0;
+    
+    for (let i = 0; i < data1.data.length; i++) {
+        const val1 = data1.data[i];
+        const val2 = data2.data[i];
+        
+        if (isNaN(val1) || isNaN(val2) || !isFinite(val1) || !isFinite(val2) || 
+            val1 === -9999 || val2 === -9999 || val1 < -1 || val1 > 1 || val2 < -1 || val2 > 1) {
+            diffData[i] = NaN;
+            continue;
+        }
+        
+        const diff = val2 - val1;
+        diffData[i] = diff;
+        
+        validCount++;
+        sumDiff += diff;
+        minDiff = Math.min(minDiff, diff);
+        maxDiff = Math.max(maxDiff, diff);
+        
+        if (diff > 0.01) {
+            positiveCount++;
+            sumPositive += diff;
+        } else if (diff < -0.01) {
+            negativeCount++;
+            sumNegative += diff;
+        } else {
+            unchangedCount++;
+        }
+    }
+    
+    const meanDiff = validCount > 0 ? sumDiff / validCount : 0;
+    const meanPositive = positiveCount > 0 ? sumPositive / positiveCount : 0;
+    const meanNegative = negativeCount > 0 ? sumNegative / negativeCount : 0;
+    
+    const percentImproved = validCount > 0 ? (positiveCount / validCount * 100) : 0;
+    const percentDeclined = validCount > 0 ? (negativeCount / validCount * 100) : 0;
+    const percentUnchanged = validCount > 0 ? (unchangedCount / validCount * 100) : 0;
+    
+    return {
+        min: minDiff,
+        max: maxDiff,
+        mean: meanDiff,
+        validCount: validCount,
+        positiveCount: positiveCount,
+        negativeCount: negativeCount,
+        unchangedCount: unchangedCount,
+        meanPositive: meanPositive,
+        meanNegative: meanNegative,
+        percentImproved: percentImproved,
+        percentDeclined: percentDeclined,
+        percentUnchanged: percentUnchanged
+    };
+}
+
+/**
+ * Display enhanced statistics and insights
+ */
+function displayEnhancedStats(data1, data2, diffStats, index) {
+    const statsContainer = document.getElementById('comparisonStats');
+    
+    const percentChange = data1.stats.mean !== 0 
+        ? ((data2.stats.mean - data1.stats.mean) / Math.abs(data1.stats.mean) * 100)
+        : 0;
+    
+    const changeClass = percentChange > 5 ? 'positive' : percentChange < -5 ? 'negative' : 'neutral';
+    const changeSymbol = percentChange > 0 ? '+' : '';
+    
+    // SVG Icons
+    const trendUpIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>';
+    const trendDownIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>';
+    const trendFlatIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
+    
+    const changeIcon = percentChange > 5 ? trendUpIcon : percentChange < -5 ? trendDownIcon : trendFlatIcon;
+    
+    // Determine overall health status
+    let healthStatus = '';
+    let healthClass = '';
+    if (percentChange > 10) {
+        healthStatus = 'Significant Improvement';
+        healthClass = 'positive';
+    } else if (percentChange > 5) {
+        healthStatus = 'Moderate Improvement';
+        healthClass = 'positive';
+    } else if (percentChange > -5) {
+        healthStatus = 'Stable Condition';
+        healthClass = 'neutral';
+    } else if (percentChange > -10) {
+        healthStatus = 'Moderate Decline';
+        healthClass = 'negative';
+    } else {
+        healthStatus = 'Significant Decline';
+        healthClass = 'negative';
+    }
+    
+    statsContainer.innerHTML = `
+        <!-- Index Values -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </span>
+                ${index} Values
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 1 (${formatDate(AppState.comparisonData.date1)}):</span>
+                <span class="stat-value">${data1.stats.mean.toFixed(4)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Date 2 (${formatDate(AppState.comparisonData.date2)}):</span>
+                <span class="stat-value">${data2.stats.mean.toFixed(4)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Difference:</span>
+                <span class="stat-value ${changeClass}">${changeSymbol}${(data2.stats.mean - data1.stats.mean).toFixed(4)}</span>
+            </div>
+        </div>
+        
+        <!-- Overall Status -->
+        <div class="stat-section">
+            <div class="stat-section-title">
+                <span class="stat-section-icon">${changeIcon}</span>
+                Overall Status
+            </div>
+            <div style="text-align: center; padding: 15px 0;">
+                <div class="change-indicator ${healthClass}" style="font-size: 16px; padding: 8px 16px;">
+                    ${healthStatus}
+                </div>
+                <div style="margin-top: 10px; font-size: 24px; font-weight: 700; color: ${changeClass === 'positive' ? '#4CAF50' : changeClass === 'negative' ? '#f44336' : '#FFC107'};">
+                    ${changeSymbol}${percentChange.toFixed(2)}%
+                </div>
+                <div style="color: #aaa; font-size: 11px; margin-top: 5px;">Change in ${index}</div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Generate insights based on index and changes
+ */
+function generateInsights(index, percentChange, diffStats, data1, data2) {
+    let insights = '';
+    
+    // SVG Icons for insights
+    const checkIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    const alertIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+    const infoIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+    const dropletIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>';
+    const seedIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
+    const searchIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+    const starIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+    const targetIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>';
+    
+    // Index-specific insights
+    if (index === 'NDVI') {
+        if (percentChange > 10) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${checkIcon} <strong>Excellent vegetation growth!</strong> NDVI increased by ${percentChange.toFixed(1)}%, indicating healthy crop development and good canopy coverage.
+                    </div>
+                </div>
+            `;
+        } else if (percentChange < -10) {
+            insights += `
+                <div class="insight-box alert">
+                    <div class="insight-text">
+                        ${alertIcon} <strong>Vegetation stress detected.</strong> NDVI decreased by ${Math.abs(percentChange).toFixed(1)}%. Consider checking irrigation, pest issues, or nutrient deficiency.
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (diffStats.percentImproved > 70) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${targetIcon} <strong>Widespread improvement:</strong> ${diffStats.percentImproved.toFixed(0)}% of the field shows increased vegetation health.
+                    </div>
+                </div>
+            `;
+        } else if (diffStats.percentDeclined > 50) {
+            insights += `
+                <div class="insight-box warning">
+                    <div class="insight-text">
+                        ${targetIcon} <strong>Attention needed:</strong> ${diffStats.percentDeclined.toFixed(0)}% of the field shows declining vegetation. Investigate potential causes.
+                    </div>
+                </div>
+            `;
+        }
+    } else if (index === 'ETc_NDVI') {
+        if (percentChange > 5) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${dropletIcon} <strong>Increased water demand:</strong> Evapotranspiration rose by ${percentChange.toFixed(1)}%. Crops are actively growing and may need more irrigation.
+                    </div>
+                </div>
+            `;
+        } else if (percentChange < -5) {
+            insights += `
+                <div class="insight-box warning">
+                    <div class="insight-text">
+                        ${dropletIcon} <strong>Reduced water use:</strong> ET decreased by ${Math.abs(percentChange).toFixed(1)}%. This could indicate crop stress or reduced growth.
+                    </div>
+                </div>
+            `;
+        }
+    } else if (index === 'FC') {
+        if (percentChange > 10) {
+            insights += `
+                <div class="insight-box">
+                    <div class="insight-text">
+                        ${seedIcon} <strong>Canopy expansion:</strong> Fractional cover increased by ${percentChange.toFixed(1)}%, showing good crop establishment and ground coverage.
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    // General recommendations
+    if (diffStats.percentDeclined > 30) {
+        insights += `
+            <div class="insight-box warning">
+                <div class="insight-text">
+                    ${searchIcon} <strong>Recommended actions:</strong>
+                    <ul style="margin: 8px 0 0 20px; padding: 0;">
+                        <li>Check irrigation system functionality</li>
+                        <li>Scout for pest or disease issues</li>
+                        <li>Review recent weather conditions</li>
+                        <li>Consider soil moisture testing</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+    } else if (percentChange > 15) {
+        insights += `
+            <div class="insight-box">
+                <div class="insight-text">
+                    ${starIcon} <strong>Keep up the good work!</strong> Current management practices are showing positive results. Continue monitoring for optimal outcomes.
+                </div>
+            </div>
+        `;
+    }
+    
+    if (!insights) {
+        insights = `
+            <div class="insight-box">
+                <div class="insight-text">
+                    ${infoIcon} Field conditions remain relatively stable between these dates. Continue regular monitoring to track any emerging trends.
+                </div>
+            </div>
+        `;
+    }
+    
+    return insights;
+}
+
+/**
+ * Calculate difference between two images (kept for potential future use)
+ */
+function calculateDifference(data1, data2) {
+    const width = data1.width;
+    const height = data1.height;
+    
+    // Create canvas for difference
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(width, height);
+    
+    // Calculate difference
+    const diffData = new Float32Array(data1.data.length);
+    let validCount = 0;
+    let sumDiff = 0;
+    let minDiff = Infinity;
+    let maxDiff = -Infinity;
+    
+    for (let i = 0; i < data1.data.length; i++) {
+        const val1 = data1.data[i];
+        const val2 = data2.data[i];
+        
+        if (isNaN(val1) || isNaN(val2) || !isFinite(val1) || !isFinite(val2) || 
+            val1 === -9999 || val2 === -9999 || val1 < -1 || val1 > 1 || val2 < -1 || val2 > 1) {
+            diffData[i] = NaN;
+            continue;
+        }
+        
+        const diff = val2 - val1;
+        diffData[i] = diff;
+        
+        validCount++;
+        sumDiff += diff;
+        minDiff = Math.min(minDiff, diff);
+        maxDiff = Math.max(maxDiff, diff);
+    }
+    
+    const meanDiff = validCount > 0 ? sumDiff / validCount : 0;
+    
+    // Color scale for difference: red (negative) to white (zero) to green (positive)
+    for (let i = 0; i < diffData.length; i++) {
+        const diff = diffData[i];
+        const idx = i * 4;
+        
+        if (isNaN(diff)) {
+            imageData.data[idx] = 0;
+            imageData.data[idx + 1] = 0;
+            imageData.data[idx + 2] = 0;
+            imageData.data[idx + 3] = 0;
+            continue;
+        }
+        
+        // Normalize difference to -1 to 1 range
+        const maxAbsDiff = Math.max(Math.abs(minDiff), Math.abs(maxDiff));
+        const normalized = maxAbsDiff > 0 ? diff / maxAbsDiff : 0;
+        
+        if (normalized > 0) {
+            // Positive change - green
+            imageData.data[idx] = Math.floor(255 * (1 - normalized));
+            imageData.data[idx + 1] = 255;
+            imageData.data[idx + 2] = Math.floor(255 * (1 - normalized));
+        } else {
+            // Negative change - red
+            imageData.data[idx] = 255;
+            imageData.data[idx + 1] = Math.floor(255 * (1 + normalized));
+            imageData.data[idx + 2] = Math.floor(255 * (1 + normalized));
+        }
+        imageData.data[idx + 3] = 220;
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    
+    return {
+        dataUrl: canvas.toDataURL(),
+        bounds: data1.bounds,
+        stats: {
+            min: minDiff,
+            max: maxDiff,
+            mean: meanDiff,
+            validCount: validCount
+        }
+    };
+}
+
+/**
+ * Close comparison view
+ */
+function closeComparisonView() {
+    console.log('🚪 [COMPARISON] Closing comparison view...');
+    
+    document.getElementById('comparisonView').classList.add('hidden');
+    
+    // Clear overlays
+    clearComparisonOverlays();
+    
+    // Cleanup maps
+    if (AppState.comparisonMaps.map1) {
+        AppState.comparisonMaps.map1.remove();
+        AppState.comparisonMaps.map1 = null;
+        console.log('🗑️ [COMPARISON] Removed map1');
+    }
+    if (AppState.comparisonMaps.map2) {
+        AppState.comparisonMaps.map2.remove();
+        AppState.comparisonMaps.map2 = null;
+        console.log('🗑️ [COMPARISON] Removed map2');
+    }
+    
+    console.log('✅ [COMPARISON] Comparison view closed');
+}
+
+// Initialize comparison on page load
+document.addEventListener('DOMContentLoaded', () => {
+    setupComparison();
+});
+
+
+/**
+ * ========================================
+ * TIMELINE EXPORT FUNCTIONALITY
+ * ========================================
+ */
+
+/**
+ * Export State
+ */
+const ExportState = {
+    isExporting: false,
+    format: 'gif',
+    startDate: null,
+    endDate: null,
+    speed: 1000,
+    quality: 20,
+    frames: [],
+    currentFrame: 0,
+    totalFrames: 0,
+    gif: null,
+    mediaRecorder: null,
+    recordedChunks: []
+};
+
+/**
+ * Initialize Export Modal
+ */
+function initializeExportModal() {
+    console.log('🎬 [EXPORT] Initializing export modal');
+    
+    const exportBtn = document.getElementById('timelineExport');
+    const exportModal = document.getElementById('exportModal');
+    const closeModal = document.getElementById('closeExportModal');
+    const cancelBtn = document.getElementById('cancelExport');
+    const startBtn = document.getElementById('startExport');
+    
+    // Format selection buttons
+    const formatBtns = document.querySelectorAll('.export-format-btn');
+    formatBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            formatBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            ExportState.format = btn.dataset.format;
+            
+            // Show/hide quality section based on format
+            const qualitySection = document.getElementById('exportQualitySection');
+            if (ExportState.format === 'gif') {
+                qualitySection.style.display = 'block';
+            } else {
+                qualitySection.style.display = 'none';
+            }
+            
+            console.log(`🎬 [EXPORT] Format selected: ${ExportState.format}`);
+        });
+    });
+    
+    // Open modal
+    exportBtn.addEventListener('click', () => {
+        if (!TimelineState.dates || TimelineState.dates.length === 0) {
+            alert('⚠️ No timeline data available. Please select a field first.');
+            return;
+        }
+        
+        console.log('🎬 [EXPORT] Opening export modal');
+        populateExportDates();
+        exportModal.classList.remove('hidden');
+    });
+    
+    // Close modal
+    const closeExportModal = () => {
+        console.log('🎬 [EXPORT] Closing export modal');
+        
+        // Cancel export if in progress
+        if (ExportState.isExporting) {
+            ExportState.isExporting = false;
+            console.log('🛑 [EXPORT] Export cancelled');
+        }
+        
+        exportModal.classList.add('hidden');
+        resetExportProgress();
+    };
+    
+    closeModal.addEventListener('click', closeExportModal);
+    cancelBtn.addEventListener('click', closeExportModal);
+    
+    // Start export
+    startBtn.addEventListener('click', startExport);
+    
+    // Speed and quality changes
+    document.getElementById('exportSpeed').addEventListener('change', (e) => {
+        ExportState.speed = parseInt(e.target.value);
+        console.log(`🎬 [EXPORT] Speed changed: ${ExportState.speed}ms`);
+    });
+    
+    document.getElementById('exportQuality').addEventListener('change', (e) => {
+        ExportState.quality = parseInt(e.target.value);
+        console.log(`🎬 [EXPORT] Quality changed: ${ExportState.quality}`);
+    });
+    
+    console.log('✅ [EXPORT] Export modal initialized');
+}
+
+/**
+ * Populate date selectors
+ */
+function populateExportDates() {
+    const startSelect = document.getElementById('exportStartDate');
+    const endSelect = document.getElementById('exportEndDate');
+    
+    startSelect.innerHTML = '';
+    endSelect.innerHTML = '';
+    
+    TimelineState.dates.forEach((date, index) => {
+        const dateObj = new Date(date);
+        const dateStr = dateObj.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric' 
+        });
+        
+        const startOption = document.createElement('option');
+        startOption.value = index;
+        startOption.textContent = dateStr;
+        startSelect.appendChild(startOption);
+        
+        const endOption = document.createElement('option');
+        endOption.value = index;
+        endOption.textContent = dateStr;
+        endSelect.appendChild(endOption);
+    });
+    
+    // Set default range (all dates)
+    startSelect.value = 0;
+    endSelect.value = TimelineState.dates.length - 1;
+    
+    console.log(`🎬 [EXPORT] Populated ${TimelineState.dates.length} dates`);
+}
+
+/**
+ * Start export process
+ */
+async function startExport() {
+    console.log('🎬 [EXPORT] Starting export process');
+    
+    const startIdx = parseInt(document.getElementById('exportStartDate').value);
+    const endIdx = parseInt(document.getElementById('exportEndDate').value);
+    
+    if (startIdx > endIdx) {
+        alert('⚠️ Start date must be before end date');
+        return;
+    }
+    
+    // Stop timeline playback if running
+    if (TimelineState.isPlaying) {
+        stopPlayback();
+        console.log('⏸️ [EXPORT] Stopped timeline playback');
+    }
+    
+    ExportState.isExporting = true;
+    ExportState.frames = [];
+    ExportState.currentFrame = 0;
+    ExportState.totalFrames = endIdx - startIdx + 1;
+    
+    // Disable start button, enable cancel
+    document.getElementById('startExport').disabled = true;
+    document.getElementById('cancelExport').disabled = false;
+    
+    // Show progress
+    const progressDiv = document.getElementById('exportProgress');
+    progressDiv.classList.remove('hidden');
+    
+    updateExportProgress(0, 'Preparing export...');
+    
+    console.log(`🎬 [EXPORT] Exporting ${ExportState.totalFrames} frames from ${startIdx} to ${endIdx}`);
+    
+    try {
+        // Capture frames
+        for (let i = startIdx; i <= endIdx; i++) {
+            // Check if export was cancelled
+            if (!ExportState.isExporting) {
+                console.log('🛑 [EXPORT] Export cancelled by user');
+                return;
+            }
+            
+            await goToFrame(i);
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait longer for render
+            
+            const canvas = await captureMapCanvas();
+            ExportState.frames.push(canvas);
+            ExportState.currentFrame++;
+            
+            const progress = (ExportState.currentFrame / ExportState.totalFrames) * 50;
+            updateExportProgress(progress, `Capturing frame ${ExportState.currentFrame}/${ExportState.totalFrames}...`);
+            
+            console.log(`📸 [EXPORT] Captured frame ${ExportState.currentFrame}/${ExportState.totalFrames}`);
+        }
+        
+        // Check if export was cancelled
+        if (!ExportState.isExporting) {
+            console.log('🛑 [EXPORT] Export cancelled by user');
+            return;
+        }
+        
+        // Generate export
+        if (ExportState.format === 'gif') {
+            await generateGIF();
+        } else {
+            await generateVideo();
+        }
+        
+    } catch (error) {
+        console.error('❌ [EXPORT] Export failed:', error);
+        alert('❌ Export failed: ' + error.message);
+        resetExportProgress();
+    }
+}
+
+/**
+ * Capture map as canvas - captures only the satellite overlay for the selected field
+ */
+async function captureMapCanvas() {
+    console.log('📸 [EXPORT] Capturing map canvas...');
+    
+    try {
+        // Get the current image overlay
+        const imageOverlay = AppState.imageOverlay;
+        if (!imageOverlay) {
+            throw new Error('No image overlay found');
+        }
+        
+        // Get the overlay image element
+        const overlayImage = imageOverlay._image;
+        if (!overlayImage) {
+            throw new Error('No overlay image element found');
+        }
+        
+        // Wait for image to be fully loaded
+        if (!overlayImage.complete) {
+            await new Promise((resolve) => {
+                overlayImage.onload = resolve;
+            });
+        }
+        
+        // Create HD canvas
+        const hdCanvas = document.createElement('canvas');
+        hdCanvas.width = 1920;
+        hdCanvas.height = 1080;
+        const ctx = hdCanvas.getContext('2d', { willReadFrequently: true });
+        
+        // Fill background with neutral color
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(0, 0, 1920, 1080);
+        
+        // Calculate dimensions to fit the overlay image centered
+        const imgWidth = overlayImage.naturalWidth || overlayImage.width;
+        const imgHeight = overlayImage.naturalHeight || overlayImage.height;
+        const aspectRatio = imgWidth / imgHeight;
+        
+        let drawWidth = 1920;
+        let drawHeight = 1080;
+        
+        // Maintain aspect ratio and fit within canvas
+        if (aspectRatio > 1920 / 1080) {
+            drawHeight = 1920 / aspectRatio;
+        } else {
+            drawWidth = 1080 * aspectRatio;
+        }
+        
+        const x = (1920 - drawWidth) / 2;
+        const y = (1080 - drawHeight) / 2;
+        
+        // Draw the satellite overlay image
+        ctx.drawImage(overlayImage, x, y, drawWidth, drawHeight);
+        
+        // Add information overlay at top
+        const currentDate = new Date(TimelineState.dates[TimelineState.currentIndex]);
+        const dateStr = currentDate.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        const indexSelect = document.getElementById('indexSelect');
+        const indexName = indexSelect.value;
+        const fieldId = AppState.selectedField;
+        
+        // Add semi-transparent overlay at top
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.fillRect(0, 0, 1920, 100);
+        
+        // Add field name
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.fillText(fieldId, 40, 50);
+        
+        // Add date
+        ctx.font = '26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.fillStyle = '#4CAF50';
+        ctx.fillText(dateStr, 40, 82);
+        
+        // Add index name at top right
+        ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+        ctx.fillStyle = '#4CAF50';
+        const indexWidth = ctx.measureText(indexName).width;
+        ctx.fillText(indexName, 1920 - indexWidth - 40, 62);
+        
+        console.log('✅ [EXPORT] Canvas captured successfully');
+        return hdCanvas;
+        
+    } catch (error) {
+        console.error('❌ [EXPORT] Canvas capture failed:', error);
+        throw error;
+    }
+}
+
+/**
+ * Generate GIF
+ */
+async function generateGIF() {
+    console.log('🎨 [EXPORT] Generating GIF...');
+    updateExportProgress(50, 'Generating GIF...');
+    
+    return new Promise((resolve, reject) => {
+        try {
+            // Convert canvases to base64 images
+            const images = [];
+            
+            for (let i = 0; i < ExportState.frames.length; i++) {
+                try {
+                    const canvas = ExportState.frames[i];
+                    // Create a new clean canvas to avoid taint issues
+                    const cleanCanvas = document.createElement('canvas');
+                    cleanCanvas.width = canvas.width;
+                    cleanCanvas.height = canvas.height;
+                    const ctx = cleanCanvas.getContext('2d', { willReadFrequently: true });
+                    ctx.drawImage(canvas, 0, 0);
+                    
+                    const dataUrl = cleanCanvas.toDataURL('image/png');
+                    images.push(dataUrl);
+                    console.log(`🖼️ [EXPORT] Converted frame ${i + 1}/${ExportState.frames.length}`);
+                } catch (err) {
+                    console.error(`❌ [EXPORT] Failed to convert frame ${i + 1}:`, err);
+                    // Use a blank frame as fallback
+                    const blankCanvas = document.createElement('canvas');
+                    blankCanvas.width = 1920;
+                    blankCanvas.height = 1080;
+                    images.push(blankCanvas.toDataURL('image/png'));
+                }
+            }
+            
+            console.log(`🖼️ [EXPORT] Converting ${images.length} frames to GIF`);
+            
+            // Calculate interval from speed (convert ms to seconds)
+            const interval = ExportState.speed / 1000;
+            
+            // Use higher quality settings for GIF
+            gifshot.createGIF({
+                images: images,
+                gifWidth: 1920,
+                gifHeight: 1080,
+                interval: interval,
+                numFrames: images.length,
+                frameDuration: 1,
+                sampleInterval: 5, // Lower value = better quality (was 10)
+                numWorkers: 4, // Use multiple workers for faster processing
+                progressCallback: (captureProgress) => {
+                    const percent = 50 + (captureProgress * 50);
+                    updateExportProgress(percent, `Encoding GIF... ${Math.round(captureProgress * 100)}%`);
+                }
+            }, (obj) => {
+                if (!obj.error) {
+                    console.log('✅ [EXPORT] GIF generated successfully');
+                    
+                    // Convert base64 to blob
+                    const base64Data = obj.image.split(',')[1];
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'image/gif' });
+                    
+                    downloadExport(blob, 'gif');
+                    resolve();
+                } else {
+                    console.error('❌ [EXPORT] GIF generation failed:', obj.error);
+                    reject(new Error(obj.error));
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ [EXPORT] GIF generation error:', error);
+            reject(error);
+        }
+    });
+}
+
+/**
+ * Generate Video (MP4)
+ */
+async function generateVideo() {
+    console.log('🎥 [EXPORT] Generating video...');
+    updateExportProgress(50, 'Generating video...');
+    
+    return new Promise((resolve, reject) => {
+        try {
+            // Create video canvas
+            const videoCanvas = document.createElement('canvas');
+            videoCanvas.width = 1920;
+            videoCanvas.height = 1080;
+            const ctx = videoCanvas.getContext('2d');
+            
+            // Setup MediaRecorder with high quality settings
+            const stream = videoCanvas.captureStream(30); // 30 FPS
+            
+            // Try different codecs for better quality
+            let mimeType = 'video/webm;codecs=vp9';
+            let videoBitsPerSecond = 25000000; // 25 Mbps for high quality
+            
+            // Check if VP9 is supported, fallback to VP8
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'video/webm;codecs=vp8';
+                console.log('🎥 [EXPORT] VP9 not supported, using VP8');
+            }
+            
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: mimeType,
+                videoBitsPerSecond: videoBitsPerSecond
+            });
+            
+            ExportState.recordedChunks = [];
+            
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    ExportState.recordedChunks.push(event.data);
+                }
+            };
+            
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(ExportState.recordedChunks, { type: 'video/webm' });
+                console.log('✅ [EXPORT] Video generated successfully');
+                downloadExport(blob, 'webm');
+                resolve();
+            };
+            
+            mediaRecorder.onerror = (error) => {
+                console.error('❌ [EXPORT] Video generation failed:', error);
+                reject(error);
+            };
+            
+            // Start recording
+            mediaRecorder.start();
+            
+            // Draw frames
+            let frameIndex = 0;
+            const drawFrame = () => {
+                if (frameIndex < ExportState.frames.length) {
+                    ctx.drawImage(ExportState.frames[frameIndex], 0, 0);
+                    frameIndex++;
+                    
+                    const progress = 50 + ((frameIndex / ExportState.frames.length) * 50);
+                    updateExportProgress(progress, `Encoding video... ${frameIndex}/${ExportState.frames.length}`);
+                    
+                    setTimeout(drawFrame, ExportState.speed);
+                } else {
+                    mediaRecorder.stop();
+                }
+            };
+            
+            drawFrame();
+            
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+/**
+ * Download export file
+ */
+function downloadExport(blob, extension) {
+    const fieldId = AppState.selectedField;
+    const indexSelect = document.getElementById('indexSelect');
+    const indexName = indexSelect.value;
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    const filename = `${fieldId}_${indexName}_${timestamp}.${extension}`;
+    
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log(`💾 [EXPORT] Downloaded: ${filename}`);
+    
+    updateExportProgress(100, `✅ Export complete! Downloaded: ${filename}`);
+    
+    // Reset after 2 seconds
+    setTimeout(() => {
+        resetExportProgress();
+        document.getElementById('exportModal').classList.add('hidden');
+    }, 2000);
+}
+
+/**
+ * Update export progress
+ */
+function updateExportProgress(percent, message) {
+    const progressFill = document.getElementById('exportProgressFill');
+    const progressText = document.getElementById('exportProgressText');
+    
+    progressFill.style.width = `${percent}%`;
+    progressText.textContent = message;
+    
+    console.log(`📊 [EXPORT] Progress: ${Math.round(percent)}% - ${message}`);
+}
+
+/**
+ * Reset export progress
+ */
+function resetExportProgress() {
+    ExportState.isExporting = false;
+    ExportState.frames = [];
+    ExportState.currentFrame = 0;
+    ExportState.totalFrames = 0;
+    ExportState.recordedChunks = [];
+    
+    const startBtn = document.getElementById('startExport');
+    const cancelBtn = document.getElementById('cancelExport');
+    
+    if (startBtn) startBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = false;
+    
+    const progressDiv = document.getElementById('exportProgress');
+    if (progressDiv) progressDiv.classList.add('hidden');
+    
+    const progressFill = document.getElementById('exportProgressFill');
+    if (progressFill) progressFill.style.width = '0%';
+    
+    const progressText = document.getElementById('exportProgressText');
+    if (progressText) progressText.textContent = 'Preparing export...';
+    
+    console.log('🔄 [EXPORT] Export state reset');
+}
+
+// Initialize export modal when timeline is ready
+document.addEventListener('DOMContentLoaded', () => {
+    initializeExportModal();
+});
+
+/**
+ * ========================================
+ * EXCEL EXPORT FUNCTIONALITY
+ * ========================================
+ */
+
+/**
+ * Export field data to Excel with two sheets
+ */
+async function exportToExcel() {
+    if (!AppState.selectedField) {
+        alert('Please select a field first');
+        return;
+    }
+
+    const exportBtn = document.getElementById('exportExcelBtn');
+    if (!exportBtn) return;
+
+    // Show loading state
+    const originalHTML = exportBtn.innerHTML;
+    exportBtn.disabled = true;
+    exportBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+            <path d="M12 2 A10 10 0 0 1 22 12" stroke-opacity="1"></path>
+        </svg>
+        Exporting...
+    `;
+
+    console.log('[EXCEL-EXPORT] Starting export for field:', AppState.selectedField);
+
+    try {
+        // Add a small delay to show loading state
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Create a new workbook
+        const wb = XLSX.utils.book_new();
+
+        // Sheet 1: Field Information
+        const fieldInfo = createFieldInfoSheet();
+        const ws1 = XLSX.utils.aoa_to_sheet(fieldInfo);
+        
+        // Set column widths for field info sheet
+        ws1['!cols'] = [
+            { wch: 25 },  // Property column
+            { wch: 40 }   // Value column
+        ];
+        
+        XLSX.utils.book_append_sheet(wb, ws1, 'Field Information');
+
+        // Sheet 2: Water Balance Data
+        const waterBalanceData = createWaterBalanceSheet();
+        const ws2 = XLSX.utils.json_to_sheet(waterBalanceData);
+        
+        // Set column widths for water balance sheet
+        ws2['!cols'] = [
+            { wch: 12 },  // Date
+            { wch: 10 },  // ETo
+            { wch: 10 },  // ETr
+            { wch: 12 },  // Kcb columns
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 },  // ETc columns
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 10 },  // AWC
+            { wch: 10 },  // TAW
+            { wch: 10 },  // Dr
+            { wch: 10 },  // fDr
+            { wch: 10 },  // ETAW
+            { wch: 14 },  // AppliedIrrig
+            { wch: 12 },  // Interpolated
+            { wch: 10 },  // Predicted
+            { wch: 16 },  // DaysSincePlanting
+            { wch: 14 }   // RootDepth_m
+        ];
+        
+        XLSX.utils.book_append_sheet(wb, ws2, 'Water Balance Data');
+
+        // Generate filename with field name and date
+        const today = new Date().toISOString().split('T')[0];
+        const fieldName = FIELD_CONFIGS[AppState.selectedField].name.replace(/\s+/g, '_');
+        const filename = `${fieldName}_Export_${today}.xlsx`;
+
+        // Write the file
+        XLSX.writeFile(wb, filename);
+
+        console.log('[EXCEL-EXPORT] Export completed:', filename);
+        
+        // Show success message
+        showExportSuccess(filename);
+
+    } catch (error) {
+        console.error('[EXCEL-EXPORT] Export failed:', error);
+        alert('Failed to export data. Please try again.');
+    } finally {
+        // Restore button state
+        if (exportBtn) {
+            exportBtn.disabled = false;
+            exportBtn.innerHTML = originalHTML;
+        }
+    }
+}
+
+/**
+ * Create field information sheet data
+ */
+function createFieldInfoSheet() {
+    const fieldConfig = FIELD_CONFIGS[AppState.selectedField];
+    const fieldData = AppState.categoryData;
+    const properties = AppState.selectedFieldProperties || {};
+    
+    const info = [
+        ['Field Information'],
+        [''],
+        ['Property', 'Value'],
+        ['Field ID', AppState.selectedField],
+        ['Field Name', properties.fieldName || fieldConfig.name],
+        ['Crop Type', formatCropName(properties.cropType) || 'N/A'],
+        ['Field Size', properties.fieldSize ? `${properties.fieldSize} acres` : 'N/A'],
+        ['Planting Date', formatDate(properties.plantingDate) || 'N/A'],
+        ['Irrigation Method', properties.irrigMethod || 'N/A'],
+        ['Soil Texture', formatSoilTexture(properties.soilTexture) || 'N/A'],
+        ['Cultivar', properties.cultivar || 'N/A'],
+        [''],
+        ['Data Summary'],
+        [''],
+        ['Total Data Points', fieldData?.timeSeries?.length || 0],
+        ['Date Range Start', fieldData?.timeSeries?.[0]?.date || 'N/A'],
+        ['Date Range End', fieldData?.timeSeries?.[fieldData.timeSeries.length - 1]?.date || 'N/A'],
+        [''],
+        ['Available Indices'],
+        [''],
+        ['NDVI', 'Normalized Difference Vegetation Index'],
+        ['SAVI', 'Soil Adjusted Vegetation Index'],
+        ['FC', 'Fractional Cover'],
+        ['GCI', 'Green Chlorophyll Index'],
+        ['MSAVI', 'Modified Soil Adjusted Vegetation Index'],
+        ['RECI', 'Red Edge Chlorophyll Index'],
+        [''],
+        ['ETc Methods'],
+        [''],
+        ['ETc_Andy', 'Andy Method Evapotranspiration'],
+        ['ETc_NDVI', 'NDVI-based Evapotranspiration'],
+        ['ETc_SAVI', 'SAVI-based Evapotranspiration'],
+        ['ETc_FC', 'Fractional Cover-based Evapotranspiration'],
+        ['ETc_Ensemble', 'Ensemble Method Evapotranspiration'],
+        ['ETc_FAO56', 'FAO-56 Method Evapotranspiration'],
+        [''],
+        ['Kcb Methods'],
+        [''],
+        ['Kcb_Andy', 'Andy Method Crop Coefficient'],
+        ['Kcb_NDVI', 'NDVI-based Crop Coefficient'],
+        ['Kcb_SAVI', 'SAVI-based Crop Coefficient'],
+        ['Kcb_FC', 'Fractional Cover-based Crop Coefficient'],
+        ['Kcb_Ensemble', 'Ensemble Method Crop Coefficient'],
+        ['Kcb_FAO56', 'FAO-56 Method Crop Coefficient'],
+        [''],
+        ['Export Information'],
+        [''],
+        ['Export Date', new Date().toISOString().split('T')[0]],
+        ['Export Time', new Date().toLocaleTimeString()],
+        ['Data Source', 'exports_enhanced folder']
+    ];
+
+    return info;
+}
+
+/**
+ * Create water balance sheet data
+ */
+function createWaterBalanceSheet() {
+    const fieldData = AppState.categoryData;
+    
+    if (!fieldData || !fieldData.timeSeries) {
+        return [];
+    }
+
+    // Map the data to a flat structure for Excel
+    const waterBalanceData = fieldData.timeSeries.map(item => ({
+        'Date': item.date,
+        'ETo': item.eto || '',
+        'ETr': item.etr || '',
+        'Kcb_Andy': item.kcbAndy || '',
+        'Kcb_NDVI': item.kcbNdvi || '',
+        'Kcb_SAVI': item.kcbSavi || '',
+        'Kcb_FC': item.kcbFc || '',
+        'Kcb_Ensemble': item.kcbEnsemble || '',
+        'Kcb_FAO56': item.kcbFao56 || '',
+        'ETc_Andy': item.etcAndy || '',
+        'ETc_NDVI': item.etcNdvi || '',
+        'ETc_SAVI': item.etcSavi || '',
+        'ETc_FC': item.etcFc || '',
+        'ETc_Ensemble': item.etcEnsemble || '',
+        'ETc_FAO56': item.etcFao56 || '',
+        'AWC': item.awc || '',
+        'TAW': item.taw || '',
+        'Dr': item.dr || '',
+        'fDr': item.fDr || '',
+        'ETAW': item.etaw || '',
+        'Applied Irrigation': item.appliedIrrig || '',
+        'Interpolated': item.interpolated || '',
+        'Predicted': item.predicted || '',
+        'Days Since Planting': item.daysSincePlanting || '',
+        'Root Depth (m)': item.rootDepth || '',
+        'NDVI': item.ndvi || '',
+        'SAVI': item.savi || '',
+        'FC': item.fc || '',
+        'GCI': item.gci || '',
+        'MSAVI': item.msavi || '',
+        'RECI': item.reci || '',
+        'Precipitation': item.precipitation || ''
+    }));
+
+    return waterBalanceData;
+}
+
+/**
+ * Show export success message
+ */
+function showExportSuccess(filename) {
+    // Create a temporary success message
+    const message = document.createElement('div');
+    message.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #2c5f2d;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideIn 0.3s ease-out;
+    `;
+    message.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Excel file exported: ${filename}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        message.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => message.remove(), 300);
+    }, 3000);
+}
+
+/**
+ * Initialize Excel export button
+ */
+function initializeExcelExport() {
+    const exportBtn = document.getElementById('exportExcelBtn');
+    
+    if (exportBtn) {
+        // Remove any existing listeners to avoid duplicates
+        exportBtn.replaceWith(exportBtn.cloneNode(true));
+        const newBtn = document.getElementById('exportExcelBtn');
+        newBtn.addEventListener('click', exportToExcel);
+        console.log('[EXCEL-EXPORT] Export button initialized');
+    }
+}
+
+// Initialize Excel export on page load
+document.addEventListener('DOMContentLoaded', () => {
+    initializeExcelExport();
+});

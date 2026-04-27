@@ -1,0 +1,3016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agroptics - Satellite Imagery Field Monitoring</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <!-- html2canvas for capturing map -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- GIF.js for GIF export - using gifshot -->
+    <script src="https://unpkg.com/gifshot@0.4.5/dist/gifshot.min.js"></script>
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar - Left side */
+        .sidebar {
+            width: 320px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        /* Right side container - Map and Analysis */
+        .right-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Map Section - Decreased by 10% */
+        #map {
+            height: 43%;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Analysis Section - Increased by 10% */
+        .analysis-section {
+            height: 57%;
+            background: white;
+            border-top: 3px solid #2c5f2d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .analysis-section.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .analysis-section.active .analysis-placeholder {
+            display: none;
+        }
+
+        .analysis-section.active .analysis-header,
+        .analysis-section.active .analysis-tabs,
+        .analysis-section.active .analysis-body {
+            display: flex;
+        }
+
+        .analysis-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .analysis-placeholder svg {
+            margin-bottom: 20px;
+        }
+
+        .analysis-placeholder-text {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .analysis-placeholder-subtext {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* Export Button */
+        .export-excel-btn {
+            display: none;
+            padding: 8px 16px;
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(44, 95, 45, 0.3);
+            white-space: nowrap;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+
+        .export-excel-btn:hover:not(:disabled) {
+            background: #1f4420;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(44, 95, 45, 0.4);
+        }
+
+        .export-excel-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .export-excel-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .export-excel-btn svg {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .analysis-section.active .export-excel-btn {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .analysis-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 16px 20px;
+            border-bottom: 2px solid #2c5f2d;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .analysis-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .analysis-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .analysis-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .analysis-tabs {
+            display: none;
+            background: #f5f5f5;
+            border-bottom: 1px solid #d0d0d0;
+        }
+
+        .analysis-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .analysis-tab:hover:not(.disabled) {
+            background: #e8e8e8;
+        }
+
+        .analysis-tab.active {
+            background: white;
+            color: #2c5f2d;
+            border-bottom: 3px solid #2c5f2d;
+        }
+
+        .analysis-tab.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .analysis-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .analysis-tab-content {
+            display: none;
+            width: 100%;
+        }
+
+        .analysis-tab-content.active {
+            display: block;
+            width: 100%;
+        }
+
+        /* Ensure image overlays appear above polygons but below popups */
+        .leaflet-image-layer,
+        .satellite-overlay {
+            z-index: 400 !important;
+            pointer-events: none;
+        }
+
+        .leaflet-overlay-pane {
+            z-index: 400 !important;
+        }
+
+        .leaflet-pane {
+            z-index: 200;
+        }
+
+        /* Ensure popups and tooltips appear above everything */
+        .leaflet-popup-pane {
+            z-index: 700 !important;
+        }
+
+        .leaflet-tooltip-pane {
+            z-index: 650 !important;
+        }
+
+        /* Header */
+        .sidebar-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            border-bottom: 3px solid #2c5f2d;
+        }
+
+        .sidebar-header h1 {
+            font-size: 20px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-header p {
+            font-size: 12px;
+            opacity: 0.85;
+            color: #b0b0b0;
+        }
+
+        /* Field List */
+        .field-list-container {
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .field-list-title {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upload-field-btn {
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 6px 10px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .upload-field-btn:hover {
+            background: #234d24;
+        }
+
+        .upload-field-btn svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .field-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Image Overlay Controls */
+        .overlay-controls {
+            display: none;
+            padding: 15px;
+            background: #f9f9f9;
+            border-top: 2px solid #2c5f2d;
+            margin-top: 15px;
+        }
+
+        .overlay-controls.active {
+            display: block;
+        }
+
+        .overlay-controls-title {
+            font-size: 11px;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        /* Calendar Styles */
+        .calendar-container {
+            margin-bottom: 15px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-month {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 5px;
+        }
+
+        .calendar-nav-btn {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 3px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav-btn:hover {
+            background: #2c5f2d;
+            color: white;
+            border-color: #2c5f2d;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-day-header {
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+            padding: 4px 0;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            border-radius: 3px;
+            cursor: default;
+            background: #f5f5f5;
+            color: #ccc;
+        }
+
+        .calendar-day.available {
+            background: white;
+            border: 1px solid #d0d0d0;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day.available:hover {
+            background: #e8f5e9;
+            border-color: #2c5f2d;
+            color: #2c5f2d;
+            font-weight: 600;
+        }
+
+        .calendar-day.selected {
+            background: #2c5f2d;
+            border-color: #2c5f2d;
+            color: white;
+            font-weight: 600;
+        }
+
+        .calendar-day.today {
+            border: 2px solid #2c5f2d;
+        }
+
+        .control-group {
+            margin-bottom: 12px;
+        }
+
+        .control-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .control-select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .control-select:hover {
+            border-color: #2c5f2d;
+        }
+
+        .control-select:focus {
+            outline: none;
+            border-color: #2c5f2d;
+            box-shadow: 0 0 0 2px rgba(44, 95, 45, 0.1);
+        }
+
+        .overlay-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2c5f2d;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #234d24;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .btn-compare {
+            background: #FF9800;
+            color: white;
+            /* margin-top: 8px; */
+            width: 100%;
+        }
+        
+        .btn-compare:hover {
+            background: #F57C00;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .overlay-info {
+            margin-top: 10px;
+            padding: 8px;
+            background: #e8f5e9;
+            border-left: 3px solid #2c5f2d;
+            font-size: 11px;
+            color: #1a1a1a;
+            border-radius: 2px;
+        }
+
+        .field-card {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .field-card:hover {
+            background: #f0f0f0;
+            border-color: #2c5f2d;
+            transform: translateX(2px);
+        }
+
+        .field-card.active {
+            background: #e8f5e9;
+            border-color: #2c5f2d;
+            border-width: 2px;
+        }
+
+        .field-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .field-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .field-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .field-crop {
+            font-size: 12px;
+            color: #666;
+            margin-left: 4px;
+        }
+
+        .field-details {
+            font-size: 11px;
+            color: #888;
+            margin-left: 22px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 1000px;
+            height: 85vh;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px 24px;
+            border-bottom: 3px solid #2c5f2d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .modal-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 1px solid #d0d0d0;
+        }
+
+        .modal-tab {
+            flex: 1;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-tab:hover:not(.disabled) {
+            background: #e8e8e8;
+        }
+
+        .modal-tab.active {
+            background: white;
+            color: #2c5f2d;
+            border-bottom: 3px solid #2c5f2d;
+        }
+
+        .modal-tab.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .modal-tab-content {
+            display: none;
+        }
+
+        .modal-tab-content.active {
+            display: block;
+        }
+
+        /* Field Info */
+        .field-info {
+            background: #f9f9f9;
+            padding: 18px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2c5f2d;
+        }
+
+        .field-info h2 {
+            font-size: 19px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #1a1a1a;
+            font-weight: 500;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            justify-content: space-between;
+            align-items: center;
+            padding-right: 15px;
+        }
+
+        .category-tabs-wrapper {
+            display: flex;
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .category-tab {
+            padding: 12px 16px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
+
+        .category-tab:hover {
+            background: #e8e8e8;
+        }
+
+        .category-tab.active {
+            background: white;
+            color: #2c5f2d;
+            border-bottom-color: #2c5f2d;
+        }
+
+        /* Category Content */
+        .category-content-wrapper {
+            display: none;
+            width: 100%;
+        }
+
+        .category-content-wrapper.active {
+            display: block;
+            width: 100%;
+        }
+
+        /* Chart Section with Side Panel */
+        .chart-section {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .chart-main {
+            flex: 1;
+            min-width: 0;
+            width: 100%;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .chart-container {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            padding: 15px;
+            height: 450px;
+            position: relative;
+            width: 100%;
+        }
+
+        .category-chart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Data Toggles - Now on the right side */
+        .data-toggles {
+            width: 220px;
+            flex-shrink: 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #e8e8e8;
+            border-radius: 4px;
+            height: fit-content;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .toggles-title {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 8px;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .toggle-item:hover {
+            background: #f0f0f0;
+        }
+
+        .toggle-checkbox {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .toggle-legend {
+            width: 16px;
+            height: 16px;
+            border-radius: 2px;
+            margin-right: 8px;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        .toggle-item span {
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .empty-state-subtext {
+            font-size: 14px;
+            color: #bbb;
+        }
+
+        /* Custom Leaflet Popup */
+        .leaflet-popup-content-wrapper {
+            border-radius: 4px;
+        }
+
+        .leaflet-popup {
+            margin-bottom: 20px !important;
+            z-index: 700 !important;
+        }
+
+        .leaflet-popup-tip-container {
+            display: block !important;
+        }
+
+        /* Ensure popup pane is always on top */
+        .leaflet-map-pane .leaflet-popup-pane {
+            z-index: 700 !important;
+        }
+
+        /* Enhanced Popup Styling for Drawn Shapes */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 2px solid #2c5f2d;
+        }
+
+        .leaflet-popup-tip {
+            border-top-color: #2c5f2d !important;
+        }
+
+        .field-popup {
+            padding: 16px;
+            min-width: 200px;
+        }
+
+        .field-popup h3 {
+            margin: 0 0 12px 0;
+            color: #1a1a1a;
+            font-size: 18px;
+            font-weight: 600;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #2c5f2d;
+            text-align: center;
+        }
+
+        .field-popup p {
+            margin: 8px 0;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .field-popup p strong {
+            color: #2c5f2d;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-popup .area-value {
+            background: #e8f5e9;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 4px 0;
+            font-weight: 600;
+            color: #2c5f2d;
+            border-left: 3px solid #2c5f2d;
+        }
+
+        .field-popup .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .field-popup .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .field-popup .metric-label {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .field-popup .metric-value {
+            color: #2c5f2d;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Custom Leaflet Tooltip */
+        .leaflet-tooltip.field-tooltip {
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid #2c5f2d;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            color: white;
+            font-weight: 500;
+            padding: 8px 12px;
+        }
+
+        .leaflet-tooltip.field-tooltip::before {
+            border-top-color: #2c5f2d;
+        }
+
+        /* Custom Drawing Controls */
+        .leaflet-draw-toolbar {
+            margin-top: 10px !important;
+        }
+
+        .leaflet-draw-toolbar a {
+            background-color: white !important;
+            border: 2px solid #2c5f2d !important;
+            border-radius: 6px !important;
+            width: 40px !important;
+            height: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            margin-bottom: 8px !important;
+        }
+
+        .leaflet-draw-toolbar a:hover {
+            background-color: #2c5f2d !important;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(44, 95, 45, 0.3) !important;
+        }
+
+        .leaflet-draw-toolbar a.leaflet-disabled {
+            opacity: 0.4 !important;
+            cursor: not-allowed !important;
+        }
+
+        .leaflet-draw-toolbar a.leaflet-disabled:hover {
+            background-color: white !important;
+            transform: none;
+        }
+
+        .leaflet-draw-actions {
+            background-color: white !important;
+            border: 2px solid #2c5f2d !important;
+            border-radius: 6px !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+            overflow: hidden !important;
+        }
+
+        .leaflet-draw-actions a {
+            background-color: white !important;
+            color: #2c5f2d !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid #e0e0e0 !important;
+            padding: 8px 12px !important;
+            transition: all 0.2s !important;
+        }
+
+        .leaflet-draw-actions a:hover {
+            background-color: #2c5f2d !important;
+            color: white !important;
+        }
+
+        .leaflet-draw-actions a:last-child {
+            border-bottom: none !important;
+        }
+
+        /* Custom icons for drawing tools - Vector Polygon with Vertices */
+        .leaflet-draw-draw-polygon {
+            background-image: none !important;
+            background: none !important;
+            position: relative;
+        }
+
+        .leaflet-draw-draw-polygon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232c5f2d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5 L19 5 L19 19 L5 19 Z"></path><rect x="3" y="3" width="4" height="4" fill="%232c5f2d" stroke="%232c5f2d" stroke-width="1.5"></rect><rect x="17" y="3" width="4" height="4" fill="%232c5f2d" stroke="%232c5f2d" stroke-width="1.5"></rect><rect x="17" y="17" width="4" height="4" fill="%232c5f2d" stroke="%232c5f2d" stroke-width="1.5"></rect><rect x="3" y="17" width="4" height="4" fill="%232c5f2d" stroke="%232c5f2d" stroke-width="1.5"></rect></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: contain !important;
+            z-index: 10;
+        }
+
+        .leaflet-draw-draw-polygon:hover::after {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5 L19 5 L19 19 L5 19 Z"></path><rect x="3" y="3" width="4" height="4" fill="%23ffffff" stroke="%23ffffff" stroke-width="1.5"></rect><rect x="17" y="3" width="4" height="4" fill="%23ffffff" stroke="%23ffffff" stroke-width="1.5"></rect><rect x="17" y="17" width="4" height="4" fill="%23ffffff" stroke="%23ffffff" stroke-width="1.5"></rect><rect x="3" y="17" width="4" height="4" fill="%23ffffff" stroke="%23ffffff" stroke-width="1.5"></rect></svg>') !important;
+        }
+
+        .leaflet-draw-draw-circle {
+            background-image: none !important;
+            background: none !important;
+            position: relative;
+        }
+
+        .leaflet-draw-draw-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232c5f2d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: contain !important;
+            z-index: 10;
+        }
+
+        .leaflet-draw-draw-circle:hover::after {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>') !important;
+        }
+
+        /* Polyline (Distance Measurement) Icon */
+        .leaflet-draw-draw-polyline {
+            background-image: none !important;
+            background: none !important;
+            position: relative;
+        }
+
+        .leaflet-draw-draw-polyline::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23FF9800" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 16 17 22 11"></polyline><circle cx="4" cy="17" r="2" fill="%23FF9800"></circle><circle cx="10" cy="11" r="2" fill="%23FF9800"></circle><circle cx="16" cy="17" r="2" fill="%23FF9800"></circle><circle cx="22" cy="11" r="2" fill="%23FF9800"></circle></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: contain !important;
+            z-index: 10;
+        }
+
+        .leaflet-draw-draw-polyline:hover::after {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 16 17 22 11"></polyline><circle cx="4" cy="17" r="2" fill="%23ffffff"></circle><circle cx="10" cy="11" r="2" fill="%23ffffff"></circle><circle cx="16" cy="17" r="2" fill="%23ffffff"></circle><circle cx="22" cy="11" r="2" fill="%23ffffff"></circle></svg>') !important;
+        }
+
+        .leaflet-draw-edit-edit {
+            background-image: none !important;
+            background: none !important;
+            position: relative;
+        }
+
+        .leaflet-draw-edit-edit::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232c5f2d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: contain !important;
+            z-index: 10;
+        }
+
+        .leaflet-draw-edit-edit:hover::after {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>') !important;
+        }
+
+        /* Keep disabled icons green even on hover */
+        .leaflet-draw-edit-edit.leaflet-disabled::after,
+        .leaflet-draw-edit-edit.leaflet-disabled:hover::after {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%232c5f2d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>') !important;
+        }
+
+        .leaflet-draw-edit-remove {
+            background-image: none !important;
+            background: none !important;
+            position: relative;
+        }
+
+        .leaflet-draw-edit-remove::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23d32f2f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: contain !important;
+            z-index: 10;
+        }
+
+        .leaflet-draw-edit-remove:hover::after {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>') !important;
+        }
+
+        /* Keep disabled icons red even on hover */
+        .leaflet-draw-edit-remove.leaflet-disabled::after,
+        .leaflet-draw-edit-remove.leaflet-disabled:hover::after {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23d32f2f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>') !important;
+        }
+
+        /* Edit mode vertex markers - Enhanced */
+        .leaflet-editing-icon {
+            border: 3px solid #2c5f2d !important;
+            background-color: white !important;
+            border-radius: 50% !important;
+            width: 12px !important;
+            height: 12px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+            transition: all 0.2s !important;
+        }
+
+        .leaflet-editing-icon:hover {
+            background-color: #2c5f2d !important;
+            transform: scale(1.3);
+            box-shadow: 0 3px 6px rgba(44, 95, 45, 0.4) !important;
+        }
+
+        /* Middle point markers for adding vertices */
+        .leaflet-marker-icon.leaflet-div-icon.leaflet-editing-icon.leaflet-touch-icon {
+            opacity: 0.6;
+        }
+
+        .leaflet-marker-icon.leaflet-div-icon.leaflet-editing-icon.leaflet-touch-icon:hover {
+            opacity: 1;
+        }
+
+        /* Drawing tooltip - Enhanced */
+        .leaflet-draw-tooltip {
+            background: rgba(26, 26, 26, 0.95) !important;
+            border: 2px solid #2c5f2d !important;
+            border-radius: 6px !important;
+            color: white !important;
+            font-weight: 600 !important;
+            padding: 8px 12px !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        }
+
+        .leaflet-draw-tooltip-single {
+            margin-top: -8px !important;
+        }
+
+        .leaflet-draw-tooltip-subtext {
+            color: #b0b0b0 !important;
+            font-size: 11px !important;
+        }
+
+        /* Drawing shapes - Blue color for better visibility */
+        /* Only apply to drawn items, not existing fields */
+        .leaflet-draw-section .leaflet-interactive {
+            stroke: #2196F3 !important;
+            stroke-width: 3 !important;
+            fill: #2196F3 !important;
+            fill-opacity: 0.3 !important;
+        }
+
+        /* Measurement labels during drawing */
+        .leaflet-draw-tooltip-single {
+            background: rgba(44, 95, 45, 0.95) !important;
+            border-color: #4CAF50 !important;
+        }
+
+        /* Drawing Tools Tour Tooltip - Formal Professional Style */
+        .drawing-tools-tooltip {
+            position: fixed;
+            top: 75px;
+            right: 85px;
+            background: #1a1a1a;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            pointer-events: none;
+            border-left: 4px solid #2196F3;
+            animation: slideInFade 0.5s ease-out;
+        }
+
+        .drawing-tools-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -12px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid #1a1a1a;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+
+        /* Animated indicator dot */
+        .drawing-tools-tooltip::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -30px;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: #2196F3;
+            border-radius: 50%;
+            animation: dotPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
+        }
+
+        @keyframes slideInFade {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes dotPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(33, 150, 243, 0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .drawing-tools-tooltip.hidden {
+            display: none;
+        }
+        
+        /* Date Comparison Modal */
+        .comparison-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .comparison-modal.hidden {
+            display: none;
+        }
+        
+        .comparison-modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .comparison-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+        
+        .comparison-modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .comparison-modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .comparison-modal-body {
+            padding: 20px;
+        }
+        
+        .comparison-date-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-date-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .comparison-date-select,
+        .comparison-index-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .comparison-date-select:focus,
+        .comparison-index-select:focus {
+            outline: none;
+            border-color: #2c5f2d;
+        }
+        
+        .comparison-index-selector {
+            margin-bottom: 20px;
+        }
+        
+        .comparison-index-selector label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        
+        .comparison-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .comparison-actions .btn {
+            flex: 1;
+        }
+        
+        /* Comparison View */
+        .comparison-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #1a1a1a;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .comparison-view.hidden {
+            display: none;
+        }
+        
+        .comparison-view-header {
+            background: #2c5f2d;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .comparison-view-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .comparison-view-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .comparison-view-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .comparison-view-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .comparison-stats-panel {
+            width: 400px;
+            background: #2a2a2a;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #444;
+            order: 1;
+        }
+        
+        .comparison-map-container {
+            flex: 1;
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 2px;
+            background: #000;
+            padding: 2px;
+            order: 2;
+        }
+        
+        .comparison-map-panel {
+            position: relative;
+            background: #2a2a2a;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .comparison-map-label {
+            background: #2a2a2a;
+            color: white;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .comparison-map {
+            flex: 1;
+            position: relative;
+        }
+        
+        /* Comparison Controls */
+        .comparison-controls {
+            background: #333;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        
+        .comparison-control-group {
+            margin-bottom: 12px;
+        }
+        
+        .comparison-control-group:last-of-type {
+            margin-bottom: 15px;
+        }
+        
+        .comparison-control-label {
+            display: block;
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .comparison-select {
+            width: 100%;
+            padding: 8px 10px;
+            background: #1a1a1a;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .comparison-select:hover {
+            border-color: #4CAF50;
+        }
+        
+        .comparison-select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .update-comparison-btn {
+            width: 100%;
+            padding: 10px;
+            background: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .update-comparison-btn:hover {
+            background: #F57C00;
+        }
+        
+        .update-comparison-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .comparison-stats-panel {
+            width: 400px;
+            background: #2a2a2a;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 2px solid #444;
+            order: 1;
+        }
+        
+        .comparison-stats-panel h4 {
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .comparison-stats-content {
+            font-size: 13px;
+        }
+        
+        .stat-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #333;
+            border-radius: 6px;
+        }
+        
+        .stat-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #FF9800;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat-section-icon {
+            font-size: 18px;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            color: #aaa;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: white;
+        }
+        
+        .stat-value.positive {
+            color: #4CAF50;
+        }
+        
+        .stat-value.negative {
+            color: #f44336;
+        }
+        
+        .stat-value.neutral {
+            color: #FFC107;
+        }
+        
+        .insight-box {
+            background: #1a1a1a;
+            border-left: 4px solid #4CAF50;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .insight-box.warning {
+            border-left-color: #FFC107;
+        }
+        
+        .insight-box.alert {
+            border-left-color: #f44336;
+        }
+        
+        .insight-text {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #ddd;
+        }
+        
+        .change-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .change-indicator.positive {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .change-indicator.negative {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+        
+        .change-indicator.neutral {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+        }
+
+        /* Swipe Control for Image Comparison */
+        .swipe-slider {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            cursor: ew-resize;
+            z-index: 1001;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .swipe-handle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 3px solid #2196F3;
+            border-radius: 50%;
+            cursor: ew-resize;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            pointer-events: auto;
+        }
+
+        .swipe-handle:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            background: #2196F3;
+            color: white;
+        }
+
+        .swipe-handle:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        .swipe-handle-grip {
+            font-size: 20px;
+            font-weight: bold;
+            user-select: none;
+            color: #2196F3;
+        }
+
+        .swipe-handle:hover .swipe-handle-grip {
+            color: white;
+        }
+
+        .swipe-handle-line {
+            position: absolute;
+            width: 4px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.8);
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .swipe-handle-line:first-child {
+            bottom: 100%;
+        }
+
+        .swipe-handle-line:last-child {
+            top: 100%;
+        }
+
+        /* Remove Leaflet control borders */
+        .leaflet-touch .leaflet-control-layers,
+        .leaflet-touch .leaflet-bar {
+            border: none !important;
+        }
+
+        .leaflet-bar a {
+            border-bottom: 1px solid #ccc;
+        }
+
+        .leaflet-bar a:last-child {
+            border-bottom: none;
+        }
+
+        /* Map Legend Styles - Horizontal */
+        .map-legend {
+            background: rgba(26, 26, 26, 0.95);
+            padding: 10px 15px 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border: 2px solid #4CAF50;
+            backdrop-filter: blur(10px);
+            z-index: 1004 !important;
+            position: absolute !important;
+            bottom: 130px !important;
+            /* left: 10px !important; */
+            max-width: 300px;
+            cursor: default;
+        }
+
+        .legend-title {
+            color: #4CAF50;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .legend-content-horizontal {
+            position: relative;
+        }
+
+        /* Min/Max labels on top */
+        .legend-labels-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'SF Mono', Monaco, monospace;
+        }
+
+        .legend-label-min {
+            color: #f44336;
+        }
+
+        .legend-label-max {
+            color: #4CAF50;
+        }
+
+        .legend-gradient-horizontal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-gradient-horizontal canvas {
+            display: block;
+            border: 1px solid #555;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Mean container at bottom */
+        .legend-mean-container {
+            position: relative;
+            height: 20px;
+        }
+
+        .legend-mean-indicator {
+            position: absolute;
+            top: -8px;
+            transform: translateX(-50%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .legend-mean-line {
+            width: 2px;
+            height: 8px;
+            background: white;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+            margin: 0 auto;
+        }
+
+        .legend-mean-label {
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            background: rgba(255, 193, 7, 0.95);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'SF Mono', Monaco, monospace;
+        }
+
+        /* Ensure legend is above timeline */
+        .leaflet-bottom.leaflet-left {
+            z-index: 1004 !important;
+            pointer-events: none;
+        }
+
+        .leaflet-bottom.leaflet-left .leaflet-control {
+            pointer-events: auto;
+        }
+
+        /* Timeline Player Styles */
+        .timeline-player {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.85) 100%);
+            padding: 6px 15px 5px;
+            z-index: 1002;
+            backdrop-filter: blur(10px);
+            border-top: 2px solid #2196F3;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            pointer-events: auto;
+        }
+
+        .timeline-player.hidden {
+            display: none;
+        }
+
+        .timeline-date-display {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .timeline-date-display span {
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 0.5px;
+        }
+
+        .timeline-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+
+        .timeline-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .timeline-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #2196F3;
+            transform: scale(1.05);
+        }
+
+        .timeline-btn:active {
+            transform: scale(0.95);
+        }
+
+        .timeline-btn-play {
+            width: 36px;
+            height: 36px;
+            background: #2196F3;
+            border-color: #2196F3;
+        }
+
+        .timeline-btn-play:hover {
+            background: #1976D2;
+            border-color: #1976D2;
+        }
+
+        .timeline-btn.active {
+            background: #2196F3;
+            border-color: #2196F3;
+        }
+        
+        #swipeToggle.active {
+            background: #FF9800;
+            border-color: #FF9800;
+        }
+        
+        #swipeToggle.active:hover {
+            background: #F57C00;
+            border-color: #F57C00;
+        }
+        
+        .timeline-btn-export {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .timeline-btn-export:hover {
+            background: #45a049;
+            border-color: #45a049;
+        }
+
+        .timeline-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            margin: 0 3px;
+        }
+
+        .timeline-speed {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 5px;
+            padding: 6px 10px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .timeline-speed:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: #2196F3;
+        }
+
+        .timeline-speed option {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .timeline-slider-container {
+            position: relative;
+            padding: 6px 0;
+            pointer-events: auto;
+        }
+
+        .timeline-slider {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .timeline-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 3px 8px rgba(33, 150, 243, 0.5);
+        }
+
+        .timeline-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+
+        .timeline-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 3px 8px rgba(33, 150, 243, 0.5);
+        }
+
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 0 5px;
+        }
+
+        .timeline-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+        }
+
+        /* Export Modal Styles */
+        .export-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .export-modal.hidden {
+            display: none;
+        }
+
+        .export-modal-content {
+            background: #1a1a1a;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 2px solid #4CAF50;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .export-modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .export-modal-header h3 {
+            margin: 0;
+            color: #4CAF50;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .export-modal-close {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 28px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        .export-modal-close:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .export-modal-body {
+            padding: 25px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .export-section {
+            margin-bottom: 20px;
+        }
+
+        .export-label {
+            display: block;
+            color: rgba(255,255,255,0.8);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .export-format-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-format-btn {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .export-format-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #4CAF50;
+            color: white;
+        }
+
+        .export-format-btn.active {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .export-format-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .export-format-btn span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .export-date-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .export-range-separator {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+        }
+
+        .export-select {
+            flex: 1;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .export-select:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #4CAF50;
+        }
+
+        .export-select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        .export-select option {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .export-progress {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+
+        .export-progress.hidden {
+            display: none;
+        }
+
+        .export-progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .export-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .export-progress-text {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .export-modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn-cancel {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+        }
+
+        .export-btn-cancel:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .export-btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .export-btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .export-btn-primary:disabled {
+            background: rgba(76, 175, 80, 0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .export-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 40vh;
+            }
+            
+            #map {
+                height: 60vh;
+            }
+
+            .modal-content {
+                width: 95%;
+                height: 90vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar - Left side -->
+        <div class="sidebar">
+            <!-- Header -->
+            <div class="sidebar-header">
+                <h1>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        <path d="M2 12h20"></path>
+                    </svg>
+                    Agroptics
+                </h1>
+                <p>Satellite Imagery Field Monitoring</p>
+            </div>
+
+            <!-- Field List -->
+            <div class="field-list-container">
+                <div class="field-list-title">
+                    <span>Select a Field</span>
+                    <button class="upload-field-btn" onclick="document.getElementById('fileInput').click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Upload
+                    </button>
+                </div>
+                <input type="file" id="fileInput" accept=".geojson,.json,.kml,.shp,.zip,.gml,.gpx" />
+                <div class="field-list">
+                    <!-- Field cards will be dynamically added here -->
+                </div>
+
+                <!-- Image Overlay Controls -->
+                <div id="overlayControls" class="overlay-controls">
+                    <div class="overlay-controls-title">View Satellite Image</div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Select Date</label>
+                        <div id="calendarContainer" class="calendar-container">
+                            <!-- Calendar will be generated here -->
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label class="control-label">Select Index</label>
+                        <select id="indexSelect" class="control-select">
+                            <option value="NDVI">NDVI - Vegetation Index</option>
+                            <option value="SAVI">SAVI - Soil Adjusted Vegetation Index</option>
+                            <option value="FC">FC - Fractional Cover</option>
+                            <option value="GCI">GCI - Green Chlorophyll Index</option>
+                            <option value="MSAVI">MSAVI - Soil-Adjusted VI</option>
+                            <option value="RECI">RECI - Red Edge Chlorophyll</option>
+                        </select>
+                    </div>
+
+                    <div class="overlay-actions">
+                        <button id="showImageBtn" class="btn btn-primary">Show Image</button>
+                        <button id="clearImageBtn" class="btn btn-secondary">Clear</button>
+                        <button id="compareBtn" class="btn btn-compare">Compare Dates</button>
+                    </div>
+
+                    <div id="overlayInfo" class="overlay-info" style="display: none;">
+                        Image overlay active
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Container - Map and Analysis -->
+        <div class="right-container">
+            <!-- Map Section - Top 50% -->
+            <div id="map">
+                <!-- Timeline Player Controls -->
+                <div id="timelinePlayer" class="timeline-player hidden">
+                    <!-- Date Display -->
+                    <div class="timeline-date-display">
+                        <span id="timelineCurrentDate">Select a date</span>
+                    </div>
+                    
+                    <!-- Control Bar -->
+                    <div class="timeline-controls">
+                        <button id="timelineFirst" class="timeline-btn" title="First">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                                <line x1="5" y1="19" x2="5" y2="5"></line>
+                            </svg>
+                        </button>
+                        <button id="timelinePrev" class="timeline-btn" title="Previous">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="15 18 9 12 15 6"></polygon>
+                            </svg>
+                        </button>
+                        <button id="timelinePlay" class="timeline-btn timeline-btn-play" title="Play">
+                            <svg class="play-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            <svg class="pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none;">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+                        <button id="timelineNext" class="timeline-btn" title="Next">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="9 18 15 12 9 6"></polygon>
+                            </svg>
+                        </button>
+                        <button id="timelineLast" class="timeline-btn" title="Last">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                                <line x1="19" y1="5" x2="19" y2="19"></line>
+                            </svg>
+                        </button>
+                        
+                        <div class="timeline-divider"></div>
+                        
+                        <select id="timelineSpeed" class="timeline-speed" title="Playback Speed">
+                            <option value="2000">0.5x</option>
+                            <option value="1000" selected>1x</option>
+                            <option value="500">2x</option>
+                            <option value="250">4x</option>
+                        </select>
+                        
+                        <button id="timelineLoop" class="timeline-btn" title="Loop">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="17 1 21 5 17 9"></polyline>
+                                <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                                <polyline points="7 23 3 19 7 15"></polyline>
+                                <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+                            </svg>
+                        </button>
+                        
+                        <div class="timeline-divider"></div>
+                        
+                        <button id="timelineExport" class="timeline-btn timeline-btn-export" title="Export Animation">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        
+                        <button id="swipeToggle" class="timeline-btn" title="Toggle Swipe Comparison">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="2" x2="12" y2="22"></line>
+                                <polyline points="8 6 4 2 8 2"></polyline>
+                                <polyline points="16 6 20 2 16 2"></polyline>
+                                <polyline points="8 18 4 22 8 22"></polyline>
+                                <polyline points="16 18 20 22 16 22"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Timeline Slider -->
+                    <div class="timeline-slider-container">
+                        <input type="range" id="timelineSlider" class="timeline-slider" min="0" max="100" value="0">
+                        <div class="timeline-labels" id="timelineLabels"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drawing Tools Tooltip -->
+            <div id="drawingToolsTooltip" class="drawing-tools-tooltip">
+                Drawing tools available
+            </div>
+            
+            <!-- Export Animation Modal -->
+            <div id="exportModal" class="export-modal hidden">
+                <div class="export-modal-content">
+                    <div class="export-modal-header">
+                        <h3>📹 Export Timeline Animation</h3>
+                        <button id="closeExportModal" class="export-modal-close">&times;</button>
+                    </div>
+                    
+                    <div class="export-modal-body">
+                        <!-- Format Selection -->
+                        <div class="export-section">
+                            <label class="export-label">Export Format</label>
+                            <div class="export-format-options">
+                                <button class="export-format-btn active" data-format="gif">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                    <span>GIF</span>
+                                </button>
+                                <button class="export-format-btn" data-format="mp4">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                    <span>MP4 Video</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Date Range -->
+                        <div class="export-section">
+                            <label class="export-label">Date Range</label>
+                            <div class="export-date-range">
+                                <select id="exportStartDate" class="export-select"></select>
+                                <span class="export-range-separator">to</span>
+                                <select id="exportEndDate" class="export-select"></select>
+                            </div>
+                        </div>
+                        
+                        <!-- Speed -->
+                        <div class="export-section">
+                            <label class="export-label">Animation Speed</label>
+                            <select id="exportSpeed" class="export-select">
+                                <option value="2000">Slow (0.5x)</option>
+                                <option value="1000" selected>Normal (1x)</option>
+                                <option value="500">Fast (2x)</option>
+                                <option value="250">Very Fast (4x)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Quality (GIF only) -->
+                        <div class="export-section" id="exportQualitySection">
+                            <label class="export-label">Quality</label>
+                            <select id="exportQuality" class="export-select">
+                                <option value="10">High (slower)</option>
+                                <option value="20" selected>Medium</option>
+                                <option value="30">Low (faster)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Progress -->
+                        <div class="export-progress hidden" id="exportProgress">
+                            <div class="export-progress-bar">
+                                <div class="export-progress-fill" id="exportProgressFill"></div>
+                            </div>
+                            <div class="export-progress-text" id="exportProgressText">Preparing export...</div>
+                        </div>
+                    </div>
+                    
+                    <div class="export-modal-footer">
+                        <button id="cancelExport" class="export-btn export-btn-cancel">Cancel</button>
+                        <button id="startExport" class="export-btn export-btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Date Comparison Modal -->
+            <div id="comparisonModal" class="comparison-modal hidden">
+                <div class="comparison-modal-content">
+                    <div class="comparison-modal-header">
+                        <h3>Compare Dates</h3>
+                        <button id="closeComparisonModal" class="comparison-modal-close">&times;</button>
+                    </div>
+                    
+                    <div class="comparison-modal-body">
+                        <div class="comparison-date-selector">
+                            <div class="comparison-date-group">
+                                <label>Date 1 (Earlier)</label>
+                                <select id="compareDate1" class="comparison-date-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="comparison-date-group">
+                                <label>Date 2 (Later)</label>
+                                <select id="compareDate2" class="comparison-date-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-index-selector">
+                            <label>Index to Compare</label>
+                            <select id="compareIndex" class="comparison-index-select">
+                                <option value="NDVI">NDVI - Vegetation Index</option>
+                                <option value="SAVI">SAVI - Soil Adjusted Vegetation Index</option>
+                                <option value="FC">FC - Fractional Cover</option>
+                                <option value="GCI">GCI - Green Chlorophyll Index</option>
+                                <option value="MSAVI">MSAVI - Soil-Adjusted VI</option>
+                                <option value="RECI">RECI - Red Edge Chlorophyll</option>
+                            </select>
+                        </div>
+                        
+                        <div class="comparison-actions">
+                            <button id="startComparisonBtn" class="btn btn-primary">Start Comparison</button>
+                            <button id="cancelComparisonBtn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comparison View -->
+            <div id="comparisonView" class="comparison-view hidden">
+                <div class="comparison-view-header">
+                    <h3 id="comparisonViewTitle">Comparing Dates</h3>
+                    <button id="closeComparisonView" class="comparison-view-close">Exit Comparison</button>
+                </div>
+                
+                <div class="comparison-view-content">
+                    <!-- Left Side: Analysis & Insights Panel -->
+                    <div class="comparison-stats-panel">
+                        <h4>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            Analysis & Insights
+                        </h4>
+                        
+                        <!-- Comparison Controls -->
+                        <div class="comparison-controls">
+                            <div class="comparison-control-group">
+                                <label class="comparison-control-label">Date 1:</label>
+                                <select id="comparisonDate1Select" class="comparison-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="comparison-control-group">
+                                <label class="comparison-control-label">Date 2:</label>
+                                <select id="comparisonDate2Select" class="comparison-select">
+                                    <option value="">Select date...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="comparison-control-group">
+                                <label class="comparison-control-label">Index:</label>
+                                <select id="comparisonIndexSelect" class="comparison-select">
+                                    <option value="NDVI">NDVI</option>
+                                    <option value="SAVI">SAVI</option>
+                                    <option value="FC">FC</option>
+                                    <option value="GCI">GCI</option>
+                                    <option value="MSAVI">MSAVI</option>
+                                    <option value="RECI">RECI</option>
+                                </select>
+                            </div>
+                            
+                            <button id="updateComparisonBtn" class="update-comparison-btn">Update Comparison</button>
+                        </div>
+                        
+                        <div id="comparisonStats" class="comparison-stats-content">
+                            <!-- Stats will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Right Side: Two Maps Stacked Vertically -->
+                    <div class="comparison-map-container">
+                        <div class="comparison-map-panel">
+                            <div class="comparison-map-label" id="comparisonLabel1">Date 1</div>
+                            <div id="comparisonMap1" class="comparison-map"></div>
+                        </div>
+                        
+                        <div class="comparison-map-panel">
+                            <div class="comparison-map-label" id="comparisonLabel2">Date 2</div>
+                            <div id="comparisonMap2" class="comparison-map"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Section - Bottom 70% -->
+            <div id="analysisSection" class="analysis-section empty">
+                <!-- Placeholder when no field selected -->
+                <div class="analysis-placeholder">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <div class="analysis-placeholder-text">Select a field to view analysis</div>
+                    <div class="analysis-placeholder-subtext">Click on any field card in the left panel</div>
+                </div>
+
+                <div class="analysis-header">
+                    <h2 id="analysisTitle" class="analysis-title">Field Analysis</h2>
+                    <button id="analysisClose" class="analysis-close">&times;</button>
+                </div>
+
+                <div class="analysis-tabs">
+                    <button class="analysis-tab" data-analysis-tab="field-info">Field Info</button>
+                    <button class="analysis-tab active" data-analysis-tab="planet">Planet</button>
+                    <button class="analysis-tab disabled" data-analysis-tab="sentinel">Sentinel</button>
+                    <button class="analysis-tab disabled" data-analysis-tab="landsat">Landsat</button>
+                </div>
+
+                <div class="analysis-body">
+                    <!-- Field Info Tab -->
+                    <div id="analysis-field-info-content" class="analysis-tab-content">
+                        <!-- Content will be dynamically added -->
+                    </div>
+
+                    <!-- Planet Tab -->
+                    <div id="analysis-planet-content" class="analysis-tab-content active">
+                        <!-- Content will be dynamically added -->
+                    </div>
+
+                    <!-- Sentinel Tab -->
+                    <div id="analysis-sentinel-content" class="analysis-tab-content">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                <path d="M2 12h20"></path>
+                            </svg>
+                            <div class="empty-state-text">Sentinel Data</div>
+                            <div class="empty-state-subtext">Coming soon...</div>
+                        </div>
+                    </div>
+
+                    <!-- Landsat Tab -->
+                    <div id="analysis-landsat-content" class="analysis-tab-content">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="4"></circle>
+                                <line x1="21.17" y1="8" x2="12" y2="8"></line>
+                                <line x1="3.95" y1="6.06" x2="8.54" y2="14"></line>
+                                <line x1="10.88" y1="21.94" x2="15.46" y2="14"></line>
+                            </svg>
+                            <div class="empty-state-text">Landsat Data</div>
+                            <div class="empty-state-subtext">Coming soon...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="fieldModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle" class="modal-title">Field Details</h2>
+                <button id="modalClose" class="modal-close">&times;</button>
+            </div>
+
+            <div class="modal-tabs">
+                <button class="modal-tab active" data-modal-tab="field-info">Field Info</button>
+                <button class="modal-tab" data-modal-tab="planet">Planet</button>
+                <button class="modal-tab disabled" data-modal-tab="sentinel">Sentinel</button>
+                <button class="modal-tab disabled" data-modal-tab="landsat">Landsat</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Field Info Tab -->
+                <div id="field-info-content" class="modal-tab-content active">
+                    <!-- Content will be dynamically added -->
+                </div>
+
+                <!-- Planet Tab -->
+                <div id="planet-content" class="modal-tab-content">
+                    <!-- Content will be dynamically added -->
+                </div>
+
+                <!-- Sentinel Tab -->
+                <div id="sentinel-content" class="modal-tab-content">
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            <path d="M2 12h20"></path>
+                        </svg>
+                        <div class="empty-state-text">Sentinel Data</div>
+                        <div class="empty-state-subtext">Coming soon...</div>
+                    </div>
+                </div>
+
+                <!-- Landsat Tab -->
+                <div id="landsat-content" class="modal-tab-content">
+                    <div class="empty-state">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 15px;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <line x1="21.17" y1="8" x2="12" y2="8"></line>
+                            <line x1="3.95" y1="6.06" x2="8.54" y2="14"></line>
+                            <line x1="10.88" y1="21.94" x2="15.46" y2="14"></line>
+                        </svg>
+                        <div class="empty-state-text">Landsat Data</div>
+                        <div class="empty-state-subtext">Coming soon...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet Draw -->
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <!-- Leaflet Sync for comparison maps -->
+    <script src="https://unpkg.com/leaflet.sync@0.2.4/L.Map.Sync.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Chart.js Annotation Plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
+    <script src="https://unpkg.com/shpjs@latest/dist/shp.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "satellite-imagery-demo-preprocessing",
+  "version": "1.0.0",
+  "description": "Data preprocessing for satellite imagery agricultural monitoring demo",
+  "main": "preprocess-data-template.js",
+  "scripts": {
+    "preprocess": "node preprocess-data-template.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "satellite",
+    "imagery",
+    "agriculture",
+    "geotiff",
+    "vegetation-indices",
+    "ndvi",
+    "planet"
+  ],
+  "author": "Agroptics",
+  "license": "ISC",
+  "dependencies": {
+    "geotiff": "^2.1.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
